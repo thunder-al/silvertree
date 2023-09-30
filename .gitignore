@@ -1,0 +1,13 @@
+*.log*
+*.pid
+*.seed
+*.pid.lock
+node_modules/
+.env
+.DS_Store
+.idea/
+common/deploy/
+common/temp/
+common/autoinstallers/*/.npmrc
+**/.rush/temp/
+dist/

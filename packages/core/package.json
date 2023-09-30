@@ -1,0 +1,17 @@
+{
+  "name": "@silvertree/core",
+  "version": "1.0.0",
+  "keywords": [],
+  "author": "ThunderAl <community@thornal.com>",
+  "license": "MIT",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "vitest": "~0.34.5",
+    "vite": "~4.4.9"
+  }
+}
