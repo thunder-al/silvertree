@@ -1,4 +1,5 @@
-export * from './container/Container'
+export * from './container'
+export * from './module'
 export * from './factory/FactoryBindContext'
-export * from './factory/Factory'
+export * from './factory/AbstractFactory'
 export * from './util'

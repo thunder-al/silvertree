@@ -1,22 +1,22 @@
-import {Container} from '../container/Container'
-import {AsyncFactory, defaultFactoryDescription, defaultFactoryName, Factory} from './Factory'
+import {AbstractAsyncFactory, defaultFactoryDescription, defaultFactoryName, AbstractFactory} from './AbstractFactory'
 import {TFactoryMetadata} from './types'
+import {Module} from '../module'
 
-export class SingletonFactory<T, M extends TFactoryMetadata = TFactoryMetadata, C extends Container = Container>
-  extends Factory<T, M, C> {
+export class SyncSingletonFactory<T, Fm extends TFactoryMetadata = TFactoryMetadata, M extends Module = Module>
+  extends AbstractFactory<T, Fm, M> {
 
   protected value?: T
 
   public constructor(
-    protected func: (container: C) => T,
-    protected metaFunc?: (container: C, factory: SingletonFactory<T, M, C>) => M,
+    protected func: (module: M) => T,
+    protected metaFunc?: (module: M, factory: SyncSingletonFactory<T, Fm, M>) => Fm,
     protected name = defaultFactoryName,
     protected description = defaultFactoryDescription,
   ) {
     super()
   }
 
-  public get(container: C): T {
+  public get(container: M): T {
     if (!this.value) {
       this.value = this.func(container)
     }
@@ -24,7 +24,7 @@ export class SingletonFactory<T, M extends TFactoryMetadata = TFactoryMetadata, 
     return this.value
   }
 
-  public getMetadata(container: C): M {
+  public getMetadata(container: M): Fm {
     return this.metaFunc
       ? this.metaFunc(container, this)
       : {} as any
@@ -40,21 +40,21 @@ export class SingletonFactory<T, M extends TFactoryMetadata = TFactoryMetadata, 
 
 }
 
-export abstract class AsyncSingletonFactory<T, M extends TFactoryMetadata = TFactoryMetadata, C extends Container = Container>
-  extends AsyncFactory<T, M, C> {
+export abstract class AsyncSingletonFactory<T, Fm extends TFactoryMetadata = TFactoryMetadata, M extends Module = Module>
+  extends AbstractAsyncFactory<T, Fm, M> {
 
   protected value?: T
 
   public constructor(
-    protected func: (container: C) => T | Promise<T>,
-    protected metaFunc?: (container: C, factory: AsyncSingletonFactory<T, M, C>) => M | Promise<M>,
+    protected func: (module: M) => T | Promise<T>,
+    protected metaFunc?: (module: M, factory: AsyncSingletonFactory<T, Fm, M>) => Fm | Promise<Fm>,
     protected name = defaultFactoryName,
     protected description = defaultFactoryDescription,
   ) {
     super()
   }
 
-  public async get(container: C): Promise<T> {
+  public async get(container: M): Promise<T> {
     if (!this.value) {
       this.value = await this.func(container)
     }
@@ -62,7 +62,7 @@ export abstract class AsyncSingletonFactory<T, M extends TFactoryMetadata = TFac
     return this.value
   }
 
-  public async getMetadata(container: C): Promise<M> {
+  public async getMetadata(container: M): Promise<Fm> {
     return this.metaFunc
       ? await this.metaFunc(container, this)
       : {} as any

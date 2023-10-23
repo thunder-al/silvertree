@@ -26,6 +26,10 @@
     "vite": "~4.4.9",
     "vite-plugin-dts": "~3.6.0",
     "vite-plugin-checker": "~0.6.2",
-    "typescript": "~5.2.2"
+    "typescript": "~5.2.2",
+    "reflect-metadata": "~0.1.13"
+  },
+  "peerDependencies": {
+    "reflect-metadata": "~0.1.13"
   }
 }

@@ -1,26 +1,26 @@
-import {AsyncFactory, Factory} from './Factory'
-import {Container} from '../container/Container'
-import {TContainerKey} from '../container/types'
+import {AbstractAsyncFactory, AbstractFactory} from './AbstractFactory'
+import {Module} from '../module'
+import {TBindKey} from '../module/types'
 
 export class FactoryBindContext<
-  C extends Container = Container,
+  M extends Module = Module,
   T = any,
-  F extends Factory<T> | AsyncFactory<T> = Factory<T> | AsyncFactory<T>
+  F extends AbstractFactory<T> | AbstractAsyncFactory<T> = AbstractFactory<T> | AbstractAsyncFactory<T>
 > {
   constructor(
-    protected container: C,
-    protected key: TContainerKey,
+    protected module: M,
+    protected key: TBindKey,
     protected factory: F,
   ) {
   }
 
   public export() {
-    this.container.export(this.key)
+    this.module.export(this.key)
     return this
   }
 
-  public alias(aliasKey: TContainerKey) {
-    this.container.alias(this.key, aliasKey)
+  public alias(aliasKey: TBindKey) {
+    this.module.alias(this.key, aliasKey)
     return this
   }
 
@@ -33,16 +33,26 @@ export class FactoryBindContext<
   }
 
   public tapFactory(func: (factory: F) => unknown) {
-    func(this.getFactory())
+    func(this.factory)
     return this
   }
 
-  public getContainer() {
-    return this.container
+  public async tapFactoryAsync(func: (factory: F) => Promise<unknown>): Promise<this> {
+    await func(this.factory)
+    return this
+  }
+
+  public getModule() {
+    return this.module
   }
 
   public tap(func: (context: this) => unknown) {
     func(this)
+    return this
+  }
+
+  public async tapAsync(func: (context: this) => Promise<unknown>): Promise<this> {
+    await func(this)
     return this
   }
 }
