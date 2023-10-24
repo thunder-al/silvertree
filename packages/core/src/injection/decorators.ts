@@ -39,7 +39,6 @@ export function Inject(
  * Inline version of `@Inject(bindingRef(() => SomeKey))`.
  * @param ref
  * @param options
- * @constructor
  */
 export function InjectFromRef(
   ref: (() => TBindKey) | TBindKeyRef,
