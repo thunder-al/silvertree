@@ -2,7 +2,7 @@ import 'reflect-metadata'
 import {expect, test} from 'vitest'
 import {Container} from '../../container'
 import {Module} from '../../module'
-import {InjectFromRef} from '../../injection'
+import {Inject, InjectFromRef} from '../../injection'
 
 test('singleton sync', async () => {
 
@@ -11,6 +11,8 @@ test('singleton sync', async () => {
     constructor(
       @InjectFromRef(() => Class2)
       protected readonly class2: Class2,
+      @Inject('string-key')
+      public readonly functional: string,
     ) {
     }
 
@@ -32,6 +34,7 @@ test('singleton sync', async () => {
     async setup() {
       this.bind.syncSingletonClass(Class1)
       this.bind.syncSingletonClass(Class2)
+      this.bind.syncSingletonFunctional('string-key', () => 'test-functional-value')
     }
   }
 
@@ -45,6 +48,7 @@ test('singleton sync', async () => {
   const instance3 = mod1.provideSync<Class2>(Class2)
 
   expect(instance1.testMethod()).toBe('test')
+  expect(instance1.functional).toBe('test-functional-value')
   expect(instance2.testMethod()).toBe('test')
   expect(instance3.triggerCount).toBe(2)
 })

@@ -1,5 +1,6 @@
 import {AbstractFactory} from './AbstractFactory'
 import {Module} from '../module'
+import {EMPTY_META_TARGET} from '../injection'
 
 /**
  * A factory that creates a single instance of a value.
@@ -11,11 +12,10 @@ export class SyncSingletonFunctionalFactory<T, M extends Module = Module>
 
   public constructor(
     protected singletonFunc: (module: M) => T,
-    protected metaTarget?: any,
     name?: string,
     description?: string,
   ) {
-    super(name,description)
+    super(name, description)
   }
 
   public get(container: M): T {
@@ -27,15 +27,23 @@ export class SyncSingletonFunctionalFactory<T, M extends Module = Module>
   }
 
   public getMetadataTarget(container: M): any {
-    return this.metaTarget
+    return EMPTY_META_TARGET
   }
 }
 
 /**
  * A factory that creates a single instance of a value.
  */
-export abstract class AsyncSingletonFunctionalFactory<T, M extends Module = Module>
+export class AsyncSingletonFunctionalFactory<T, M extends Module = Module>
   extends SyncSingletonFunctionalFactory<Promise<T> | T, M> {
+
+  public constructor(
+    singletonFunc: (module: M) => Promise<T> | T,
+    name?: string,
+    description?: string,
+  ) {
+    super(singletonFunc, name, description)
+  }
 
   public async get(container: M): Promise<T> {
     if (!this.value) {
