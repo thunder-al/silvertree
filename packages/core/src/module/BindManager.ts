@@ -1,5 +1,6 @@
 import {Module} from './Module'
 import {TBindKey, TClassConstructor} from '../types'
+import {AsyncSingletonClassFactory, SyncSingletonClassFactory} from '../factory/SingletonClassFactory'
 
 
 export interface BindManagerImpl {
@@ -13,11 +14,24 @@ export class BindManager<M extends Module = Module> implements BindManagerImpl {
   ) {
   }
 
-  public syncSingleton<T = any>(
-    key: TBindKey,
-    value: (...injectedArgs: any) => T | TClassConstructor<T>,
+  /**
+   * Binds sync singleton class
+   * @param cls
+   */
+  public syncSingletonClass(
+    cls: TClassConstructor,
   ) {
-    // return this.module.bindSync(key, new SyncSingletonFactory())
+    return this.module.bindSync(cls, new SyncSingletonClassFactory(cls))
+  }
+
+  /**
+   * Binds sync singleton class
+   * @param cls
+   */
+  public singletonAsync(
+    cls: TClassConstructor,
+  ) {
+    return this.module.bindAsync(cls, new AsyncSingletonClassFactory(cls))
   }
 
   public extendBindManager(methodName: string, getter: Function) {

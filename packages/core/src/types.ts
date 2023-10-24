@@ -1,4 +1,6 @@
 import 'reflect-metadata'
+import {Module} from './module'
+import {AbstractFactory} from './factory/AbstractFactory'
 
 /**
  * Helper type for a class constructor.
@@ -20,7 +22,9 @@ export type TBindKeyRef = { (): TBindKey, __isBindRef: true }
  * Additional context parameters for injection
  */
 export interface IInjectOptions {
+  constructorArgs?: Array<any>
 
+  [ley: string]: any
 }
 
 export interface TClassInjectPropertyMetadataItem {
@@ -37,7 +41,7 @@ export interface TClassInjectPropertyMetadataItem {
   /**
    * Inject options.
    */
-  o?: Partial<IInjectOptions>
+  o: Partial<IInjectOptions> | null
 }
 
 export interface TClassInjectArgumentMetadataItem {
@@ -60,5 +64,10 @@ export interface TClassInjectArgumentMetadataItem {
   /**
    * Inject options.
    */
-  o?: Partial<IInjectOptions>
+  o: Partial<IInjectOptions> | null
+}
+
+export interface TProvideContext {
+  key: TBindKey
+  chain: Array<{ module: Module, factory: AbstractFactory<any>, key: TBindKey }>
 }

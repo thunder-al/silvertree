@@ -1,9 +1,11 @@
-import {TBindKey, TClassConstructor} from '../types'
-import {isClassInstance} from '../util'
-import {ModuleImportError, makeNoOwnBindingError} from './exceptions'
+import {TBindKey, TBindKeyRef, TClassConstructor} from '../types'
+import {isClassInstance, resolveBindingKey} from '../util'
+import {makeNoOwnBindingError} from './exceptions'
 import {Module} from './Module'
 
-export function bindingKeyToString(key: TBindKey): string {
+export function bindingKeyToString(key: TBindKey | TBindKeyRef): string {
+
+  key = resolveBindingKey(key)
 
   // string
   if (typeof key === 'string') {
@@ -19,7 +21,7 @@ export function bindingKeyToString(key: TBindKey): string {
     if ('constructor' in key) {
 
       // class
-      const name: string = (<any>key).name
+      const name: string = (<any>key).name || (<any>key).constructor?.name
       return `Class(${name})`
 
     } else {
@@ -54,4 +56,3 @@ export function assertOwnBindingOrAlias(m: Module, key: TBindKey) {
     throw makeNoOwnBindingError(m, key)
   }
 }
-

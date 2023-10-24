@@ -7,6 +7,8 @@ importers:
 
   ../../packages/core:
     specifiers:
+      '@types/nested-error-stacks': ~2.1.1
+      nested-error-stacks: ~2.1.1
       reflect-metadata: ~0.1.13
       rollup-plugin-node-externals: ~6.1.1
       typescript: ~5.2.2
@@ -14,7 +16,10 @@ importers:
       vite-plugin-checker: ~0.6.2
       vite-plugin-dts: ~3.6.0
       vitest: ~0.34.5
+    dependencies:
+      nested-error-stacks: 2.1.1
     devDependencies:
+      '@types/nested-error-stacks': 2.1.1
       reflect-metadata: 0.1.13
       rollup-plugin-node-externals: 6.1.1
       typescript: 5.2.2
@@ -371,6 +376,10 @@ packages:
 
   /@types/estree/1.0.2:
     resolution: {integrity: sha512-VeiPZ9MMwXjO32/Xu7+OwflfmeoRwkE/qzndw42gGtgJwZopBnzy2gD//NN1+go1mADzkDcqf/KnFRSjTJ8xJA==}
+    dev: true
+
+  /@types/nested-error-stacks/2.1.1:
+    resolution: {integrity: sha512-trHT0wH/HMWx7lXrLI0Eh+05rPj9WtqTcrPeiD+B23c5Nk/GLyXsMlqgCPP4gmFd14twx/FtXxuJWxXjAkKhCw==}
     dev: true
 
   /@types/node/20.4.9:
@@ -1009,6 +1018,10 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
     dev: true
+
+  /nested-error-stacks/2.1.1:
+    resolution: {integrity: sha512-9iN1ka/9zmX1ZvLV9ewJYEk9h7RyRRtqdK0woXcqohu8EWIerfPUjYJPg0ULy0UqP7cslmdGc8xKDJcojlKiaw==}
+    dev: false
 
   /normalize-path/3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}

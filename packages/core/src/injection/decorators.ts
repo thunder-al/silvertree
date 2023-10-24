@@ -7,8 +7,7 @@ import {
 } from '../types'
 import {tapClassMetadata} from '../metadata'
 import {INJECT_CLASS_ARGUMENT_METADATA_KEY, INJECT_CLASS_PROPERTY_METADATA_KEY} from './const'
-import {bindingRef, isBindingRef} from './func'
-import {isClassInstance} from '../util'
+import {bindingRef, isBindingRef, isClassInstance} from '../util'
 
 /**
  * Injects a dependency into a class property, method parameter or constructor parameter.
@@ -62,12 +61,20 @@ export function decorateInjectProperty(
     target,
     INJECT_CLASS_PROPERTY_METADATA_KEY,
     (metadata: Array<TClassInjectPropertyMetadataItem> = []) => {
-      metadata.push({k: key, p: propertyKey, o: options})
+      metadata.push({k: key, p: propertyKey, o: options ?? null})
       return metadata
     },
   )
 }
 
+/**
+ * Decorates a class constructor or method parameter with a dependency injection.
+ * @param target
+ * @param propertyKey
+ * @param parameterIndex
+ * @param key
+ * @param options
+ */
 export function decorateInjectArgument(
   target: Object,
   propertyKey: string | symbol | undefined,
@@ -81,7 +88,7 @@ export function decorateInjectArgument(
       target,
       INJECT_CLASS_ARGUMENT_METADATA_KEY,
       (metadata: Array<TClassInjectArgumentMetadataItem> = []) => {
-        metadata.push({k: key, p: null, i: parameterIndex, o: options})
+        metadata.push({k: key, p: null, i: parameterIndex, o: options ?? null})
         return metadata
       },
     )
@@ -91,7 +98,7 @@ export function decorateInjectArgument(
       target,
       INJECT_CLASS_ARGUMENT_METADATA_KEY,
       (metadata: Array<TClassInjectArgumentMetadataItem> = []) => {
-        metadata.push({k: key, p: propertyKey, i: parameterIndex, o: options})
+        metadata.push({k: key, p: propertyKey, i: parameterIndex, o: options ?? null})
         return metadata
       },
     )

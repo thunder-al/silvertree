@@ -1,7 +1,7 @@
 import {FactoryBindContext} from './FactoryBindContext'
 import {Module} from '../module'
 
-import {TBindKey} from '../types'
+import {IInjectOptions, TBindKey, TProvideContext} from '../types'
 
 export const defaultFactoryName = '(no-name)'
 export const defaultFactoryDescription = '(no-description)'
@@ -20,7 +20,11 @@ export abstract class AbstractFactory<
   /**
    * Returns injected object
    */
-  public abstract get(container: M): T
+  public abstract get(
+    module: M,
+    options: Partial<IInjectOptions> | null,
+    ctx: TProvideContext,
+  ): T
 
   /**
    * Returns object's metadata

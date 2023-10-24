@@ -20,7 +20,7 @@ test('injection-metadata', () => {
     }
 
     method1(
-      @Inject('some-key1')
+      @Inject('some-key1', {someOption: 'someValue'})
         arg1: any,
       @Inject('some-key2')
         arg2: any,
@@ -48,7 +48,7 @@ test('injection-metadata', () => {
       .toEqual([
         {
           'k': StubClass1,
-          'o': undefined,
+          'o': null,
           'p': 'field1',
         },
       ])
@@ -64,7 +64,7 @@ test('injection-metadata', () => {
         {
           'i': 0,
           'k': expect.objectContaining({__isBindRef: true}),
-          'o': undefined,
+          'o': null,
           'p': null,
         },
       ])
@@ -79,13 +79,13 @@ test('injection-metadata', () => {
         {
           'i': 1,
           'k': 'some-key2',
-          'o': undefined,
+          'o': null,
           'p': 'method1',
         },
         {
           'i': 0,
           'k': 'some-key1',
-          'o': undefined,
+          'o': {someOption: 'someValue'},
           'p': 'method1',
         },
       ])
@@ -100,13 +100,13 @@ test('injection-metadata', () => {
         {
           'i': 1,
           'k': 'some-key4',
-          'o': undefined,
+          'o': null,
           'p': 'method2',
         },
         {
           'i': 0,
           'k': expect.objectContaining({__isBindRef: true}),
-          'o': undefined,
+          'o': null,
           'p': 'method2',
         },
       ])

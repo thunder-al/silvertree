@@ -1,6 +1,7 @@
 import {Module} from '../module'
 import {TClassConstructor} from '../types'
 import {isClassConstructor} from '../util'
+import {bindingKeyToString, getModuleName} from '../module/util'
 
 /**
  * Container is a root object of the DI system.
@@ -55,6 +56,20 @@ export class Container {
     }
 
     return this.modules.has(module as Module)
+  }
+
+  /**
+   * Returns a module by its class.
+   * @param module
+   */
+  public getModule<M extends Module>(module: TClassConstructor<M>): M {
+    for (const mod of this.modules) {
+      if (mod instanceof module) {
+        return mod
+      }
+    }
+
+    throw new Error(`Module ${getModuleName(module)} is not registered`)
   }
 
   /**

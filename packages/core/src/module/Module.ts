@@ -3,14 +3,14 @@ import {AbstractAsyncFactory, AbstractFactory} from '../factory/AbstractFactory'
 import {BindManager} from './BindManager'
 import {makeNoBindingError, ModuleBindingError} from './exceptions'
 import {assertOwnBinding, bindingKeyToString, getModuleName} from './util'
-import {TBindKey, TClassConstructor} from '../types'
+import {IInjectOptions, TBindKey, TClassConstructor, TProvideContext} from '../types'
 
 export abstract class Module<Cfg = any> {
 
-  protected factoriesSync = new Map<TBindKey, AbstractFactory<any>>()
-  protected factoriesAsync = new Map<TBindKey, AbstractAsyncFactory<any>>()
-  protected aliases = new Map<TBindKey, TBindKey>()
-  protected bindManger = new BindManager(this)
+  public readonly factoriesSync = new Map<TBindKey, AbstractFactory<any>>()
+  protected readonly factoriesAsync = new Map<TBindKey, AbstractAsyncFactory<any>>()
+  protected readonly aliases = new Map<TBindKey, TBindKey>()
+  protected readonly bindManger = new BindManager(this)
 
   protected exports: Set<TBindKey> = new Set()
 
@@ -85,7 +85,7 @@ export abstract class Module<Cfg = any> {
   >(key: TBindKey) {
 
     if (this.factoriesAsync.has(key) || (this.aliases.has(key) && this.factoriesAsync.has(this.aliases.get(key)!))) {
-      throw new ModuleBindingError(this, key, `Cannot get async factory ${bindingKeyToString(key)} as sync in module ${getModuleName(this)}}. Use async method instead instead`)
+      throw new ModuleBindingError(this, key, `Cannot get async factory ${bindingKeyToString(key)} as sync in module ${getModuleName(this)}. Use async method instead sync variant`)
     }
 
     // resolve alias only if current key not exists in bindings
@@ -106,32 +106,49 @@ export abstract class Module<Cfg = any> {
   >(key: TBindKey) {
 
     // if sync factory exists, return it
-    if (this.factoriesSync.has(key)) {
+    if (this.factoriesSync.has(key) || (this.aliases.has(key) && this.factoriesSync.has(this.aliases.get(key)!))) {
       return this.getSyncFactory(key)
-    } else
+    }
 
-      // resolve alias only if current key not exists in bindings
-    if (!this.factoriesSync.has(key) && this.aliases.has(key)) {
+    // resolve alias only if current key not exists in bindings
+    if (!this.factoriesAsync.has(key) && this.aliases.has(key)) {
       key = this.aliases.get(key)!
     }
 
-    if (!this.factoriesSync.has(key)) {
+    if (!this.factoriesAsync.has(key)) {
       throw makeNoBindingError(this, key)
     }
 
-    return this.factoriesSync.get(key) as F
+    return this.factoriesAsync.get(key) as F
   }
 
-  public provideSync<T>(key: TBindKey) {
+  public provideSync<T>(
+    key: TBindKey,
+    options: Partial<IInjectOptions> | null = null,
+    ctx: TProvideContext = {chain: [], key},
+  ): T {
     const factory = this.getSyncFactory(key)
 
-    return factory.get(this) as T
+    ctx = {
+      ...ctx,
+      key: key,
+      chain: [
+        ...ctx.chain,
+        {module: this, key, factory},
+      ],
+    }
+
+    return factory.get(this, options, ctx)
   }
 
-  public async provideAsync<T>(key: TBindKey) {
-    const factory = this.getSyncFactory(key)
+  public async provideAsync<T>(
+    key: TBindKey,
+    options: Partial<IInjectOptions> | null = null,
+    ctx: TProvideContext = {chain: [], key},
+  ): Promise<T> {
+    const factory = this.getAsyncFactory(key)
 
-    return factory.get(this) as T
+    return await factory.get(this, options, ctx)
   }
 
   public hasOwnBindOrAlias(key: TBindKey) {
@@ -159,6 +176,7 @@ export abstract class Module<Cfg = any> {
    * Initializes module
    */
   async init(): Promise<unknown> {
+    await this.setup()
     return
   }
 }
