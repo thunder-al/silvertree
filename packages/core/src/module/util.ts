@@ -1,6 +1,5 @@
-import {TClassConstructor} from '../types'
+import {TBindKey, TClassConstructor} from '../types'
 import {isClassInstance} from '../util'
-import {TBindKey} from './types'
 import {ModuleImportError, makeNoOwnBindingError} from './exceptions'
 import {Module} from './Module'
 

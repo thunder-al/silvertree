@@ -4,12 +4,16 @@ import {isClassConstructor, isClassInstance} from '../util'
 /**
  * Get metadata from a class
  */
-export function getClassMetadata<T = any>(target: any, key: string): T {
+export function getClassMetadata<T = any>(target: any, key: string, own = true): T {
   if (isClassInstance(target)) {
     target = target.constructor
   }
 
-  return Reflect.getOwnMetadata(METADATA_PREFIX + key, target)
+  if (own) {
+    return Reflect.getOwnMetadata(METADATA_PREFIX + key, target)
+  }
+
+  return Reflect.getMetadata(METADATA_PREFIX + key, target)
 }
 
 /**

@@ -3,11 +3,9 @@ import {AbstractAsyncFactory, AbstractFactory} from '../factory/AbstractFactory'
 import {BindManager} from './BindManager'
 import {makeNoBindingError, ModuleBindingError} from './exceptions'
 import {assertOwnBinding, bindingKeyToString, getModuleName} from './util'
-import {TBindKey} from './types'
-import {TFactoryMetadata} from '../factory/types'
-import {TClassConstructor} from '../types'
+import {TBindKey, TClassConstructor} from '../types'
 
-export abstract class Module {
+export abstract class Module<Cfg = any> {
 
   protected factoriesSync = new Map<TBindKey, AbstractFactory<any>>()
   protected factoriesAsync = new Map<TBindKey, AbstractAsyncFactory<any>>()
@@ -20,7 +18,7 @@ export abstract class Module {
 
   constructor(
     protected container: Container,
-    protected readonly config: Record<string, any>,
+    protected readonly config: Cfg,
   ) {
   }
 
@@ -83,7 +81,7 @@ export abstract class Module {
 
   public getSyncFactory<
     T = any,
-    F extends AbstractFactory<T, TFactoryMetadata, this> = AbstractFactory<T, TFactoryMetadata, this>
+    F extends AbstractFactory<T, this> = AbstractFactory<T, this>
   >(key: TBindKey) {
 
     if (this.factoriesAsync.has(key) || (this.aliases.has(key) && this.factoriesAsync.has(this.aliases.get(key)!))) {
@@ -104,7 +102,7 @@ export abstract class Module {
 
   public getAsyncFactory<
     T = any,
-    F extends AbstractAsyncFactory<T, TFactoryMetadata, this> = AbstractAsyncFactory<T, TFactoryMetadata, this>
+    F extends AbstractAsyncFactory<T, this> = AbstractAsyncFactory<T, this>
   >(key: TBindKey) {
 
     // if sync factory exists, return it

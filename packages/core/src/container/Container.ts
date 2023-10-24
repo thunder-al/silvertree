@@ -20,13 +20,19 @@ export class Container {
   /**
    * Registers a new module in the container.
    */
-  public register(
-    module: TClassConstructor<Module>,
-    config?: any,
-  ): this {
+  public async register<
+    M extends Module,
+    Cfg = M extends Module<infer C> ? C : any,
+  >(
+    module: TClassConstructor<M>,
+    config?: Cfg,
+  ): Promise<void> {
     const instance = new module(this, config)
     this.modules.add(instance)
-    return this
+
+    if(this.initialized) {
+      await this.initModule(instance)
+    }
   }
 
   /**

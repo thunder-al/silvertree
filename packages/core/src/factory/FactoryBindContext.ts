@@ -1,6 +1,7 @@
 import {AbstractAsyncFactory, AbstractFactory} from './AbstractFactory'
 import {Module} from '../module'
-import {TBindKey} from '../module/types'
+
+import {TBindKey} from '../types'
 
 export class FactoryBindContext<
   M extends Module = Module,

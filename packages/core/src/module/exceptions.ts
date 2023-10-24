@@ -1,6 +1,6 @@
-import {TBindKey} from './types'
 import {bindingKeyToString, getModuleName} from './util'
 import {Module} from './Module'
+import {TBindKey} from '../types'
 
 export class ModuleBindingError extends Error {
   constructor(

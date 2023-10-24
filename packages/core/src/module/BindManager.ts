@@ -1,6 +1,5 @@
 import {Module} from './Module'
-import {TBindKey} from './types'
-import {TClassConstructor} from '../types'
+import {TBindKey, TClassConstructor} from '../types'
 
 
 export interface BindManagerImpl {

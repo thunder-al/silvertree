@@ -1,16 +1,21 @@
 import {FactoryBindContext} from './FactoryBindContext'
-import {TFactoryMetadata} from './types'
 import {Module} from '../module'
-import {TBindKey} from '../module/types'
+
+import {TBindKey} from '../types'
 
 export const defaultFactoryName = '(no-name)'
 export const defaultFactoryDescription = '(no-description)'
 
 export abstract class AbstractFactory<
   T,
-  Fm extends TFactoryMetadata = TFactoryMetadata,
   M extends Module = Module,
 > {
+
+  constructor(
+    protected factoryName = defaultFactoryName,
+    protected factoryDescription = defaultFactoryDescription,
+  ) {
+  }
 
   /**
    * Returns injected object
@@ -20,20 +25,20 @@ export abstract class AbstractFactory<
   /**
    * Returns object's metadata
    */
-  public abstract getMetadata(container: M): Fm
+  public abstract getMetadataTarget(container: M): any
 
   /**
    * Returns factory/object name. For debugging/documentation purposes
    */
   public getName(): string {
-    return defaultFactoryName
+    return this.factoryName
   }
 
   /**
    * Returns factory/object description. For debugging/documentation purposes
    */
   public getDescription(): string {
-    return defaultFactoryDescription
+    return this.factoryDescription
   }
 
   public makeBindContext(module: M, key: TBindKey): FactoryBindContext<M, T, this> {
@@ -42,11 +47,6 @@ export abstract class AbstractFactory<
 
 }
 
-export abstract class AbstractAsyncFactory<T, Fm extends TFactoryMetadata = TFactoryMetadata, M extends Module = Module>
-  extends AbstractFactory<T | Promise<T>, Fm | Promise<Fm>, M> {
-
-  public abstract get(container: M): T | Promise<T>
-
-  public abstract getMetadata(container: M): Fm | Promise<Fm>
-
+export abstract class AbstractAsyncFactory<T, M extends Module = Module>
+  extends AbstractFactory<T | Promise<T>, M> {
 }
