@@ -22,7 +22,6 @@
   },
   "devDependencies": {
     "vitest": "~0.34.5",
-    "rollup-plugin-node-externals": "~6.1.1",
     "vite": "~4.4.9",
     "vite-plugin-dts": "~3.6.0",
     "vite-plugin-checker": "~0.6.2",

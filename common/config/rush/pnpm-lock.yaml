@@ -10,7 +10,6 @@ importers:
       '@types/nested-error-stacks': ~2.1.1
       nested-error-stacks: ~2.1.1
       reflect-metadata: ~0.1.13
-      rollup-plugin-node-externals: ~6.1.1
       typescript: ~5.2.2
       vite: ~4.4.9
       vite-plugin-checker: ~0.6.2
@@ -21,7 +20,6 @@ importers:
     devDependencies:
       '@types/nested-error-stacks': 2.1.1
       reflect-metadata: 0.1.13
-      rollup-plugin-node-externals: 6.1.1
       typescript: 5.2.2
       vite: 4.4.9
       vite-plugin-checker: 0.6.2_typescript@5.2.2+vite@4.4.9
@@ -1137,13 +1135,6 @@ packages:
   /reusify/1.0.4:
     resolution: {integrity: sha512-U9nH88a3fc/ekCF1l0/UP1IosiuIjyTh7hBvXVMHYgVcfGvt897Xguj2UOLDeI5BG2m7/uwyaLVT6fbtCwTyzw==}
     engines: {iojs: '>=1.0.0', node: '>=0.10.0'}
-    dev: true
-
-  /rollup-plugin-node-externals/6.1.1:
-    resolution: {integrity: sha512-127OFMkpH5rBVlRHRBDUMk1m1sGuzbGy7so5aj/IkpUb2r3+wOWjR/erUzd2ChEQWPsxsyQG6xpYYvPBAdcBRA==}
-    engines: {node: '>=16.0.0'}
-    peerDependencies:
-      rollup: ^3.0.0
     dev: true
 
   /rollup/3.29.3:
