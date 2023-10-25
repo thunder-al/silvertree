@@ -1,7 +1,5 @@
 import 'reflect-metadata'
 import {expect, test} from 'vitest'
-import {Module} from '../../module'
-import {Container} from '../../container'
 
 
 @Reflect.metadata('class-key', 'class-val')

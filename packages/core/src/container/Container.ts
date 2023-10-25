@@ -1,7 +1,7 @@
 import {Module} from '../module'
 import {TClassConstructor} from '../types'
 import {isClassConstructor} from '../util'
-import {bindingKeyToString, getModuleName} from '../module/util'
+import {getModuleName} from '../module/util'
 
 /**
  * Container is a root object of the DI system.
@@ -31,7 +31,7 @@ export class Container {
     const instance = new module(this, config)
     this.modules.add(instance)
 
-    if(this.initialized) {
+    if (this.initialized) {
       await this.initModule(instance)
     }
   }
