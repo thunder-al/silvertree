@@ -2,6 +2,15 @@ import {bindingKeyToString, getModuleName} from './util'
 import {Module} from './Module'
 import {TBindKey} from '../types'
 
+export class ModuleError extends Error {
+  constructor(
+    public readonly module: Module,
+    message?: string,
+  ) {
+    super(message)
+  }
+}
+
 export class ModuleBindingError extends Error {
   constructor(
     public readonly module: Module,
@@ -23,20 +32,6 @@ export class ModuleImportError extends Error {
 }
 
 /**
- * Throws if container doesn't have any *own* bindings or aliases with this key
- */
-export function makeNoOwnBindingError(
-  module: Module,
-  key: TBindKey,
-) {
-  return new ModuleBindingError(
-    module,
-    key,
-    `Binding "${bindingKeyToString(key)}" not found in own bindings or aliases of module ${getModuleName(module)}`,
-  )
-}
-
-/**
  * Throws if container doesn't have any bindings or aliases with this key
  */
 export function makeNoBindingError(
@@ -46,6 +41,6 @@ export function makeNoBindingError(
   return new ModuleBindingError(
     module,
     key,
-    `Binding "${bindingKeyToString(key)}" not found in bindings or aliases of module ${getModuleName(module)}`,
+    `Binding "${bindingKeyToString(key)}" not found in bindings or aliases of module ${getModuleName(module)}. Maybe you forgot to import module or provide the value?`,
   )
 }

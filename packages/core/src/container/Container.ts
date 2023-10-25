@@ -9,8 +9,6 @@ import {getModuleName} from '../module/util'
 export class Container {
   protected readonly modules = new Set<Module>()
 
-  protected initialized = false
-
   /**
    * Creates a new container.
    */
@@ -28,12 +26,14 @@ export class Container {
     module: TClassConstructor<M>,
     config?: Cfg,
   ): Promise<void> {
+    if (this.hasModule(module)) {
+      return
+    }
+
     const instance = new module(this, config)
     this.modules.add(instance)
 
-    if (this.initialized) {
-      await this.initModule(instance)
-    }
+    await this.initModule(instance)
   }
 
   /**
@@ -70,23 +70,6 @@ export class Container {
     }
 
     throw new Error(`Module ${getModuleName(module)} is not registered`)
-  }
-
-  /**
-   * Initializes all modules in the container.
-   */
-  public async init() {
-    if (this.initialized) {
-      throw new Error('Container is already initialized')
-    }
-
-    for (const module of this.modules) {
-      await this.initModule(module)
-    }
-
-    this.initialized = true
-
-    return this
   }
 
   protected async initModule(module: Module) {

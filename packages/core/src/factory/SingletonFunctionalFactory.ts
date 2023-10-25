@@ -1,4 +1,4 @@
-import {AbstractSyncFactory} from './AbstractSyncFactory'
+import {AbstractAsyncFactory, AbstractSyncFactory} from './AbstractSyncFactory'
 import {Module} from '../module'
 import {EMPTY_META_TARGET} from '../injection'
 
@@ -11,22 +11,28 @@ export class SyncSingletonFunctionalFactory<T, M extends Module = Module>
   protected value?: T
 
   public constructor(
-    protected singletonFunc: (module: M) => T,
+    module: M,
+    protected readonly func: (module: M) => T,
+    protected readonly singleton: boolean = true,
     name?: string,
     description?: string,
   ) {
-    super(name, description)
+    super(module, name, description)
   }
 
-  public get(container: M): T {
+  public get(module: M): T {
+    if (!this.singleton) {
+      return this.func(module)
+    }
+
     if (!this.value) {
-      this.value = this.singletonFunc(container)
+      this.value = this.func(module)
     }
 
     return this.value
   }
 
-  public getMetadataTarget(container: M): any {
+  public getMetadataTarget(module: M): any {
     return EMPTY_META_TARGET
   }
 }
@@ -35,22 +41,33 @@ export class SyncSingletonFunctionalFactory<T, M extends Module = Module>
  * A factory that creates a single instance of a value.
  */
 export class AsyncSingletonFunctionalFactory<T, M extends Module = Module>
-  extends SyncSingletonFunctionalFactory<Promise<T> | T, M> {
+  extends AbstractAsyncFactory<Promise<T> | T, M> {
+
+  protected value?: T
 
   public constructor(
-    singletonFunc: (module: M) => Promise<T> | T,
+    module: M,
+    protected readonly func: (module: M) => Promise<T> | T,
+    protected readonly singleton: boolean = true,
     name?: string,
     description?: string,
   ) {
-    super(singletonFunc, name, description)
+    super(module, name, description)
   }
 
-  public async get(container: M): Promise<T> {
+  public async get(module: M): Promise<T> {
+    if (!this.singleton) {
+      return this.func(module)
+    }
+
     if (!this.value) {
-      this.value = await this.singletonFunc(container)
+      this.value = await this.func(module)
     }
 
     return this.value
   }
 
+  public getMetadataTarget(module: M): any {
+    return EMPTY_META_TARGET
+  }
 }

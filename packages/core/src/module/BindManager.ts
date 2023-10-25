@@ -22,7 +22,7 @@ export class BindManager<M extends Module = Module> implements BindManagerImpl {
   public syncSingletonClass(
     cls: TClassConstructor,
   ) {
-    return this.module.bindSync(cls, new SingletonClassSyncFactory(cls))
+    return this.module.bindSync(cls, new SingletonClassSyncFactory(this.module, cls))
   }
 
   /**
@@ -32,7 +32,7 @@ export class BindManager<M extends Module = Module> implements BindManagerImpl {
   public singletonClass(
     cls: TClassConstructor,
   ) {
-    return this.module.bindAsync(cls, new SingletonClassAsyncFactory(cls))
+    return this.module.bindAsync(cls, new SingletonClassAsyncFactory(this.module, cls))
   }
 
   /**
@@ -40,18 +40,18 @@ export class BindManager<M extends Module = Module> implements BindManagerImpl {
    * @param key
    * @param func
    */
-  public syncSingletonFunctional(
+  public syncFunctional(
     key: TBindKey,
     func: (module: M) => unknown,
   ) {
-    return this.module.bindSync(key, new SyncSingletonFunctionalFactory(func))
+    return this.module.bindSync(key, new SyncSingletonFunctionalFactory(this.module, func))
   }
 
-  public singletonFunctional(
+  public functional(
     key: TBindKey,
     func: (module: M) => Promise<unknown> | unknown,
   ) {
-    return this.module.bindAsync(key, new AsyncSingletonFunctionalFactory(func))
+    return this.module.bindAsync(key, new AsyncSingletonFunctionalFactory(this.module, func))
   }
 
   public extendBindManager(methodName: string, getter: Function) {

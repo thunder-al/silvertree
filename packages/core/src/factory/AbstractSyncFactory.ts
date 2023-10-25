@@ -12,6 +12,7 @@ export abstract class AbstractSyncFactory<
 > {
 
   constructor(
+    protected readonly module: M,
     protected factoryName = defaultFactoryName,
     protected factoryDescription = defaultFactoryDescription,
   ) {
@@ -29,7 +30,7 @@ export abstract class AbstractSyncFactory<
   /**
    * Returns object's metadata
    */
-  public abstract getMetadataTarget(container: M): any
+  public abstract getMetadataTarget(module: M): any
 
   /**
    * Returns factory/object name. For debugging/documentation purposes
@@ -47,6 +48,10 @@ export abstract class AbstractSyncFactory<
 
   public makeBindContext(module: M, key: TBindKey): FactoryBindContext<M, T, this> {
     return new FactoryBindContext(module, key, this)
+  }
+
+  public getModule(): M {
+    return this.module
   }
 
 }

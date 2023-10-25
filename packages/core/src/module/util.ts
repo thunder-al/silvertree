@@ -1,6 +1,5 @@
 import {TBindKey, TBindKeyRef, TClassConstructor} from '../types'
 import {isClassInstance, resolveBindingKey} from '../util'
-import {makeNoOwnBindingError} from './exceptions'
 import {Module} from './Module'
 
 export function bindingKeyToString(key: TBindKey | TBindKeyRef): string {
@@ -43,16 +42,4 @@ export function getModuleName(module: Module | TClassConstructor<Module>): strin
   }
 
   return module.name
-}
-
-export function assertOwnBinding(m: Module, key: TBindKey) {
-  if (!m.hasOwnBind(key)) {
-    throw makeNoOwnBindingError(m, key)
-  }
-}
-
-export function assertOwnBindingOrAlias(m: Module, key: TBindKey) {
-  if (!m.hasOwnBindOrAlias(key)) {
-    throw makeNoOwnBindingError(m, key)
-  }
 }

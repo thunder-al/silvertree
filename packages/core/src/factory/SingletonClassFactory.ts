@@ -17,12 +17,13 @@ export class SingletonClassSyncFactory<T, M extends Module = Module>
   protected value?: T
 
   public constructor(
+    module: M,
     protected cls: TClassConstructor<T>,
     name?: string,
     description?: string,
   ) {
     name = name ?? cls.name
-    super(name, description)
+    super(module, name, description)
   }
 
   public get(
@@ -74,12 +75,13 @@ export class SingletonClassAsyncFactory<T, M extends Module = Module>
   protected value?: T
 
   public constructor(
+    module: M,
     protected cls: TClassConstructor<T>,
     name?: string,
     description?: string,
   ) {
     name = name ?? cls.name
-    super(name, description)
+    super(module, name, description)
   }
 
   public async get(

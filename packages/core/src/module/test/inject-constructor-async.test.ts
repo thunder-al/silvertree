@@ -34,7 +34,7 @@ test('inject to constructor async', async () => {
     async setup() {
       this.bind.singletonClass(Class1)
       this.bind.singletonClass(Class2).alias('class2')
-      this.bind.singletonFunctional('string-key', async () => {
+      this.bind.functional('string-key', async () => {
         // tiny delay to test async
         await new Promise(resolve => setTimeout(resolve, 1))
         return 'test-functional-value'
@@ -44,7 +44,6 @@ test('inject to constructor async', async () => {
 
   const container = new Container()
   await container.register(TestModule)
-  await container.init()
 
   const mod1 = container.getModule(TestModule)
   const instance1 = await mod1.provideAsync<Class1>(Class1)

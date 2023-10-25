@@ -15,14 +15,28 @@ export class FactoryBindContext<
   ) {
   }
 
-  public export() {
+  public export(opts?: { withAliases?: boolean }) {
     this.module.export(this.key)
+
+    if (opts?.withAliases) {
+      const aliases = this.module.getAliasesPointingTo(this.key)
+      for (const alias of aliases) {
+        this.module.export(alias)
+      }
+    }
+
     return this
   }
 
-  public alias(aliasKey: TBindKey) {
+  public alias(aliasKey: TBindKey | Array<TBindKey>) {
+    if (Array.isArray(aliasKey)) {
+      for (const alias of aliasKey) {
+        this.module.alias(this.key, alias)
+      }
+      return this
+    }
+
     this.module.alias(this.key, aliasKey)
-    return this
   }
 
   public getKey() {

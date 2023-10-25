@@ -37,13 +37,12 @@ test('inject to constructor sync', async () => {
     async setup() {
       this.bind.syncSingletonClass(Class1)
       this.bind.syncSingletonClass(Class2)
-      this.bind.syncSingletonFunctional('string-key', () => 'test-functional-value')
+      this.bind.syncFunctional('string-key', () => 'test-functional-value')
     }
   }
 
   const container = new Container()
   await container.register(TestModule)
-  await container.init()
 
   const mod1 = container.getModule(TestModule)
   const instance1 = mod1.provideSync<Class1>(Class1)

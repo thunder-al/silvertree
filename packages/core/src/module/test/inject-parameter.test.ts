@@ -45,13 +45,12 @@ test('inject to parameter', async () => {
     async setup() {
       this.bind.singletonClass(Class1).alias('class1')
       this.bind.syncSingletonClass(Class2)
-      this.bind.syncSingletonFunctional('string-key', () => 'test-functional-value')
+      this.bind.syncFunctional('string-key', () => 'test-functional-value')
     }
   }
 
   const container = new Container()
   await container.register(TestModule)
-  await container.init()
 
   const mod = container.getModule(TestModule)
   const instance1 = await mod.provideAsync<Class1>('class1')
