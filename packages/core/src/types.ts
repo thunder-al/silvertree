@@ -11,7 +11,7 @@ export type TClassConstructor<T = any, C extends Array<any> = Array<any>>
 /**
  * A binding key for providing or injecting a resource.
  */
-export type TBindKey = string | TClassConstructor | symbol
+export type TBindKey<T = any> = string | TClassConstructor<T> | symbol
 
 /**
  * A binding key reference.

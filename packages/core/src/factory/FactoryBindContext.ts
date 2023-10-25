@@ -37,6 +37,7 @@ export class FactoryBindContext<
     }
 
     this.module.alias(this.key, aliasKey)
+    return this
   }
 
   public getKey() {

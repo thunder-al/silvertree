@@ -46,9 +46,9 @@ test('inject to constructor async', async () => {
   await container.register(TestModule)
 
   const mod1 = container.getModule(TestModule)
-  const instance1 = await mod1.provideAsync<Class1>(Class1)
-  const instance2 = await mod1.provideAsync<Class1>(Class1)
-  const instance3 = await mod1.provideAsync<Class2>(Class2)
+  const instance1 = await mod1.provideAsync(Class1)
+  const instance2 = await mod1.provideAsync(Class1)
+  const instance3 = await mod1.provideAsync(Class2)
 
   expect(instance1.testMethod()).toBe('test')
   expect(instance1.functional).toBe('test-functional-value')

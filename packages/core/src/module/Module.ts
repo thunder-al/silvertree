@@ -98,7 +98,8 @@ export abstract class Module<Cfg = any> {
     }
 
     // search for binding in imported modules
-    for (const moduleClass of this.imports) {
+    const importedAndGlobal = [...this.imports, ...this.container.getGlobalModules()]
+    for (const moduleClass of importedAndGlobal) {
       const module = this.container.getModule(moduleClass)
       if (module.hasExportedSyncBind(key)) {
         return module.getSyncFactory(key)
@@ -127,8 +128,9 @@ export abstract class Module<Cfg = any> {
       return this.factoriesAsync.get(key) as F
     }
 
-    // search for binding in imported modules
-    for (const moduleClass of this.imports) {
+    // search for binding in imported and global modules
+    const importedAndGlobal = [...this.imports, ...this.container.getGlobalModules()]
+    for (const moduleClass of importedAndGlobal) {
       const module = this.container.getModule(moduleClass)
       if (module.hasExportedAsyncBind(key)) {
         return module.getAsyncFactory(key)
@@ -138,6 +140,8 @@ export abstract class Module<Cfg = any> {
     throw makeNoBindingError(this, key)
   }
 
+  public provideSync<T>(key: TClassConstructor<T>, options?: Partial<IInjectOptions> | null, ctx?: TProvideContext): T
+  public provideSync<T>(key: string | symbol, options?: Partial<IInjectOptions> | null, ctx?: TProvideContext): T
   public provideSync<T>(
     key: TBindKey,
     options: Partial<IInjectOptions> | null = null,
@@ -156,6 +160,8 @@ export abstract class Module<Cfg = any> {
     return factory.get(this, options, ctx)
   }
 
+  public provideAsync<T>(key: TClassConstructor<T>, options?: Partial<IInjectOptions> | null, ctx?: TProvideContext): Promise<T>
+  public provideAsync<T>(key: string | symbol, options?: Partial<IInjectOptions> | null, ctx?: TProvideContext): Promise<T>
   public async provideAsync<T>(
     key: TBindKey,
     options: Partial<IInjectOptions> | null = null,
@@ -183,7 +189,8 @@ export abstract class Module<Cfg = any> {
   }
 
   public hasImportedSyncBinding(key: TBindKey) {
-    for (const modClass of this.imports) {
+    const importedAndGlobal = [...this.imports, ...this.container.getGlobalModules()]
+    for (const modClass of importedAndGlobal) {
       const mod = this.container.getModule(modClass)
       if (mod.hasExportedSyncBind(key)) {
         return true
@@ -194,7 +201,8 @@ export abstract class Module<Cfg = any> {
   }
 
   public hasImportedAsyncBinding(key: TBindKey) {
-    for (const modClass of this.imports) {
+    const importedAndGlobal = [...this.imports, ...this.container.getGlobalModules()]
+    for (const modClass of importedAndGlobal) {
       const mod = this.container.getModule(modClass)
       if (mod.hasExportedAsyncBind(key)) {
         return true
@@ -217,6 +225,10 @@ export abstract class Module<Cfg = any> {
       return true
     }
 
+    if (this.aliases.has(key)) {
+      key = this.aliases.get(key)!
+    }
+
     return this.hasImportedSyncBinding(key)
   }
 
@@ -235,16 +247,16 @@ export abstract class Module<Cfg = any> {
     }
 
     // fallback to async
-    if (!this.exports.has(key)) {
-      return false
-    }
-
     if (this.factoriesSync.has(key)) {
       return true
     }
 
     if (this.aliases.has(key) && this.factoriesSync.has(this.aliases.get(key)!)) {
       return true
+    }
+
+    if (this.aliases.has(key)) {
+      key = this.aliases.get(key)!
     }
 
     // check imported modules
@@ -256,17 +268,8 @@ export abstract class Module<Cfg = any> {
 
     for (const key of keys) {
       const boundHere = this.aliases.has(key) || this.factoriesSync.has(key) || this.factoriesAsync.has(key)
-      let importedFromOther = false
-
-      for (const modCass of this.imports) {
-        const mod = this.container.getModule(modCass)
-        // async check also includes a sync check
-        const hasExported = mod.hasExportedAsyncBind(key)
-        if (hasExported) {
-          importedFromOther = true
-          break
-        }
-      }
+      // async check also includes a sync check
+      let importedFromOther = this.hasImportedAsyncBinding(key)
 
       if (!boundHere && !importedFromOther) {
         throw new ModuleError(
@@ -322,5 +325,12 @@ export abstract class Module<Cfg = any> {
   async init(): Promise<unknown> {
     await this.setup()
     return
+  }
+
+  /**
+   * Returns true if module is global
+   */
+  public isGlobal() {
+    return false
   }
 }

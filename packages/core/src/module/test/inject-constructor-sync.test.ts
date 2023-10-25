@@ -45,9 +45,9 @@ test('inject to constructor sync', async () => {
   await container.register(TestModule)
 
   const mod1 = container.getModule(TestModule)
-  const instance1 = mod1.provideSync<Class1>(Class1)
-  const instance2 = mod1.provideSync<Class1>(Class1)
-  const instance3 = mod1.provideSync<Class2>(Class2)
+  const instance1 = mod1.provideSync(Class1)
+  const instance2 = mod1.provideSync(Class1)
+  const instance3 = mod1.provideSync(Class2)
 
   expect(class1ConstructorTriggerCount).toBe(1)
   expect(instance1.testMethod()).toBe('test')

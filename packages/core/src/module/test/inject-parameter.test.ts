@@ -54,7 +54,7 @@ test('inject to parameter', async () => {
 
   const mod = container.getModule(TestModule)
   const instance1 = await mod.provideAsync<Class1>('class1')
-  const instance2 = mod.provideSync<Class2>(Class2)
+  const instance2 = mod.provideSync(Class2)
 
   expect(instance1.class1).toBe(instance1)
   expect(instance2.class2).toBe(instance2)

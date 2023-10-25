@@ -8,6 +8,7 @@ import {getModuleName} from '../module/util'
  */
 export class Container {
   protected readonly modules = new Set<Module>()
+  protected readonly globalModules = new Set<TClassConstructor<Module>>()
 
   /**
    * Creates a new container.
@@ -33,6 +34,10 @@ export class Container {
     const instance = new module(this, config)
     this.modules.add(instance)
 
+    if (instance.isGlobal() && !this.globalModules.has(module)) {
+      this.globalModules.add(module)
+    }
+
     await this.initModule(instance)
   }
 
@@ -41,6 +46,13 @@ export class Container {
    */
   public getModules(): Set<Module> {
     return this.modules
+  }
+
+  /**
+   * Returns global modules in the container.
+   */
+  public getGlobalModules(): Set<TClassConstructor<Module>> {
+    return this.globalModules
   }
 
   /**
