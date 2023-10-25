@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 import {Module} from './module'
-import {AbstractFactory} from './factory/AbstractFactory'
+import {AbstractSyncFactory} from './factory/AbstractSyncFactory'
 
 /**
  * Helper type for a class constructor.
@@ -69,5 +69,5 @@ export interface TClassInjectArgumentMetadataItem {
 
 export interface TProvideContext {
   key: TBindKey
-  chain: Array<{ module: Module, factory: AbstractFactory<any>, key: TBindKey }>
+  chain: Array<{ module: Module, factory: AbstractSyncFactory<any>, key: TBindKey }>
 }

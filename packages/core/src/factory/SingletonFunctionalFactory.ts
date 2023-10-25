@@ -1,4 +1,4 @@
-import {AbstractFactory} from './AbstractFactory'
+import {AbstractSyncFactory} from './AbstractSyncFactory'
 import {Module} from '../module'
 import {EMPTY_META_TARGET} from '../injection'
 
@@ -6,7 +6,7 @@ import {EMPTY_META_TARGET} from '../injection'
  * A factory that creates a single instance of a value.
  */
 export class SyncSingletonFunctionalFactory<T, M extends Module = Module>
-  extends AbstractFactory<T, M> {
+  extends AbstractSyncFactory<T, M> {
 
   protected value?: T
 

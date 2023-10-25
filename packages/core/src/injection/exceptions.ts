@@ -5,7 +5,7 @@ export class InjectionError extends Error {
   constructor(
     public readonly module: Module,
     message: string,
-    nested?: Error,
+    public readonly nested?: Error,
   ) {
     super(message, nested)
   }

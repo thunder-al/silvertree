@@ -9,7 +9,7 @@ export function bindingKeyToString(key: TBindKey | TBindKeyRef): string {
 
   // string
   if (typeof key === 'string') {
-    return key
+    return `String(${key})`
   }
 
   // symbol

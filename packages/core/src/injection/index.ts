@@ -1,5 +1,6 @@
 export * from './const'
 export * from './decorators'
 export * from './exceptions'
-export * from './factory'
+export * from './factory-constructor'
+export * from './factory-property'
 export * from './func'

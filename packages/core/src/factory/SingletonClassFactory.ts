@@ -1,13 +1,18 @@
-import {AbstractFactory} from './AbstractFactory'
+import {AbstractAsyncFactory, AbstractSyncFactory} from './AbstractSyncFactory'
 import {Module} from '../module'
 import {IInjectOptions, TClassConstructor, TProvideContext} from '../types'
-import {getBindingArgumentsForClassConstructorAsync, getBindingArgumentsForClassConstructorSync} from '../injection'
+import {
+  getBindingArgumentsForClassConstructorAsync,
+  getBindingArgumentsForClassConstructorSync,
+  injectBindingsForClassParameterAsync,
+  injectBindingsForClassParameterSync,
+} from '../injection'
 
 /**
  * A factory that creates a single instance of a class.
  */
-export class SyncSingletonClassFactory<T, M extends Module = Module>
-  extends AbstractFactory<T, M> {
+export class SingletonClassSyncFactory<T, M extends Module = Module>
+  extends AbstractSyncFactory<T, M> {
 
   protected value?: T
 
@@ -26,29 +31,33 @@ export class SyncSingletonClassFactory<T, M extends Module = Module>
     ctx: TProvideContext,
   ): T {
     if (!this.value) {
-      this.value = this.createInstance(module, options, ctx)
+
+      // prepare constructor arguments
+      const constructorArgs = getBindingArgumentsForClassConstructorSync(
+        module,
+        this,
+        this.cls,
+        options?.constructorArgs ?? {},
+        ctx,
+      )
+
+      // create instance
+      const instance: T = new this.cls(...constructorArgs)
+
+      // save value for future recursive calls
+      this.value = instance
+
+      // inject properties
+      injectBindingsForClassParameterSync(
+        module,
+        instance,
+        ctx,
+      )
+
+      return instance
     }
 
     return this.value
-  }
-
-  protected createInstance(
-    module: M,
-    options: Partial<IInjectOptions> | null,
-    ctx: TProvideContext,
-  ): T {
-
-    const args = getBindingArgumentsForClassConstructorSync(
-      module,
-      this,
-      this.cls,
-      options?.constructorArgs ?? {},
-      ctx,
-    )
-
-    const instance = new this.cls(...args)
-
-    return instance
   }
 
   public getMetadataTarget(module: M): any {
@@ -59,16 +68,18 @@ export class SyncSingletonClassFactory<T, M extends Module = Module>
 /**
  * A factory that creates a single instance of a class.
  */
-export class AsyncSingletonClassFactory<T, M extends Module = Module>
-  extends SyncSingletonClassFactory<Promise<T> | T, M> {
+export class SingletonClassAsyncFactory<T, M extends Module = Module>
+  extends AbstractAsyncFactory<Promise<T> | T, M> {
+
+  protected value?: T
 
   public constructor(
-    cls: TClassConstructor<T>,
+    protected cls: TClassConstructor<T>,
     name?: string,
     description?: string,
   ) {
     name = name ?? cls.name
-    super(cls, name, description)
+    super(name, description)
   }
 
   public async get(
@@ -77,29 +88,34 @@ export class AsyncSingletonClassFactory<T, M extends Module = Module>
     ctx: TProvideContext,
   ): Promise<T> {
     if (!this.value) {
-      this.value = this.createInstance(module, options, ctx)
+
+      // prepare constructor arguments
+      const constructorArgs = await getBindingArgumentsForClassConstructorAsync(
+        module,
+        this,
+        this.cls,
+        options?.constructorArgs ?? {},
+        ctx,
+      )
+
+      // create instance
+      const instance = new this.cls(...constructorArgs)
+
+      // save value for future recursive calls
+      this.value = instance
+
+      // inject properties
+      await injectBindingsForClassParameterAsync(
+        module,
+        instance,
+        ctx,
+      )
     }
 
     return this.value
   }
 
-  protected async createInstance(
-    module: M,
-    options: Partial<IInjectOptions> | null,
-    ctx: TProvideContext,
-  ): Promise<T> {
-
-    const args = await getBindingArgumentsForClassConstructorAsync(
-      module,
-      this,
-      this.cls,
-      options?.constructorArgs ?? {},
-      ctx,
-    )
-
-    const instance = new this.cls(...args)
-
-    return instance
+  public getMetadataTarget(module: M): any {
+    return this.cls
   }
-
 }

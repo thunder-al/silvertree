@@ -50,7 +50,7 @@ export function formatProvideChain(
   options?: { multiline?: boolean, includeFactories?: boolean },
 ) {
   const elements: Array<string> = []
-  const separator = options?.multiline ? '\n -> ' : ' -> '
+  const separator = options?.multiline ? '\n' : ' <- '
 
   for (const el of chain) {
     if (options?.includeFactories) {

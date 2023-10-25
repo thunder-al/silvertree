@@ -1,10 +1,12 @@
 import 'reflect-metadata'
 import {expect, test} from 'vitest'
 import {Container} from '../../container'
-import {Module} from '../../module'
+import {Module} from '../index'
 import {Inject, InjectFromRef} from '../../injection'
 
-test('singleton sync', async () => {
+test('inject to constructor sync', async () => {
+
+  let class1ConstructorTriggerCount = 0
 
   class Class1 {
 
@@ -14,6 +16,7 @@ test('singleton sync', async () => {
       @Inject('string-key')
       public readonly functional: string,
     ) {
+      class1ConstructorTriggerCount++
     }
 
     testMethod() {
@@ -47,6 +50,7 @@ test('singleton sync', async () => {
   const instance2 = mod1.provideSync<Class1>(Class1)
   const instance3 = mod1.provideSync<Class2>(Class2)
 
+  expect(class1ConstructorTriggerCount).toBe(1)
   expect(instance1.testMethod()).toBe('test')
   expect(instance1.functional).toBe('test-functional-value')
   expect(instance2.testMethod()).toBe('test')

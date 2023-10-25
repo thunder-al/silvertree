@@ -1,7 +1,7 @@
 import {TClassConstructor, TProvideContext} from '../types'
 import {getClassArgumentInjections} from './func'
 import {Module} from '../module'
-import {AbstractAsyncFactory, AbstractFactory} from '../factory/AbstractFactory'
+import {AbstractAsyncFactory, AbstractSyncFactory} from '../factory/AbstractSyncFactory'
 import {InjectionError} from './exceptions'
 import {bindingKeyToString} from '../module/util'
 import {formatProvideChain, resolveBindingKey} from '../util'
@@ -17,7 +17,7 @@ import {formatProvideChain, resolveBindingKey} from '../util'
 export function getBindingArgumentsForClassConstructorSync<
   T = any,
   M extends Module = Module,
-  F extends AbstractFactory<T, M> = AbstractFactory<T, M>,
+  F extends AbstractSyncFactory<T, M> = AbstractSyncFactory<T, M>,
   Args extends Record<number, any> = Record<number, any>,
 >(
   module: M,
@@ -40,6 +40,10 @@ export function getBindingArgumentsForClassConstructorSync<
       const key = resolveBindingKey(inj.k)
       result[inj.i] = module.provideSync(key, inj.o, ctx)
     } catch (e: any) {
+      if (e instanceof InjectionError) {
+        throw e
+      }
+
       throw new InjectionError(
         module,
         `Failed to inject constructor argument #${inj.i} of class ${cls.name} with key ${bindingKeyToString(inj.k)}`,
@@ -91,6 +95,10 @@ export async function getBindingArgumentsForClassConstructorAsync<
       const key = resolveBindingKey(inj.k)
       result[inj.i] = await module.provideAsync(key, inj.o, ctx)
     } catch (e: any) {
+      if (e instanceof InjectionError) {
+        throw e
+      }
+
       throw new InjectionError(
         module,
         `Failed to inject constructor argument #${inj.i} of class ${cls.name} with key ${bindingKeyToString(inj.k)}`,
@@ -111,7 +119,7 @@ export async function getBindingArgumentsForClassConstructorAsync<
 function assertClassConstructorCircularDependency<
   T = any,
   M extends Module = Module,
-  F extends AbstractAsyncFactory<T, M> = AbstractAsyncFactory<T, M>
+  F extends AbstractAsyncFactory<T, M> | AbstractSyncFactory<T, M> = AbstractAsyncFactory<T, M> | AbstractSyncFactory<T, M>,
 >(
   module: M,
   factory: F,

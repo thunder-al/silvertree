@@ -1,5 +1,5 @@
 import {Container} from '../container'
-import {AbstractAsyncFactory, AbstractFactory} from '../factory/AbstractFactory'
+import {AbstractAsyncFactory, AbstractSyncFactory} from '../factory/AbstractSyncFactory'
 import {BindManager} from './BindManager'
 import {makeNoBindingError, ModuleBindingError} from './exceptions'
 import {assertOwnBinding, bindingKeyToString, getModuleName} from './util'
@@ -7,7 +7,7 @@ import {IInjectOptions, TBindKey, TClassConstructor, TProvideContext} from '../t
 
 export abstract class Module<Cfg = any> {
 
-  public readonly factoriesSync = new Map<TBindKey, AbstractFactory<any>>()
+  public readonly factoriesSync = new Map<TBindKey, AbstractSyncFactory<any>>()
   protected readonly factoriesAsync = new Map<TBindKey, AbstractAsyncFactory<any>>()
   protected readonly aliases = new Map<TBindKey, TBindKey>()
   protected readonly bindManger = new BindManager(this)
@@ -44,7 +44,7 @@ export abstract class Module<Cfg = any> {
    * @param key
    * @param factory
    */
-  public bindSync<T, F extends AbstractFactory<T>>(key: TBindKey, factory: F) {
+  public bindSync<T, F extends AbstractSyncFactory<T>>(key: TBindKey, factory: F) {
     if (this.factoriesAsync.has(key) || (this.aliases.has(key) && this.factoriesAsync.has(this.aliases.get(key)!))) {
       throw new ModuleBindingError(this, key, `Cannot bind ${bindingKeyToString(key)} as sync because it is already bound as async in module ${getModuleName(this)}}. You should drop it with dropBinding(key) before binding it as sync`)
     }
@@ -81,7 +81,7 @@ export abstract class Module<Cfg = any> {
 
   public getSyncFactory<
     T = any,
-    F extends AbstractFactory<T, this> = AbstractFactory<T, this>
+    F extends AbstractSyncFactory<T, this> = AbstractSyncFactory<T, this>
   >(key: TBindKey) {
 
     if (this.factoriesAsync.has(key) || (this.aliases.has(key) && this.factoriesAsync.has(this.aliases.get(key)!))) {
@@ -147,6 +147,15 @@ export abstract class Module<Cfg = any> {
     ctx: TProvideContext = {chain: [], key},
   ): Promise<T> {
     const factory = this.getAsyncFactory(key)
+
+    ctx = {
+      ...ctx,
+      key: key,
+      chain: [
+        ...ctx.chain,
+        {module: this, key, factory},
+      ],
+    }
 
     return await factory.get(this, options, ctx)
   }

@@ -6,7 +6,7 @@ import {IInjectOptions, TBindKey, TProvideContext} from '../types'
 export const defaultFactoryName = '(no-name)'
 export const defaultFactoryDescription = '(no-description)'
 
-export abstract class AbstractFactory<
+export abstract class AbstractSyncFactory<
   T,
   M extends Module = Module,
 > {
@@ -52,5 +52,5 @@ export abstract class AbstractFactory<
 }
 
 export abstract class AbstractAsyncFactory<T, M extends Module = Module>
-  extends AbstractFactory<T | Promise<T>, M> {
+  extends AbstractSyncFactory<T | Promise<T>, M> {
 }

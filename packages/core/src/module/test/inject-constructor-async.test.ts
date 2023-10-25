@@ -1,15 +1,15 @@
 import 'reflect-metadata'
 import {expect, test} from 'vitest'
 import {Container} from '../../container'
-import {Module} from '../../module'
-import {Inject, InjectFromRef} from '../../injection'
+import {Module} from '../index'
+import {Inject} from '../../injection'
 
-test('singleton async', async () => {
+test('inject to constructor async', async () => {
 
   class Class1 {
 
     constructor(
-      @InjectFromRef(() => Class2)
+      @Inject('class2')
       protected readonly class2: Class2,
       @Inject('string-key')
       public readonly functional: string,
@@ -32,8 +32,8 @@ test('singleton async', async () => {
 
   class TestModule extends Module {
     async setup() {
-      this.bind.singletonAsync(Class1)
-      this.bind.singletonAsync(Class2)
+      this.bind.singletonClass(Class1)
+      this.bind.singletonClass(Class2).alias('class2')
       this.bind.singletonFunctional('string-key', async () => {
         // tiny delay to test async
         await new Promise(resolve => setTimeout(resolve, 1))
