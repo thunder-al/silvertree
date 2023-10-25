@@ -38,7 +38,7 @@ export function getBindingArgumentsForClassConstructorSync<
   for (const inj of constructorInjects) {
     try {
       const key = resolveBindingKey(inj.k)
-      result[inj.i] = module.provideSync(key, inj.o, ctx)
+      result[inj.i] = module.provideSync(key as string, inj.o, ctx)
     } catch (e: any) {
       if (e instanceof InjectionError) {
         throw e
@@ -93,7 +93,7 @@ export async function getBindingArgumentsForClassConstructorAsync<
   await Promise.all(constructorInjects.map(async (inj) => {
     try {
       const key = resolveBindingKey(inj.k)
-      result[inj.i] = await module.provideAsync(key, inj.o, ctx)
+      result[inj.i] = await module.provideAsync(key as string, inj.o, ctx)
     } catch (e: any) {
       if (e instanceof InjectionError) {
         throw e

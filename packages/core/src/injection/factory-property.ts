@@ -1,8 +1,7 @@
 import {TProvideContext} from '../types'
 import {getClassPropertyInjections} from './func'
-import {Module} from '../module'
+import {bindingKeyToString, Module} from '../module'
 import {InjectionError} from './exceptions'
-import {bindingKeyToString} from '../module/util'
 import {formatProvideChain, resolveBindingKey} from '../util'
 
 export function injectBindingsForClassParameterSync<
@@ -24,7 +23,7 @@ export function injectBindingsForClassParameterSync<
   for (const inj of injects) {
     try {
       const key = resolveBindingKey(inj.k)
-      obj[inj.p] = module.provideSync(key, inj.o, ctx)
+      obj[inj.p] = module.provideSync(key as string, inj.o, ctx)
     } catch (e: any) {
       if (e instanceof InjectionError) {
         throw e
@@ -58,7 +57,7 @@ export async function injectBindingsForClassParameterAsync<
   await Promise.all(injects.map(async inj => {
     try {
       const key = resolveBindingKey(inj.k)
-      obj[inj.p] = await module.provideAsync(key, inj.o, ctx)
+      obj[inj.p] = await module.provideAsync(key as string, inj.o, ctx)
     } catch (e: any) {
       if (e instanceof InjectionError) {
         throw e
