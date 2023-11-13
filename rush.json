@@ -13,6 +13,10 @@
     {
       "packageName": "@silvertree/core",
       "projectFolder": "packages/core"
+    },
+    {
+      "packageName": "@silvertree/lightql",
+      "projectFolder": "packages/lightql"
     }
   ]
 }
