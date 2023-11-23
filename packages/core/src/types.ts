@@ -23,8 +23,13 @@ export type TConfiguredModuleTerm<
   M extends Module,
   C extends Container = Container,
   MP extends Module | null = Module,
-  Cfg = (container: C, module: MP | null) => (M extends Module<infer Cfg> ? (Promise<Cfg> | Cfg) : any),
-> = [TClassConstructor<M>, Cfg] & { __isConfModuleTerm: true, strict: boolean }
+  Cfg = M extends Module<infer Cfg> ? Cfg : any,
+> = {
+  module: TClassConstructor<M>,
+  config: (container: C, module: MP | null) => Promise<Cfg> | Cfg,
+  __isConfModuleTerm: true,
+  strict: boolean
+}
 
 /**
  * Additional context parameters for injection

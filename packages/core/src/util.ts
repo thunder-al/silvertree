@@ -78,11 +78,11 @@ export function formatProvideChain(
  * Create a configured module term.
  * @param module
  * @param configure
- * @param options if `strict` is true (by default), error will be thrown if the module already registered (TODO)
+ * @param options if `strict` is true (by default), error will be thrown if the module already registered
  */
 export function configureModule<
   M extends Module,
-  Cfg = M extends Module<infer C> ? C : () => any,
+  Cfg = M extends Module<infer C> ? C : any,
   C extends Container = Container,
   MP extends Module = Module,
 >(
@@ -90,16 +90,42 @@ export function configureModule<
   configure: (container: C, parentMod: MP | null) => Promise<Cfg> | Cfg,
   options?: { strict?: boolean },
 ): TConfiguredModuleTerm<M, C, MP, Cfg> {
-  const term = [module, configure] as TConfiguredModuleTerm<M, C, MP, Cfg>
-
-  term.__isConfModuleTerm = true
-  term.strict = options?.strict ?? true
-
-  return term
+  return {
+    __isConfModuleTerm: true,
+    strict: options?.strict ?? true,
+    module,
+    config: configure,
+  }
 }
 
+/**
+ * Check if an object is a configured module term.
+ * @param obj
+ */
 export function isConfiguredModuleTerm<M extends Module = any>(obj: any): obj is TConfiguredModuleTerm<M> {
-  return Array.isArray(obj) && (<any>obj).__isConfModuleTerm === true
+  return obj.__isConfModuleTerm === true
+}
+
+export function extractConfiguredModuleTerm<
+  M extends Module,
+  T extends TConfiguredModuleTerm<M, any, any, any> | TClassConstructor<Module>
+>(term: T): [
+  TClassConstructor<M>,
+  T extends TConfiguredModuleTerm<M, infer C, infer MP, infer Cfg>
+    ? (container: C, module: MP | null) => Promise<Cfg> | Cfg
+    : null
+] {
+  if (isConfiguredModuleTerm(term)) {
+    return [
+      term.module,
+      term.config as any,
+    ]
+  }
+
+  return [
+    term as TClassConstructor<M>,
+    null as any,
+  ]
 }
 
 /**

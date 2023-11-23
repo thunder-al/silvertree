@@ -1,7 +1,7 @@
 import {DynamicModule, Module} from '../module/Module'
 import {getModuleName} from '../module/util'
 import {TClassConstructor, TConfiguredModuleTerm} from '../types'
-import {isClassConstructor, isConfiguredModuleTerm} from '../util'
+import {extractConfiguredModuleTerm, isClassConstructor} from '../util'
 
 /**
  * Container is a root object of the DI system.
@@ -68,9 +68,7 @@ export class Container {
     const batchModules: Array<Module> = []
 
     for (const rawMod of modules) {
-      const isConfModuleTerm = isConfiguredModuleTerm(rawMod)
-      const module = isConfModuleTerm ? rawMod[0] : <TClassConstructor<Module>>rawMod
-      const configure = isConfModuleTerm ? rawMod[1] : null
+      const [module, configure] = extractConfiguredModuleTerm(rawMod)
       const instance = await this.register(module, configure, {skipInitPhase: true})
       batchModules.push(instance)
     }

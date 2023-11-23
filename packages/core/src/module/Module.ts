@@ -5,7 +5,7 @@ import {makeNoBindingError, ModuleBindingError, ModuleError} from './exceptions'
 import {bindingKeyToString, getModuleName} from './util'
 import {IInjectOptions, TBindKey, TClassConstructor, TConfiguredModuleTerm, TProvideContext} from '../types'
 import {INJECT_MODULE_CONFIG_METADATA_KEY, INJECT_MODULE_METADATA_KEY} from '../injection'
-import {instanceOf, isConfiguredModuleTerm} from '../util'
+import {extractConfiguredModuleTerm, instanceOf} from '../util'
 
 export abstract class Module<Cfg = any> {
 
@@ -328,31 +328,27 @@ export abstract class Module<Cfg = any> {
       | TConfiguredModuleTerm<Module, Container, this, any>
       | Array<TClassConstructor<Module> | TConfiguredModuleTerm<Module, Container, this, any>>,
   ) {
-    const modArray: Array<TConfiguredModuleTerm<any, any> | TClassConstructor<Module>>
-      = !Array.isArray(modules)
+    const modArray = !Array.isArray(modules)
       ? [modules]
-      : isConfiguredModuleTerm(modules)
-        ? [modules]
-        : modules
+      : modules
 
-    const modulesToRegister: Array<TConfiguredModuleTerm<any, any> | TClassConstructor<Module>> = []
+    const modulesToRegister: Array<TConfiguredModuleTerm<any, any, any, any> | TClassConstructor<Module>> = []
 
-    await Promise.all(modArray.map(async (module) => {
+    await Promise.all(modArray.map(async (rawMod) => {
 
-      const mod = isConfiguredModuleTerm(module) ? module[0] : module
+      const [module, configure] = extractConfiguredModuleTerm(rawMod)
 
       // noinspection SuspiciousTypeOfGuard
-      if (instanceOf(mod, DynamicModule)) {
-        const conf = isConfiguredModuleTerm(module) ? module[1] : null
-        const config = conf ? await conf(this.container, this) : null
+      if (instanceOf(module, DynamicModule)) {
+        const config = configure ? await configure(this.container, this) : null
 
-        const instance = new mod(this.container, config)
+        const instance = new module(this.container, config)
         this.importedDynamicModules.add(instance)
         await instance.init()
 
       } else {
-        this.imports.add(mod)
-        modulesToRegister.push(module)
+        this.imports.add(module)
+        modulesToRegister.push(rawMod)
       }
 
     }))
