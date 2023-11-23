@@ -11,7 +11,6 @@ import {formatProvideChain, resolveBindingKey} from '../util'
  * @param module
  * @param factory
  * @param cls
- * @param args class constructor static arguments
  * @param ctx
  */
 export function getBindingArgumentsForClassConstructorSync<
