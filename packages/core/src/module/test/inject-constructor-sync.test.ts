@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 import {expect, test} from 'vitest'
 import {Container} from '../../container'
-import {Module} from '../index'
+import {Module} from '../../module/Module'
 import {Inject, InjectFromRef, InjectModule, InjectModuleConfig} from '../../injection'
 
 test('inject to constructor sync', async () => {

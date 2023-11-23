@@ -112,7 +112,7 @@ export function instanceOf<P>(obj: any, parent: TClassConstructor<P>) {
   }
 
   const proto = Object.getPrototypeOf(obj)
-  if (proto === Object) {
+  if (!proto || proto === Object || proto === Object.getPrototypeOf(Object)) {
     return false
   }
 
