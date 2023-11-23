@@ -1,15 +1,25 @@
 import {DynamicModule, Module} from '../module/Module'
-import {getModuleName} from '../module/util'
-import {TClassConstructor, TConfiguredModuleTerm} from '../types'
-import {extractConfiguredModuleTerm, isClassConstructor} from '../util'
+import {bindingKeyToString, getModuleName} from '../module/util'
+import {
+  IInjectOptions,
+  TBindKey,
+  TBindKeyRef,
+  TClassConstructor,
+  TConfiguredModuleTerm,
+  TProvideContext,
+} from '../types'
+import {extractConfiguredModuleTerm, isClassConstructor, resolveBindingKey} from '../util'
+import {AbstractAsyncFactory, AbstractSyncFactory} from '../factory'
+import {ContainerProviderError} from './exceptions'
 
 /**
  * Container is a root object of the DI system.
  */
 export class Container {
   protected readonly modules = new Set<Module>()
-  protected readonly globalModules = new Set<TClassConstructor<Module>>()
   protected readonly dynamicModules = new Set<Module>()
+
+  protected readonly globalFactoryRefs = new Map<Module, Set<TBindKey>>()
 
   /**
    * Creates a new container. Just a nice shortcut for `new Container()`.
@@ -45,12 +55,6 @@ export class Container {
       this.dynamicModules.add(instance)
     } else {
       this.modules.add(instance)
-    }
-
-    // if a module is global, put it into the global modules set
-    // noinspection SuspiciousTypeOfGuard
-    if (instance.isGlobal() && !this.globalModules.has(module)) {
-      this.globalModules.add(module)
     }
 
     if (!options?.skipInitPhase) {
@@ -90,22 +94,6 @@ export class Container {
    */
   public getDynamicModules(): Set<Module> {
     return this.dynamicModules
-  }
-
-  /**
-   * Returns global modules in the container.
-   */
-  public getGlobalModules(): Set<TClassConstructor<Module>> {
-    return this.globalModules
-  }
-
-  /**
-   * Returns global modules instances in the container.
-   */
-  public* getGlobalModuleInstances() {
-    for (const globalModule of this.globalModules) {
-      yield this.getModule(globalModule)
-    }
   }
 
   /**
@@ -153,8 +141,146 @@ export class Container {
     return modules
   }
 
+  /**
+   * Internal method for initializing a module.
+   * @param module
+   * @protected
+   */
   protected async initModule(module: Module) {
     await module.init()
+  }
+
+  /**
+   * Registers a sync factory with a key as a global exported binding. Module also should export this key.
+   * @param module
+   * @param key
+   */
+  public registerGlobalBindingRef(module: Module, key: TBindKey | TBindKeyRef) {
+    key = resolveBindingKey(key)
+    if (!module.hasExportedSyncBinding(key) && !module.hasExportedAsyncBinding(key)) {
+      throw new ContainerProviderError(this, `Cannot register global export: key ${bindingKeyToString(key)} not found in module ${getModuleName(module)} exports`)
+    }
+
+    if (!this.globalFactoryRefs.has(module)) {
+      this.globalFactoryRefs.set(module, new Set())
+    }
+
+    this.globalFactoryRefs.get(module)!.add(key)
+  }
+
+  /**
+   * Returns a sync factory by its key from already bound as global bindings.
+   * @param key
+   */
+  public getSyncModuleFactory<
+    T = any,
+    M extends Module = Module,
+    F extends AbstractSyncFactory<T, M> = AbstractSyncFactory<T, M>
+  >(key: TBindKey): [F, M] {
+
+    for (let module of this.globalFactoryRefs.keys()) {
+      const refs = this.globalFactoryRefs.get(module)!
+
+      if (refs.has(key) && module.hasExportedSyncBinding(key)) {
+        return [
+          module.getSyncFactory(key) as F,
+          module as M,
+        ]
+      }
+    }
+
+    throw new ContainerProviderError(this, `Sync factory ${key.toString()} not found in global exports`)
+  }
+
+  /**
+   * Returns an async factory by its key from already bound as global bindings.
+   * @param key
+   */
+  public getAsyncModuleFactory<
+    T = any,
+    M extends Module = Module,
+    F extends AbstractAsyncFactory<T, M> = AbstractAsyncFactory<T, M>
+  >(key: TBindKey): [F, M] {
+
+    for (let module of this.globalFactoryRefs.keys()) {
+      const refs = this.globalFactoryRefs.get(module)!
+
+      if (refs.has(key) && module.hasExportedAsyncBinding(key)) {
+        return [
+          module.getAsyncFactory(key) as F,
+          module as M,
+        ]
+      }
+    }
+
+    throw new ContainerProviderError(this, `Async factory ${key.toString()} not found in global exports`)
+  }
+
+  /**
+   * Determines if a sync binding exists in global exports.
+   * @param key
+   */
+  public hasSyncBinding(key: TBindKey): boolean {
+    for (let module of this.globalFactoryRefs.keys()) {
+      const refs = this.globalFactoryRefs.get(module)!
+
+      if (refs.has(key)) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  /**
+   * Determines if an async binding exists in global exports.
+   * @param key
+   */
+  public hasAsyncBinding(key: TBindKey): boolean {
+
+    for (let module of this.globalFactoryRefs.keys()) {
+      const refs = this.globalFactoryRefs.get(module)!
+
+      if (refs.has(key)) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  /**
+   * Provides a value of a binding by its key.
+   * @param key
+   * @param options
+   * @param ctx
+   */
+  public provideSync<T>(key: TClassConstructor<T>, options?: Partial<IInjectOptions> | null, ctx?: TProvideContext): T
+  public provideSync<T>(key: string | symbol, options?: Partial<IInjectOptions> | null, ctx?: TProvideContext): T
+  public provideSync<T>(
+    key: TBindKey,
+    options: Partial<IInjectOptions> | null = null,
+    ctx: TProvideContext = {chain: [], key},
+  ): T {
+    const [factory, module] = this.getSyncModuleFactory(key)
+    return factory.get(module, options, ctx)
+  }
+
+  /**
+   * Provides a value of a binding by its key.
+   * @param key
+   * @param options
+   * @param ctx
+   */
+  public provideAsync<T>(key: TClassConstructor<T>, options?: Partial<IInjectOptions> | null, ctx?: TProvideContext): Promise<T>
+  public provideAsync<T>(key: string | symbol, options?: Partial<IInjectOptions> | null, ctx?: TProvideContext): Promise<T>
+  public async provideAsync<T>(
+    key: TBindKey,
+    options: Partial<IInjectOptions> | null = null,
+    ctx: TProvideContext = {chain: [], key},
+  ): Promise<T> {
+    const [factory, module] = this.getAsyncModuleFactory(key)
+    return await factory.get(module, options, ctx)
   }
 }
 

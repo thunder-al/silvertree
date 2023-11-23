@@ -18,12 +18,10 @@ export function getBindingArgumentsForClassConstructorSync<
   T = any,
   M extends Module = Module,
   F extends AbstractSyncFactory<T, M> = AbstractSyncFactory<T, M>,
-  Args extends Record<number, any> = Record<number, any>,
 >(
   module: M,
   factory: F,
   cls: TClassConstructor<T>,
-  args: Args,
   ctx: TProvideContext,
 ) {
 
@@ -32,7 +30,6 @@ export function getBindingArgumentsForClassConstructorSync<
   const constructorInjects = getClassArgumentInjections(cls, null)
 
   const result: Record<number, any> = {
-    ...args,
   }
 
   for (const inj of constructorInjects) {

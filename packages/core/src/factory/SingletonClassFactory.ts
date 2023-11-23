@@ -38,7 +38,6 @@ export class SingletonClassSyncFactory<T, M extends Module = Module>
         module,
         this,
         this.cls,
-        options?.constructorArgs ?? {},
         ctx,
       )
 

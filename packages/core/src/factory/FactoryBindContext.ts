@@ -15,13 +15,21 @@ export class FactoryBindContext<
   ) {
   }
 
-  public export(opts?: { withAliases?: boolean }) {
-    this.module.export(this.key)
+  public export(opts?: { withAliases?: boolean, global?: boolean }) {
+    const keys = [
+      this.key,
+    ]
 
     if (opts?.withAliases) {
       const aliases = this.module.getAliasesPointingTo(this.key)
-      for (const alias of aliases) {
-        this.module.export(alias)
+      keys.push(...aliases)
+    }
+
+    for (const key of keys) {
+      this.module.export(key)
+
+      if (opts?.global) {
+        this.module.exportGlobal(key)
       }
     }
 

@@ -75,16 +75,6 @@ export abstract class Module<Cfg = any> {
     return factory.makeBindContext(this, key)
   }
 
-  /**
-   * Drops binding by key
-   * @param key
-   */
-  public dropBinding(key: TBindKey) {
-    if (!this.factoriesSync.delete(key) && !this.factoriesAsync.delete(key) && !this.aliases.delete(key)) {
-      throw makeNoBindingError(this, key)
-    }
-  }
-
   public getSyncFactory<
     T = any,
     F extends AbstractSyncFactory<T, this> = AbstractSyncFactory<T, this>
@@ -105,7 +95,16 @@ export abstract class Module<Cfg = any> {
 
     // search for binding in imported modules
     for (const module of this.getSourceModuleInstances()) {
-      if (module.hasExportedSyncBind(key)) {
+      if (module instanceof Container) {
+        if (module.hasSyncBinding(key)) {
+          const [factory] = module.getSyncModuleFactory<T, Module, F>(key)
+          return factory
+        } else {
+          continue
+        }
+      }
+
+      if (module.hasExportedSyncBinding(key)) {
         return module.getSyncFactory(key)
       }
     }
@@ -134,7 +133,16 @@ export abstract class Module<Cfg = any> {
 
     // search for binding in imported and global modules
     for (const module of this.getSourceModuleInstances()) {
-      if (module.hasExportedAsyncBind(key)) {
+      if (module instanceof Container) {
+        if (module.hasAsyncBinding(key)) {
+          const [factory] = module.getAsyncModuleFactory<T, Module, F>(key)
+          return factory
+        } else {
+          continue
+        }
+      }
+
+      if (module.hasExportedAsyncBinding(key)) {
         return module.getAsyncFactory(key)
       }
     }
@@ -193,7 +201,7 @@ export abstract class Module<Cfg = any> {
 
     yield* this.importedDynamicModules
 
-    yield* this.container.getGlobalModuleInstances()
+    yield this.container
     yield* this.container.getDynamicModules()
   }
 
@@ -207,7 +215,15 @@ export abstract class Module<Cfg = any> {
 
   public hasImportedSyncBinding(key: TBindKey) {
     for (const mod of this.getSourceModuleInstances()) {
-      if (mod.hasExportedSyncBind(key)) {
+      if (mod instanceof Container) {
+        if (mod.hasSyncBinding(key)) {
+          return true
+        } else {
+          continue
+        }
+      }
+
+      if (mod !== this && mod.hasExportedSyncBinding(key)) {
         return true
       }
     }
@@ -217,7 +233,15 @@ export abstract class Module<Cfg = any> {
 
   public hasImportedAsyncBinding(key: TBindKey) {
     for (const mod of this.getSourceModuleInstances()) {
-      if (mod.hasExportedAsyncBind(key)) {
+      if (mod instanceof Container) {
+        if (mod.hasAsyncBinding(key)) {
+          return true
+        } else {
+          continue
+        }
+      }
+
+      if (mod !== this && mod.hasExportedAsyncBinding(key)) {
         return true
       }
     }
@@ -225,7 +249,7 @@ export abstract class Module<Cfg = any> {
     return false
   }
 
-  public hasExportedSyncBind(key: TBindKey) {
+  public hasExportedSyncBinding(key: TBindKey) {
     if (!this.exports.has(key)) {
       return false
     }
@@ -245,7 +269,7 @@ export abstract class Module<Cfg = any> {
     return this.hasImportedSyncBinding(key)
   }
 
-  public hasExportedAsyncBind(key: TBindKey) {
+  public hasExportedAsyncBinding(key: TBindKey) {
     if (!this.exports.has(key)) {
       return false
     }
@@ -292,6 +316,25 @@ export abstract class Module<Cfg = any> {
       }
 
       this.exports.add(key)
+    }
+  }
+
+  public exportGlobal(keys: TBindKey | Array<TBindKey>) {
+    keys = Array.isArray(keys) ? keys : [keys]
+
+    for (const key of keys) {
+      const boundHere = this.aliases.has(key) || this.factoriesSync.has(key) || this.factoriesAsync.has(key)
+      // async check also includes a sync check
+      let importedFromOther = this.hasImportedAsyncBinding(key)
+
+      if (!boundHere && !importedFromOther) {
+        throw new ModuleError(
+          this,
+          `Cannot export ${bindingKeyToString(key)} globally because it is not bound in module ${getModuleName(this)} and not imported from other modules`,
+        )
+      }
+
+      this.container.registerGlobalBindingRef(this, key)
     }
   }
 
@@ -382,20 +425,6 @@ export abstract class Module<Cfg = any> {
     // inject current module
     this.bind.syncFunctional(INJECT_MODULE_METADATA_KEY, () => this, {singleton: false})
       .alias([Module as TBindKey, this.constructor as TBindKey])
-  }
-
-  public isGlobal() {
-    return false
-  }
-}
-
-/**
- * All exported bindings from global module will be available in all modules
- */
-export class GlobalModule<Cfg = any> extends Module<Cfg> {
-
-  public isGlobal(): boolean {
-    return true
   }
 }
 

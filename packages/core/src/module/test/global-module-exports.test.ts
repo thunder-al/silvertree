@@ -1,24 +1,24 @@
 import 'reflect-metadata'
 import {expect, test} from 'vitest'
-import {GlobalModule, Module} from '..'
+import {Module} from '../../module'
 import {Container} from '../../container'
 import {Inject} from '../../injection'
 
 test('global module exports', async () => {
 
-  // "create" global module with some exported value
-  class Mod1Global extends GlobalModule {
+  // create a module with some globally exported value
+  class Mod1Global extends Module {
     async setup() {
       this.bind.functional('global-key', () => 'some-global-value')
         .alias('global-key-alias')
-        .export({withAliases: true})
+        .export({withAliases: true, global: true})
     }
   }
 
   // create module, that exports alias of global module
   class Mod2 extends Module {
     async setup() {
-      // no imports. should load from global module
+      // no imports. should load from global bindings
       this.alias('global-key-alias', 'mod2-alias-of-global')
       this.export('mod2-alias-of-global')
     }
@@ -28,7 +28,7 @@ test('global module exports', async () => {
   class Mod3 extends Module {
     async setup() {
       await this.import(Mod2)
-      this.bind.singletonClass(Mod3Service).export()
+      this.bind.singletonClass(Mod3Service).export({global: true})
     }
   }
 
@@ -42,13 +42,14 @@ test('global module exports', async () => {
     }
   }
 
-  const container = new Container()
-  await container.register(Mod1Global)
-  await container.register(Mod2)
-  await container.register(Mod3)
+  const container = await Container.make()
+    .registerBatch([
+      Mod1Global,
+      Mod2,
+      Mod3,
+    ])
 
-  const mod3 = container.getModule(Mod3)
-  const mod3Service = await mod3.provideAsync(Mod3Service)
+  const mod3Service = await container.provideAsync(Mod3Service)
 
   expect(mod3Service.getVal()).toBe('some-global-value')
 })

@@ -9,7 +9,7 @@ export function isClassConstructor<T>(obj: TClassConstructor<T> | T): obj is TCl
 }
 
 export function isClassInstance<T>(obj: TClassConstructor<T> | T): obj is (T & Object) {
-  return typeof obj === 'object'
+  return typeof obj === 'object' && !isClassConstructor(obj)
 }
 
 export function bindingRef(key: () => TBindKey, options: {
@@ -89,7 +89,7 @@ export function configureModule<
   module: TClassConstructor<M>,
   configure: (container: C, parentMod: MP | null) => Promise<Cfg> | Cfg,
   options?: { strict?: boolean },
-): TConfiguredModuleTerm<M, C, MP, Cfg> {
+): TConfiguredModuleTerm<M, C, MP | null, Cfg> {
   return {
     __isConfModuleTerm: true,
     strict: options?.strict ?? true,

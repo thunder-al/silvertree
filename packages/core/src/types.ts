@@ -35,8 +35,6 @@ export type TConfiguredModuleTerm<
  * Additional context parameters for injection
  */
 export interface IInjectOptions {
-  constructorArgs?: Array<any>
-
   [ley: string]: any
 }
 
