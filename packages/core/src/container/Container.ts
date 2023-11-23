@@ -1,7 +1,7 @@
-import {Module} from '../module'
-import {TClassConstructor} from '../types'
-import {isClassConstructor} from '../util'
+import {DynamicModule, Module} from '../module/Module'
 import {getModuleName} from '../module/util'
+import {TClassConstructor, TConfiguredModuleTerm} from '../types'
+import {isClassConstructor, isConfiguredModuleTerm} from '../util'
 
 /**
  * Container is a root object of the DI system.
@@ -9,9 +9,10 @@ import {getModuleName} from '../module/util'
 export class Container {
   protected readonly modules = new Set<Module>()
   protected readonly globalModules = new Set<TClassConstructor<Module>>()
+  protected readonly dynamicModules = new Set<Module>()
 
   /**
-   * Creates a new container.
+   * Creates a new container. Just a nice shortcut for `new Container()`.
    */
   public static make(): Container {
     return new Container()
@@ -25,20 +26,58 @@ export class Container {
     Cfg = M extends Module<infer C> ? C : any,
   >(
     module: TClassConstructor<M>,
-    config?: Cfg,
-  ): Promise<void> {
+    configure?: ((container: this, module: null) => Promise<Cfg> | Cfg) | null,
+    options?: {
+      skipInitPhase?: boolean
+    },
+  ): Promise<M> {
     if (this.hasModule(module)) {
-      return
+      return this.getModule(module)
     }
 
-    const instance = new module(this, config)
-    this.modules.add(instance)
+    const config = configure ? await configure(this, null) : null
 
+    const instance = new module(this, config)
+
+    // noinspection SuspiciousTypeOfGuard
+    if (instance instanceof DynamicModule) {
+      // dynamic module instances will go to a separated set
+      this.dynamicModules.add(instance)
+    } else {
+      this.modules.add(instance)
+    }
+
+    // if a module is global, put it into the global modules set
+    // noinspection SuspiciousTypeOfGuard
     if (instance.isGlobal() && !this.globalModules.has(module)) {
       this.globalModules.add(module)
     }
 
-    await this.initModule(instance)
+    if (!options?.skipInitPhase) {
+      await this.initModule(instance)
+    }
+
+    return instance
+  }
+
+  /**
+   * Registers a batch of modules in the container.
+   * @param modules
+   */
+  public async registerBatch(modules: Array<TConfiguredModuleTerm<Module, this, null, any> | TClassConstructor<Module>>) {
+    const batchModules: Array<Module> = []
+
+    for (const rawMod of modules) {
+      const isConfModuleTerm = isConfiguredModuleTerm(rawMod)
+      const module = isConfModuleTerm ? rawMod[0] : <TClassConstructor<Module>>rawMod
+      const configure = isConfModuleTerm ? rawMod[1] : null
+      const instance = await this.register(module, configure, {skipInitPhase: true})
+      batchModules.push(instance)
+    }
+
+    await Promise.all(batchModules.map(module => this.initModule(module)))
+
+    return this
   }
 
   /**
@@ -49,10 +88,26 @@ export class Container {
   }
 
   /**
+   * Returns dynamic modules, registered directly in the container.
+   */
+  public getDynamicModules(): Set<Module> {
+    return this.dynamicModules
+  }
+
+  /**
    * Returns global modules in the container.
    */
   public getGlobalModules(): Set<TClassConstructor<Module>> {
     return this.globalModules
+  }
+
+  /**
+   * Returns global modules instances in the container.
+   */
+  public* getGlobalModuleInstances() {
+    for (const globalModule of this.globalModules) {
+      yield this.getModule(globalModule)
+    }
   }
 
   /**
@@ -82,6 +137,22 @@ export class Container {
     }
 
     throw new Error(`Module ${getModuleName(module)} is not registered`)
+  }
+
+  /**
+   * Returns dynamic modules, registered directly in the container by class.
+   * @param module
+   */
+  public getDynamicModulesByClass<M extends Module>(module: TClassConstructor<M>): Array<M> {
+    const modules: Array<M> = []
+
+    for (const mod of this.dynamicModules) {
+      if (mod instanceof module) {
+        modules.push(mod)
+      }
+    }
+
+    return modules
   }
 
   protected async initModule(module: Module) {

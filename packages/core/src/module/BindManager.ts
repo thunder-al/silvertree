@@ -1,7 +1,7 @@
 import {Module} from './Module'
 import {TBindKey, TClassConstructor} from '../types'
 import {SingletonClassAsyncFactory, SingletonClassSyncFactory} from '../factory/SingletonClassFactory'
-import {AsyncSingletonFunctionalFactory, SyncSingletonFunctionalFactory} from '../factory/SingletonFunctionalFactory'
+import {AsyncFunctionalFactory, SyncFunctionalFactory} from '../factory/SingletonFunctionalFactory'
 
 
 export interface BindManagerImpl {
@@ -39,19 +39,29 @@ export class BindManager<M extends Module = Module> implements BindManagerImpl {
    * Binds sync singleton functional
    * @param key
    * @param func
+   * @param options
    */
   public syncFunctional(
     key: TBindKey,
     func: (module: M) => unknown,
+    options?: { singleton?: boolean },
   ) {
-    return this.module.bindSync(key, new SyncSingletonFunctionalFactory(this.module, func))
+    return this.module.bindSync(key, new SyncFunctionalFactory(this.module, func, options?.singleton ?? true))
   }
 
   public functional(
     key: TBindKey,
     func: (module: M) => Promise<unknown> | unknown,
+    options?: { singleton?: boolean },
   ) {
-    return this.module.bindAsync(key, new AsyncSingletonFunctionalFactory(this.module, func))
+    return this.module.bindAsync(key, new AsyncFunctionalFactory(this.module, func, options?.singleton ?? true))
+  }
+
+  public constant<V>(
+    key: TBindKey,
+    value: V,
+  ) {
+    return this.module.bindAsync(key, new SyncFunctionalFactory(this.module, () => value, false))
   }
 
   public extendBindManager(methodName: string, getter: Function) {

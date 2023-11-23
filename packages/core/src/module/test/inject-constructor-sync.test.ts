@@ -2,7 +2,7 @@ import 'reflect-metadata'
 import {expect, test} from 'vitest'
 import {Container} from '../../container'
 import {Module} from '../index'
-import {Inject, InjectFromRef} from '../../injection'
+import {Inject, InjectFromRef, InjectModule, InjectModuleConfig} from '../../injection'
 
 test('inject to constructor sync', async () => {
 
@@ -15,6 +15,10 @@ test('inject to constructor sync', async () => {
       protected readonly class2: Class2,
       @Inject('string-key')
       public readonly functional: string,
+      @InjectModule()
+      public readonly module: TestModule,
+      @InjectModuleConfig()
+      public readonly config: any,
     ) {
       class1ConstructorTriggerCount++
     }
@@ -33,7 +37,7 @@ test('inject to constructor sync', async () => {
     }
   }
 
-  class TestModule extends Module {
+  class TestModule extends Module<{ test: number }> {
     async setup() {
       this.bind.syncSingletonClass(Class1)
       this.bind.syncSingletonClass(Class2)
@@ -42,7 +46,7 @@ test('inject to constructor sync', async () => {
   }
 
   const container = new Container()
-  await container.register(TestModule)
+  await container.register(TestModule, () => ({test: 123}))
 
   const mod1 = container.getModule(TestModule)
   const instance1 = mod1.provideSync(Class1)
@@ -54,4 +58,7 @@ test('inject to constructor sync', async () => {
   expect(instance1.functional).toBe('test-functional-value')
   expect(instance2.testMethod()).toBe('test')
   expect(instance3.triggerCount).toBe(2)
+
+  expect(instance1.module).toBe(mod1)
+  expect(instance1.config).toStrictEqual({test: 123})
 })

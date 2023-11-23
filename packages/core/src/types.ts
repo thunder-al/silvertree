@@ -1,6 +1,7 @@
 import 'reflect-metadata'
 import {Module} from './module'
-import {AbstractSyncFactory} from './factory/AbstractSyncFactory'
+import {AbstractSyncFactory} from './factory'
+import {Container} from './container'
 
 /**
  * Helper type for a class constructor.
@@ -16,7 +17,14 @@ export type TBindKey<T = any> = string | TClassConstructor<T> | symbol
 /**
  * A binding key reference.
  */
-export type TBindKeyRef = { (): TBindKey, __isBindRef: true }
+export type TBindKeyRef<T = any> = { (): TBindKey<T>, __isBindRef: true }
+
+export type TConfiguredModuleTerm<
+  M extends Module,
+  C extends Container = Container,
+  MP extends Module | null = Module,
+  Cfg = (container: C, module: MP | null) => (M extends Module<infer Cfg> ? (Promise<Cfg> | Cfg) : any),
+> = [TClassConstructor<M>, Cfg] & { __isConfModuleTerm: true, strict: boolean }
 
 /**
  * Additional context parameters for injection

@@ -1,11 +1,15 @@
 import {Container} from '../container'
-import {AbstractAsyncFactory, AbstractSyncFactory} from '../factory/AbstractSyncFactory'
+import {AbstractAsyncFactory, AbstractSyncFactory} from '../factory'
 import {BindManager} from './BindManager'
 import {makeNoBindingError, ModuleBindingError, ModuleError} from './exceptions'
 import {bindingKeyToString, getModuleName} from './util'
-import {IInjectOptions, TBindKey, TClassConstructor, TProvideContext} from '../types'
+import {IInjectOptions, TBindKey, TClassConstructor, TConfiguredModuleTerm, TProvideContext} from '../types'
+import {INJECT_MODULE_CONFIG_METADATA_KEY, INJECT_MODULE_METADATA_KEY} from '../injection'
+import {instanceOf, isConfiguredModuleTerm} from '../util'
 
 export abstract class Module<Cfg = any> {
+
+  protected initialized = false
 
   protected readonly factoriesSync = new Map<TBindKey, AbstractSyncFactory<any>>()
   protected readonly factoriesAsync = new Map<TBindKey, AbstractAsyncFactory<any>>()
@@ -15,6 +19,8 @@ export abstract class Module<Cfg = any> {
   protected readonly exports: Set<TBindKey> = new Set()
 
   protected readonly imports: Set<TClassConstructor<Module>> = new Set()
+
+  protected readonly importedDynamicModules = new Set<Module>()
 
   constructor(
     protected container: Container,
@@ -98,9 +104,7 @@ export abstract class Module<Cfg = any> {
     }
 
     // search for binding in imported modules
-    const importedAndGlobal = [...this.imports, ...this.container.getGlobalModules()]
-    for (const moduleClass of importedAndGlobal) {
-      const module = this.container.getModule(moduleClass)
+    for (const module of this.getSourceModuleInstances()) {
       if (module.hasExportedSyncBind(key)) {
         return module.getSyncFactory(key)
       }
@@ -129,9 +133,7 @@ export abstract class Module<Cfg = any> {
     }
 
     // search for binding in imported and global modules
-    const importedAndGlobal = [...this.imports, ...this.container.getGlobalModules()]
-    for (const moduleClass of importedAndGlobal) {
-      const module = this.container.getModule(moduleClass)
+    for (const module of this.getSourceModuleInstances()) {
       if (module.hasExportedAsyncBind(key)) {
         return module.getAsyncFactory(key)
       }
@@ -180,6 +182,21 @@ export abstract class Module<Cfg = any> {
     return await factory.get(this, options, ctx)
   }
 
+  /**
+   * Returns module instances which can be used for resolving bindings in this module
+   */
+  protected* getSourceModuleInstances() {
+
+    for (const mod of this.imports) {
+      yield this.container.getModule(mod)
+    }
+
+    yield* this.importedDynamicModules
+
+    yield* this.container.getGlobalModuleInstances()
+    yield* this.container.getDynamicModules()
+  }
+
   public hasOwnBindOrAlias(key: TBindKey) {
     return this.factoriesSync.has(key) || this.factoriesAsync.has(key)
   }
@@ -189,9 +206,7 @@ export abstract class Module<Cfg = any> {
   }
 
   public hasImportedSyncBinding(key: TBindKey) {
-    const importedAndGlobal = [...this.imports, ...this.container.getGlobalModules()]
-    for (const modClass of importedAndGlobal) {
-      const mod = this.container.getModule(modClass)
+    for (const mod of this.getSourceModuleInstances()) {
       if (mod.hasExportedSyncBind(key)) {
         return true
       }
@@ -201,9 +216,7 @@ export abstract class Module<Cfg = any> {
   }
 
   public hasImportedAsyncBinding(key: TBindKey) {
-    const importedAndGlobal = [...this.imports, ...this.container.getGlobalModules()]
-    for (const modClass of importedAndGlobal) {
-      const mod = this.container.getModule(modClass)
+    for (const mod of this.getSourceModuleInstances()) {
       if (mod.hasExportedAsyncBind(key)) {
         return true
       }
@@ -309,28 +322,93 @@ export abstract class Module<Cfg = any> {
     return pointingAliases
   }
 
-  public async import<M extends Module>(modules: TClassConstructor<M> | Array<TClassConstructor<M>>) {
-    modules = Array.isArray(modules) ? modules : [modules]
+  public async import(
+    modules:
+      | TClassConstructor<Module>
+      | TConfiguredModuleTerm<Module, Container, this, any>
+      | Array<TClassConstructor<Module> | TConfiguredModuleTerm<Module, Container, this, any>>,
+  ) {
+    const modArray: Array<TConfiguredModuleTerm<any, any> | TClassConstructor<Module>>
+      = !Array.isArray(modules)
+      ? [modules]
+      : isConfiguredModuleTerm(modules)
+        ? [modules]
+        : modules
 
-    for (const module of modules) {
-      this.imports.add(module)
-    }
+    const modulesToRegister: Array<TConfiguredModuleTerm<any, any> | TClassConstructor<Module>> = []
 
-    await Promise.all(modules.map(module => this.container.register(module)))
+    await Promise.all(modArray.map(async (module) => {
+
+      const mod = isConfiguredModuleTerm(module) ? module[0] : module
+
+      // noinspection SuspiciousTypeOfGuard
+      if (instanceOf(mod, DynamicModule)) {
+        const conf = isConfiguredModuleTerm(module) ? module[1] : null
+        const config = conf ? await conf(this.container, this) : null
+
+        const instance = new mod(this.container, config)
+        this.importedDynamicModules.add(instance)
+        await instance.init()
+
+      } else {
+        this.imports.add(mod)
+        modulesToRegister.push(module)
+      }
+
+    }))
+
+    await this.container.registerBatch(modulesToRegister)
   }
 
   /**
    * Initializes module
    */
-  async init(): Promise<unknown> {
+  public async init(): Promise<unknown> {
+    if (this.initialized) {
+      return
+    }
+
+    this.initialized = true
+
+    await this.setupDefaultBindings()
     await this.setup()
+
     return
   }
 
   /**
-   * Returns true if module is global
+   * Defines basic bindings such as module config, container, etc.
    */
+  protected async setupDefaultBindings() {
+    // inject module config
+    this.bind.syncFunctional(INJECT_MODULE_CONFIG_METADATA_KEY, () => this.config, {singleton: false})
+
+    // inject current module
+    this.bind.syncFunctional(INJECT_MODULE_METADATA_KEY, () => this, {singleton: false})
+      .alias([Module as TBindKey, this.constructor as TBindKey])
+  }
+
   public isGlobal() {
     return false
   }
+}
+
+/**
+ * All exported bindings from global module will be available in all modules
+ */
+export class GlobalModule<Cfg = any> extends Module<Cfg> {
+
+  public isGlobal(): boolean {
+    return true
+  }
+}
+
+/**
+ * This is a special module type designed specially for providing bindings and logic to other modules by its input config.
+ * Unlike other modules, this module type is not registered in the container and only be imported only from other modules.
+ * Every module import will create a new instance of this module which will be able to process all logic separately.
+ * For example, you can register http controllers or database orm models in any module.
+ */
+export class DynamicModule<Cfg = any> extends Module<Cfg> {
+
 }

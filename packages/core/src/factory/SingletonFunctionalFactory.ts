@@ -5,7 +5,7 @@ import {EMPTY_META_TARGET} from '../injection'
 /**
  * A factory that creates a single instance of a value.
  */
-export class SyncSingletonFunctionalFactory<T, M extends Module = Module>
+export class SyncFunctionalFactory<T, M extends Module = Module>
   extends AbstractSyncFactory<T, M> {
 
   protected value?: T
@@ -40,7 +40,7 @@ export class SyncSingletonFunctionalFactory<T, M extends Module = Module>
 /**
  * A factory that creates a single instance of a value.
  */
-export class AsyncSingletonFunctionalFactory<T, M extends Module = Module>
+export class AsyncFunctionalFactory<T, M extends Module = Module>
   extends AbstractAsyncFactory<Promise<T> | T, M> {
 
   protected value?: T

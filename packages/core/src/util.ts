@@ -1,5 +1,7 @@
-import {TBindKey, TBindKeyRef, TClassConstructor, TProvideContext} from './types'
+import {TBindKey, TBindKeyRef, TClassConstructor, TConfiguredModuleTerm, TProvideContext} from './types'
 import {bindingKeyToString, getModuleName} from './module/util'
+import {Module} from './module'
+import {Container} from './container'
 
 
 export function isClassConstructor<T>(obj: TClassConstructor<T> | T): obj is TClassConstructor<T> {
@@ -10,8 +12,12 @@ export function isClassInstance<T>(obj: TClassConstructor<T> | T): obj is (T & O
   return typeof obj === 'object'
 }
 
-export function bindingRef(key: () => TBindKey, options: { raw: true }): TBindKeyRef
-export function bindingRef(key: TBindKey, options?: { raw: false }): TBindKeyRef
+export function bindingRef(key: () => TBindKey, options: {
+  raw: true
+}): TBindKeyRef
+export function bindingRef(key: TBindKey, options?: {
+  raw: false
+}): TBindKeyRef
 
 /**
  * Creates a reference to a binding key.
@@ -19,7 +25,9 @@ export function bindingRef(key: TBindKey, options?: { raw: false }): TBindKeyRef
  * @param key
  * @param options if raw is true, key will not be wrapped in a function
  */
-export function bindingRef(key: TBindKey | (() => TBindKey), options?: { raw?: boolean }): TBindKeyRef {
+export function bindingRef(key: TBindKey | (() => TBindKey), options?: {
+  raw?: boolean
+}): TBindKeyRef {
   const storedInjectionKey = options?.raw
     ? key as TBindKeyRef
     : (() => key) as TBindKeyRef
@@ -47,7 +55,10 @@ export function resolveBindingKey(key: TBindKey | TBindKeyRef): TBindKey {
 
 export function formatProvideChain(
   chain: TProvideContext['chain'],
-  options?: { multiline?: boolean, includeFactories?: boolean },
+  options?: {
+    multiline?: boolean,
+    includeFactories?: boolean
+  },
 ) {
   const elements: Array<string> = []
   const separator = options?.multiline ? '\n' : ' <- '
@@ -61,4 +72,53 @@ export function formatProvideChain(
   }
 
   return elements.join(separator)
+}
+
+/**
+ * Create a configured module term.
+ * @param module
+ * @param configure
+ * @param options if `strict` is true (by default), error will be thrown if the module already registered (TODO)
+ */
+export function configureModule<
+  M extends Module,
+  Cfg = M extends Module<infer C> ? C : () => any,
+  C extends Container = Container,
+  MP extends Module = Module,
+>(
+  module: TClassConstructor<M>,
+  configure: (container: C, parentMod: MP | null) => Promise<Cfg> | Cfg,
+  options?: { strict?: boolean },
+): TConfiguredModuleTerm<M, C, MP, Cfg> {
+  const term = [module, configure] as TConfiguredModuleTerm<M, C, MP, Cfg>
+
+  term.__isConfModuleTerm = true
+  term.strict = options?.strict ?? true
+
+  return term
+}
+
+export function isConfiguredModuleTerm<M extends Module = any>(obj: any): obj is TConfiguredModuleTerm<M> {
+  return Array.isArray(obj) && (<any>obj).__isConfModuleTerm === true
+}
+
+/**
+ * Check if an object is an instance of a class.
+ * Can check not only class instances, but also class constructor functions.
+ */
+export function instanceOf<P>(obj: any, parent: TClassConstructor<P>) {
+  if (obj instanceof parent) {
+    return true
+  }
+
+  const proto = Object.getPrototypeOf(obj)
+  if (proto === Object) {
+    return false
+  }
+
+  if (proto === parent) {
+    return true
+  }
+
+  return instanceOf(proto, parent)
 }

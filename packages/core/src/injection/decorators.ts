@@ -6,7 +6,11 @@ import {
   TClassInjectPropertyMetadataItem,
 } from '../types'
 import {tapClassMetadata} from '../metadata'
-import {INJECT_CLASS_ARGUMENT_METADATA_KEY, INJECT_CLASS_PROPERTY_METADATA_KEY} from './const'
+import {
+  INJECT_CLASS_ARGUMENT_METADATA_KEY,
+  INJECT_CLASS_PROPERTY_METADATA_KEY,
+  INJECT_MODULE_CONFIG_METADATA_KEY, INJECT_MODULE_METADATA_KEY,
+} from './const'
 import {bindingRef, isBindingRef, isClassInstance} from '../util'
 
 /**
@@ -103,4 +107,18 @@ export function decorateInjectArgument(
       },
     )
   }
+}
+
+/**
+ * Injects a current module config into a class property, method parameter or constructor parameter.
+ */
+export function InjectModuleConfig(): PropertyDecorator & ParameterDecorator {
+  return Inject(INJECT_MODULE_CONFIG_METADATA_KEY)
+}
+
+/**
+ * Injects a current module into a class property, method parameter or constructor parameter.
+ */
+export function InjectModule(): PropertyDecorator & ParameterDecorator {
+  return Inject(INJECT_MODULE_METADATA_KEY)
 }
