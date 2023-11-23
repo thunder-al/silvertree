@@ -19,7 +19,7 @@ export default defineConfig(async () => {
       sourcemap: true,
       lib: {
         entry: {index: './src/index.ts'},
-        formats: ['es', 'cjs', 'umd'],
+        formats: ['es', 'cjs'],
         name: 'index',
       },
       target: 'esnext',
