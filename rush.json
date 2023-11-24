@@ -12,7 +12,8 @@
   "projects": [
     {
       "packageName": "@silvertree/core",
-      "projectFolder": "packages/core"
+      "projectFolder": "packages/core",
+      "shouldPublish": true
     },
     {
       "packageName": "@silvertree/lightql",
