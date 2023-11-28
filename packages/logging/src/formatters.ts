@@ -1,4 +1,4 @@
-import {format, transports} from 'winston'
+import * as winston from 'winston'
 import {inspect} from 'node:util'
 import {omit} from './util'
 import {LoggerRootModuleConfig} from './types'
@@ -14,10 +14,10 @@ export function makeSimpleFormatter(config: LoggerRootModuleConfig) {
     ...config?.hideLabels ?? [],
   ]
 
-  return new transports.Console({
-    format: format.combine(
-      format.colorize(),
-      format.printf(info => {
+  return new winston.transports.Console({
+    format: winston.format.combine(
+      winston.format.colorize(),
+      winston.format.printf(info => {
         const data = omit(info, hideLabels)
 
         const stringifyRest = Object.keys(data).length > 0
@@ -36,10 +36,10 @@ export function makePrettyFormatter(config: LoggerRootModuleConfig) {
     ...config.hideLabels ?? [],
   ]
 
-  return new transports.Console({
-    format: format.combine(
-      format.colorize(),
-      format.printf(info => {
+  return new winston.transports.Console({
+    format: winston.format.combine(
+      winston.format.colorize(),
+      winston.format.printf(info => {
         const data = omit(info, hideLabels)
 
         const stringifyRest = Object.keys(data).length > 0
@@ -59,7 +59,7 @@ export function makePrettyFormatter(config: LoggerRootModuleConfig) {
 }
 
 export function makeJsonFormatter(_: LoggerRootModuleConfig) {
-  return new transports.Console({
-    format: format.json(),
+  return new winston.transports.Console({
+    format: winston.format.json(),
   })
 }

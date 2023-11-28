@@ -1,6 +1,6 @@
 import {InjectModuleConfig} from '@silvertree/core'
 import {LoggerRootModuleConfig} from './types'
-import {createLogger, format, Logger, LoggerOptions} from 'winston'
+import * as winston from 'winston'
 import {makeJsonFormatter, makePrettyFormatter, makeSimpleFormatter} from './formatters'
 
 export class LoggerFactory {
@@ -8,9 +8,9 @@ export class LoggerFactory {
   @InjectModuleConfig()
   protected readonly config!: LoggerRootModuleConfig
 
-  protected logger!: Logger
+  protected logger!: winston.Logger
 
-  public getRootLogger(): Logger {
+  public getRootLogger(): winston.Logger {
     if (!this.logger) {
       this.logger = this.makeWinstonLogger()
     }
@@ -18,7 +18,7 @@ export class LoggerFactory {
     return this.logger
   }
 
-  public getChildLogger(module: string): Logger {
+  public getChildLogger(module: string): winston.Logger {
     const root = this.getRootLogger()
 
     if (this.config?.makeChildLogger) {
@@ -28,16 +28,16 @@ export class LoggerFactory {
     return this.makeChildLogger(root, module)
   }
 
-  protected makeChildLogger(root: Logger, module: string): Logger {
+  protected makeChildLogger(root: winston.Logger, module: string): winston.Logger {
     return root.child({module})
   }
 
-  protected makeWinstonLogger(): Logger {
+  protected makeWinstonLogger(): winston.Logger {
     const config = this.makeWinstonConfig()
-    return createLogger(config)
+    return winston.createLogger(config)
   }
 
-  protected makeWinstonConfig(): LoggerOptions {
+  protected makeWinstonConfig(): winston.LoggerOptions {
     const config = this.config?.winston ?? {}
 
     config.level = config.level ?? (process.env.LOG_LEVEL || 'info')
@@ -49,18 +49,18 @@ export class LoggerFactory {
     return config
   }
 
-  protected makeLoggerFormatter(): LoggerOptions['format'] {
+  protected makeLoggerFormatter(): winston.LoggerOptions['format'] {
     const formatter = this.config?.winston?.format
     if (formatter) {
       return formatter
     }
 
-    return format.combine(
-      format.timestamp(),
+    return winston.format.combine(
+      winston.format.timestamp(),
     )
   }
 
-  protected applyLoggingPreset(config: LoggerOptions) {
+  protected applyLoggingPreset(config: winston.LoggerOptions) {
     switch (this.config?.loggingPreset ?? 'simple') {
       case 'simple':
         config.transports = makeSimpleFormatter(this.config)

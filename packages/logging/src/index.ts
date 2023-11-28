@@ -5,7 +5,9 @@ export * from './logger-root-module'
 export type * from './types'
 export * from './util'
 
-export {Logger, LoggerOptions} from 'winston'
+export type {LoggerOptions} from 'winston'
 import * as winston from 'winston'
 
 export {winston}
+
+export const Logger = winston.Logger

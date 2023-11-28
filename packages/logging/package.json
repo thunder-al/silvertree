@@ -1,6 +1,6 @@
 {
   "name": "@silvertree/logging",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "keywords": [
     "silvertree",
     "logger",
@@ -37,13 +37,13 @@
     "build": "vite build -m production"
   },
   "devDependencies": {
-    "vitest": "~0.34.6",
-    "vite": "~5.0.2",
-    "vite-plugin-dts": "~3.6.3",
-    "vite-plugin-checker": "~0.6.2",
-    "typescript": "~5.2.2",
+    "@types/nested-error-stacks": "~2.1.1",
     "reflect-metadata": "~0.1.13",
-    "@types/nested-error-stacks": "~2.1.1"
+    "typescript": "~5.2.2",
+    "vite": "~5.0.2",
+    "vite-plugin-checker": "~0.6.2",
+    "vite-plugin-dts": "~3.6.3",
+    "vitest": "~0.34.6"
   },
   "dependencies": {
     "@silvertree/core": "workspace:*",

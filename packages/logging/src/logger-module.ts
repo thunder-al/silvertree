@@ -8,7 +8,7 @@ import {
 } from '@silvertree/core'
 import {LoggerFactory} from './logger-factory'
 import {LoggerModuleConfig} from './types'
-import {Logger} from 'winston'
+import * as winston from 'winston'
 import {getLocalLoggerInjectKey, getLoggerFactoryInjectKey} from './util'
 
 
@@ -24,11 +24,11 @@ export class LoggerModule extends DynamicModule<LoggerModuleConfig> {
   }
 }
 
-export class LocalLoggerFactory extends AbstractSyncFactory<Logger, LoggerModule> {
+export class LocalLoggerFactory extends AbstractSyncFactory<winston.Logger, LoggerModule> {
 
-  protected localLogger!: Logger
+  protected localLogger!: winston.Logger
 
-  public get(module: LoggerModule, options: Partial<IInjectOptions> | null, ctx: TProvideContext): Logger {
+  public get(module: LoggerModule, options: Partial<IInjectOptions> | null, ctx: TProvideContext): winston.Logger {
     if (!this.localLogger) {
       const factoryKey = getLoggerFactoryInjectKey(module.getConfig()?.scope)
       const factory = module.provideSync<LoggerFactory>(factoryKey)

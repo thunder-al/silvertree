@@ -1,4 +1,4 @@
-import {Logger, LoggerOptions} from 'winston'
+import * as winston from 'winston'
 
 /**
  * The root logger module configuration.
@@ -13,12 +13,12 @@ export interface LoggerRootModuleConfig {
    * The winston configuration. Used to manually configure edge cases.
    * @see https://github.com/winstonjs/winston
    */
-  winston?: LoggerOptions
+  winston?: winston.LoggerOptions
   /**
    * The log level. This is used to filter log messages.
    * @default process.env.LOG_LEVEL || 'warning'
    */
-  level?: LoggerOptions['level']
+  level?: winston.LoggerOptions['level']
   /**
    * The base labels for the logger. These are added to every log message of all child loggers.
    */
@@ -42,19 +42,19 @@ export interface LoggerRootModuleConfig {
    * The logger configuration. This is used to create the logger's configuration.
    * @param conf The logger preset configuration. If `loggingPreset` is `'none'`, this will be an empty object
    */
-  makeWinstonConfig?: (conf: LoggerOptions) => LoggerOptions
+  makeWinstonConfig?: (conf: winston.LoggerOptions) => winston.LoggerOptions
   /**
    * The logger factory. This is used to create the logger.
    * @param conf The logger configuration.
    */
-  makeLogger?: (conf: LoggerOptions) => Logger
+  makeLogger?: (conf: winston.LoggerOptions) => winston.Logger
   /**
    * The child logger factory. This is used to create the child logger.
    * @param rootLogger
    * @param module
    * @param conf
    */
-  makeChildLogger?: (rootLogger: Logger, module: string, conf: LoggerRootModuleConfig) => Logger
+  makeChildLogger?: (rootLogger: winston.Logger, module: string, conf: LoggerRootModuleConfig) => winston.Logger
 }
 
 /**
