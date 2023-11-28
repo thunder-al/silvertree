@@ -8,6 +8,7 @@
     "moduleResolution": "node",
     "target": "es2020",
     "strict": true,
+    "strictFunctionTypes": false,
     "emitDecoratorMetadata": false,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
@@ -15,7 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@silvertree/core": [
-        "./packages/core/dist"
+        "./packages/core/dist/index.d.ts"
       ]
     }
   },

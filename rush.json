@@ -16,6 +16,11 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@silvertree/logging",
+      "projectFolder": "packages/logging",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@silvertree/lightql",
       "projectFolder": "packages/lightql"
     }
