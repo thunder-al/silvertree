@@ -12,22 +12,15 @@ export function isClassInstance<T>(obj: TClassConstructor<T> | T): obj is (T & O
   return typeof obj === 'object' && !isClassConstructor(obj)
 }
 
-export function bindingRef(key: () => TBindKey, options: {
-  raw: true
-}): TBindKeyRef
-export function bindingRef(key: TBindKey, options?: {
-  raw: false
-}): TBindKeyRef
-
+export function bindingRef(key: () => TBindKey, options: { raw: true }): TBindKeyRef
+export function bindingRef(key: TBindKey, options?: { raw: false }): TBindKeyRef
 /**
  * Creates a reference to a binding key.
  * Used when you need to pass a binding key of not defined class to a decorator.
  * @param key
  * @param options if raw is true, key will not be wrapped in a function
  */
-export function bindingRef(key: TBindKey | (() => TBindKey), options?: {
-  raw?: boolean
-}): TBindKeyRef {
+export function bindingRef(key: TBindKey | (() => TBindKey), options?: { raw?: boolean }): TBindKeyRef {
   const storedInjectionKey = options?.raw
     ? key as TBindKeyRef
     : (() => key) as TBindKeyRef

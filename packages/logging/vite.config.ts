@@ -35,7 +35,7 @@ export default defineConfig(async () => {
       minifyIdentifiers: false,
     },
     plugins: [
-      dts({rollupTypes: true, compilerOptions: {removeComments: false}}),
+      dts({rollupTypes: true, compilerOptions: {removeComments: false, declaration: true}}),
       checker({typescript: true}),
     ],
   }

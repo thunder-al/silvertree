@@ -4,6 +4,7 @@ import {LoggerRootModule} from '../logger-root-module'
 import {Logger} from 'winston'
 import {InjectLogger} from '../decorators'
 import {LoggerModule} from '../logger-module'
+import {getLocalLoggerInjectKey} from '../util'
 
 test('logger', async () => {
 
@@ -13,7 +14,13 @@ test('logger', async () => {
         LoggerModule,
       ])
 
+      this.export(getLocalLoggerInjectKey())
+      this.exportGlobal(getLocalLoggerInjectKey())
+
       this.bind.syncSingletonClass(TestService).export({global: true})
+
+      const logger = this.provideSync<Logger>(getLocalLoggerInjectKey())
+      logger.info('hello from setup')
     }
   }
 
@@ -36,4 +43,9 @@ test('logger', async () => {
   const childLogger = testService.logger
   expect(childLogger).instanceOf(Logger)
   childLogger.info('child logger')
+
+  // same logger, but from container
+  const childLogger2 = c.provideSync<Logger>(getLocalLoggerInjectKey())
+  expect(childLogger2).instanceOf(Logger)
+  childLogger2.info('child logger2')
 })

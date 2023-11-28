@@ -32,7 +32,8 @@ export class LocalLoggerFactory extends AbstractSyncFactory<winston.Logger, Logg
     if (!this.localLogger) {
       const factoryKey = getLoggerFactoryInjectKey(module.getConfig()?.scope)
       const factory = module.provideSync<LoggerFactory>(factoryKey)
-      const name = getModuleName(ctx.chain[ctx.chain.length - 2]?.module)
+      const previousModule = ctx.chain[ctx.chain.length - 2]?.module
+      const name = previousModule ? getModuleName(previousModule) : 'unknown'
 
       this.localLogger = factory.getChildLogger(name)
     }

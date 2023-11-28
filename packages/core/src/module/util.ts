@@ -37,6 +37,10 @@ export function bindingKeyToString(key: TBindKey | TBindKeyRef): string {
 
 export function getModuleName(module: Module | TClassConstructor<Module>): string {
 
+  if (!module) {
+    return 'ModuleIsUndefined'
+  }
+
   if (isClassInstance(module)) {
     return module.constructor.name
   }

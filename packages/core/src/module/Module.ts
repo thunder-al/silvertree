@@ -163,6 +163,12 @@ export abstract class Module<Cfg = any> {
   ): T {
     const [factory, module] = this.getSyncFactory(key)
 
+    if (!ctx.chain.length) {
+      ctx.chain = [
+        {module: this, key, factory},
+      ]
+    }
+
     ctx = {
       key: key,
       chain: [
@@ -182,6 +188,12 @@ export abstract class Module<Cfg = any> {
     ctx: TProvideContext = {chain: [], key},
   ): Promise<T> {
     const [factory, module] = this.getAsyncFactory(key)
+
+    if (!ctx.chain.length) {
+      ctx.chain = [
+        {module: this, key, factory},
+      ]
+    }
 
     ctx = {
       key: key,

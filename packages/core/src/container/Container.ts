@@ -182,7 +182,11 @@ export class Container {
       const refs = this.globalFactoryRefs.get(module)!
 
       if (refs.has(key) && module.hasExportedSyncBinding(key)) {
-        return module.getSyncFactory(key) as [F, M]
+        const [factory] = module.getSyncFactory(key)
+        return [
+          factory as F,
+          module as M,
+        ]
       }
     }
 
@@ -203,7 +207,11 @@ export class Container {
       const refs = this.globalFactoryRefs.get(module)!
 
       if (refs.has(key) && module.hasExportedAsyncBinding(key)) {
-        return module.getAsyncFactory(key) as [F, M]
+        const [factory] = module.getAsyncFactory(key)
+        return [
+          factory as F,
+          module as M,
+        ]
       }
     }
 
@@ -256,8 +264,8 @@ export class Container {
     options: Partial<IInjectOptions> | null = null,
     ctx: TProvideContext = {chain: [], key},
   ): T {
-    const [factory, module] = this.getSyncModuleFactory(key)
-    return factory.get(module, options, ctx)
+    const [_, module] = this.getSyncModuleFactory(key)
+    return module.provideSync(key as string, options, ctx)
   }
 
   /**
@@ -273,8 +281,8 @@ export class Container {
     options: Partial<IInjectOptions> | null = null,
     ctx: TProvideContext = {chain: [], key},
   ): Promise<T> {
-    const [factory, module] = this.getAsyncModuleFactory(key)
-    return await factory.get(module, options, ctx)
+    const [_, module] = this.getAsyncModuleFactory(key)
+    return await module.provideAsync(key as string, options, ctx)
   }
 }
 
