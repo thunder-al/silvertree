@@ -182,10 +182,7 @@ export class Container {
       const refs = this.globalFactoryRefs.get(module)!
 
       if (refs.has(key) && module.hasExportedSyncBinding(key)) {
-        return [
-          module.getSyncFactory(key) as F,
-          module as M,
-        ]
+        return module.getSyncFactory(key) as [F, M]
       }
     }
 
@@ -206,10 +203,7 @@ export class Container {
       const refs = this.globalFactoryRefs.get(module)!
 
       if (refs.has(key) && module.hasExportedAsyncBinding(key)) {
-        return [
-          module.getAsyncFactory(key) as F,
-          module as M,
-        ]
+        return module.getAsyncFactory(key) as [F, M]
       }
     }
 

@@ -50,7 +50,7 @@ export abstract class Module<Cfg = any> {
    * @param key
    * @param factory
    */
-  public bindSync<T, F extends AbstractSyncFactory<T>>(key: TBindKey, factory: F) {
+  public bindSync<F extends AbstractSyncFactory<any>>(key: TBindKey, factory: F) {
     if (this.factoriesAsync.has(key) || (this.aliases.has(key) && this.factoriesAsync.has(this.aliases.get(key)!))) {
       throw new ModuleBindingError(this, key, `Cannot bind ${bindingKeyToString(key)} as sync because it is already bound as async in module ${getModuleName(this)}}. You should drop it with dropBinding(key) before binding it as sync`)
     }
@@ -65,7 +65,7 @@ export abstract class Module<Cfg = any> {
    * @param key
    * @param factory
    */
-  public bindAsync<T, F extends AbstractAsyncFactory<T>>(key: TBindKey, factory: F) {
+  public bindAsync<F extends AbstractAsyncFactory<any>>(key: TBindKey, factory: F) {
     if (this.factoriesSync.has(key) || (this.aliases.has(key) && this.factoriesSync.has(this.aliases.get(key)!))) {
       throw new ModuleBindingError(this, key, `Cannot bind ${bindingKeyToString(key)} as async because it is already bound as sync in container ${getModuleName(this)}}. You should drop it with dropBinding(key) before binding it as async`)
     }
@@ -77,8 +77,8 @@ export abstract class Module<Cfg = any> {
 
   public getSyncFactory<
     T = any,
-    F extends AbstractSyncFactory<T, this> = AbstractSyncFactory<T, this>
-  >(key: TBindKey): F {
+    F extends AbstractSyncFactory<T, Module> = AbstractSyncFactory<T, Module>,
+  >(key: TBindKey): [F, Module] {
 
     if (this.factoriesAsync.has(key) || (this.aliases.has(key) && this.factoriesAsync.has(this.aliases.get(key)!))) {
       throw new ModuleBindingError(this, key, `Cannot get async factory ${bindingKeyToString(key)} as sync in module ${getModuleName(this)}. Use async method instead sync variant`)
@@ -90,15 +90,17 @@ export abstract class Module<Cfg = any> {
     }
 
     if (this.factoriesSync.has(key)) {
-      return this.factoriesSync.get(key) as F
+      return [
+        this.factoriesSync.get(key) as F,
+        this,
+      ]
     }
 
     // search for binding in imported modules
     for (const module of this.getSourceModuleInstances()) {
       if (module instanceof Container) {
         if (module.hasSyncBinding(key)) {
-          const [factory] = module.getSyncModuleFactory<T, Module, F>(key)
-          return factory
+          return module.getSyncModuleFactory<T, Module, F>(key)
         } else {
           continue
         }
@@ -114,8 +116,8 @@ export abstract class Module<Cfg = any> {
 
   public getAsyncFactory<
     T = any,
-    F extends AbstractAsyncFactory<T, this> = AbstractAsyncFactory<T, this>
-  >(key: TBindKey): F {
+    F extends AbstractAsyncFactory<T, Module> = AbstractAsyncFactory<T, Module>
+  >(key: TBindKey): [F, Module] {
 
     // if sync factory exists, return it
     if (this.factoriesSync.has(key) || (this.aliases.has(key) && this.factoriesSync.has(this.aliases.get(key)!))) {
@@ -128,15 +130,17 @@ export abstract class Module<Cfg = any> {
     }
 
     if (this.factoriesAsync.has(key)) {
-      return this.factoriesAsync.get(key) as F
+      return [
+        this.factoriesAsync.get(key) as F,
+        this,
+      ]
     }
 
     // search for binding in imported and global modules
     for (const module of this.getSourceModuleInstances()) {
       if (module instanceof Container) {
         if (module.hasAsyncBinding(key)) {
-          const [factory] = module.getAsyncModuleFactory<T, Module, F>(key)
-          return factory
+          return module.getAsyncModuleFactory<T, Module, F>(key)
         } else {
           continue
         }
@@ -157,7 +161,7 @@ export abstract class Module<Cfg = any> {
     options: Partial<IInjectOptions> | null = null,
     ctx: TProvideContext = {chain: [], key},
   ): T {
-    const factory = this.getSyncFactory(key)
+    const [factory, module] = this.getSyncFactory(key)
 
     ctx = {
       key: key,
@@ -167,7 +171,7 @@ export abstract class Module<Cfg = any> {
       ],
     }
 
-    return factory.get(this, options, ctx)
+    return factory.get(module, options, ctx)
   }
 
   public provideAsync<T>(key: TClassConstructor<T>, options?: Partial<IInjectOptions> | null, ctx?: TProvideContext): Promise<T>
@@ -177,7 +181,7 @@ export abstract class Module<Cfg = any> {
     options: Partial<IInjectOptions> | null = null,
     ctx: TProvideContext = {chain: [], key},
   ): Promise<T> {
-    const factory = this.getAsyncFactory(key)
+    const [factory, module] = this.getAsyncFactory(key)
 
     ctx = {
       key: key,
@@ -187,7 +191,7 @@ export abstract class Module<Cfg = any> {
       ],
     }
 
-    return await factory.get(this, options, ctx)
+    return await factory.get(module, options, ctx)
   }
 
   /**
