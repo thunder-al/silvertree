@@ -1,5 +1,5 @@
 import {format, transports} from 'winston'
-import {inspect} from 'util'
+import {inspect} from 'node:util'
 import {omit} from './util'
 import {LoggerRootModuleConfig} from './types'
 

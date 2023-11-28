@@ -10,6 +10,7 @@ export default defineConfig(async () => {
   const externals = [
     ...Object.keys(pkg.dependencies || {}),
     ...Object.keys(pkg.peerDependencies || {}),
+    /^node:/,
   ]
 
   return <UserConfig>{
