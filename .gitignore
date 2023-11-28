@@ -12,3 +12,4 @@ common/autoinstallers/*/.npmrc
 **/.rush/temp/
 dist/
 tsconfig.tsbuildinfo
+common/config/rush/.npmrc-publish
