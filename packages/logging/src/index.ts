@@ -10,4 +10,4 @@ import * as winston from 'winston'
 
 export {winston}
 
-export const Logger = winston.Logger
+export type Logger = winston.Logger
