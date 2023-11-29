@@ -6,6 +6,9 @@ import {IInjectOptions, TBindKey, TProvideContext} from '../types'
 export const defaultFactoryName = '(no-name)'
 export const defaultFactoryDescription = '(no-description)'
 
+/**
+ * Base class for all factories
+ */
 export abstract class AbstractSyncFactory<
   T,
   M extends Module = Module,
@@ -46,10 +49,18 @@ export abstract class AbstractSyncFactory<
     return this.factoryDescription
   }
 
+  /**
+   * Creates a context for current factory
+   * @param module
+   * @param key
+   */
   public makeBindContext(module: M, key: TBindKey): FactoryBindContext<M, T, this> {
     return new FactoryBindContext(module, key, this)
   }
 
+  /**
+   * Returns module of current factory
+   */
   public getModule(): M {
     return this.module
   }

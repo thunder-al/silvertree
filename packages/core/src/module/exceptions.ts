@@ -2,6 +2,10 @@ import {bindingKeyToString, getModuleName} from './util'
 import {Module} from './Module'
 import {TBindKey} from '../types'
 
+/**
+ * Throws in general module errors.
+ * For example, if a module tries to export non-existing binding.
+ */
 export class ModuleError extends Error {
   constructor(
     public readonly module: Module,
@@ -11,20 +15,16 @@ export class ModuleError extends Error {
   }
 }
 
+/**
+ * Throws on binding errors.
+ * For example, if a module tries to bind sync factory for already
+ * bound async factory or tries to provide async factory of async factory
+ * or module don't have any bindings for given key.
+ */
 export class ModuleBindingError extends Error {
   constructor(
     public readonly module: Module,
     public readonly key: TBindKey,
-    message?: string,
-  ) {
-    super(message)
-  }
-}
-
-export class ModuleImportError extends Error {
-  constructor(
-    public readonly module: Module,
-    public readonly importedModule: Module,
     message?: string,
   ) {
     super(message)

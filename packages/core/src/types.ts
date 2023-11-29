@@ -1,7 +1,6 @@
-import 'reflect-metadata'
-import {Module} from './module'
-import {AbstractSyncFactory} from './factory'
-import {Container} from './container'
+import type {Module} from './module/Module'
+import type {AbstractSyncFactory} from './factory/AbstractFactory'
+import type {Container} from './container/Container'
 
 /**
  * Helper type for a class constructor.
@@ -78,6 +77,10 @@ export interface TClassInjectArgumentMetadataItem {
   o: Partial<IInjectOptions> | null
 }
 
+/**
+ * Context for providing an entity.
+ * Used to detect circular dependencies and injection/providing chain discovery.
+ */
 export interface TProvideContext {
   key: TBindKey
   chain: Array<{ module: Module, factory: AbstractSyncFactory<any>, key: TBindKey }>

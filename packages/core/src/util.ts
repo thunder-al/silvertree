@@ -1,25 +1,32 @@
-import {TBindKey, TBindKeyRef, TClassConstructor, TConfiguredModuleTerm, TProvideContext} from './types'
+import type {TBindKey, TBindKeyRef, TClassConstructor, TConfiguredModuleTerm, TProvideContext} from './types'
 import {bindingKeyToString, getModuleName} from './module/util'
-import {Module} from './module'
-import {Container} from './container'
+import {Module} from './module/Module'
+import {Container} from './container/Container'
 
-
+/**
+ * Checks if an object is an instance of a class
+ * @param obj
+ */
 export function isClassConstructor<T>(obj: TClassConstructor<T> | T): obj is TClassConstructor<T> {
-  return typeof obj === 'function'
+  return obj && typeof obj === 'function' && 'prototype' in obj
 }
 
+/**
+ * Checks if an object is an instance of a class.
+ * @param obj
+ */
 export function isClassInstance<T>(obj: TClassConstructor<T> | T): obj is (T & Object) {
-  return typeof obj === 'object' && !isClassConstructor(obj)
+  return obj && typeof obj === 'object' && 'constructor' in obj
 }
 
-export function bindingRef(key: () => TBindKey, options: { raw: true }): TBindKeyRef
-export function bindingRef(key: TBindKey, options?: { raw: false }): TBindKeyRef
 /**
  * Creates a reference to a binding key.
  * Used when you need to pass a binding key of not defined class to a decorator.
  * @param key
  * @param options if raw is true, key will not be wrapped in a function
  */
+export function bindingRef(key: () => TBindKey, options: { raw: true }): TBindKeyRef
+export function bindingRef(key: TBindKey, options?: { raw: false }): TBindKeyRef
 export function bindingRef(key: TBindKey | (() => TBindKey), options?: { raw?: boolean }): TBindKeyRef {
   const storedInjectionKey = options?.raw
     ? key as TBindKeyRef
@@ -46,6 +53,11 @@ export function resolveBindingKey(key: TBindKey | TBindKeyRef): TBindKey {
   return isBindingRef(key) ? key() : key
 }
 
+/**
+ * Returns a string representation of a provided chain.
+ * @param chain
+ * @param options
+ */
 export function formatProvideChain(
   chain: TProvideContext['chain'],
   options?: {
@@ -99,6 +111,10 @@ export function isConfiguredModuleTerm<M extends Module = any>(obj: any): obj is
   return obj.__isConfModuleTerm === true
 }
 
+/**
+ * Extract a configured module term.
+ * @param term
+ */
 export function extractConfiguredModuleTerm<
   M extends Module,
   T extends TConfiguredModuleTerm<M, any, any, any> | TClassConstructor<Module>

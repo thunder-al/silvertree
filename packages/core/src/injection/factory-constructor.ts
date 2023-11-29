@@ -1,7 +1,7 @@
 import {TClassConstructor, TProvideContext} from '../types'
 import {getClassArgumentInjections} from './func'
 import {Module} from '../module'
-import {AbstractAsyncFactory, AbstractSyncFactory} from '../factory/AbstractSyncFactory'
+import {AbstractAsyncFactory, AbstractSyncFactory} from '../factory/AbstractFactory'
 import {InjectionError} from './exceptions'
 import {bindingKeyToString} from '../module/util'
 import {formatProvideChain, resolveBindingKey} from '../util'

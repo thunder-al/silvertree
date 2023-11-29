@@ -35,7 +35,7 @@
     }
   },
   "scripts": {
-    "test": "vitest",
+    "test": "vitest --threads=false --single-thread",
     "watch": "vite build -w -m development",
     "dev": "vite build -m development",
     "build": "vite build -m production"

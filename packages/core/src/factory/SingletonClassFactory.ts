@@ -1,4 +1,4 @@
-import {AbstractAsyncFactory, AbstractSyncFactory} from './AbstractSyncFactory'
+import {AbstractAsyncFactory, AbstractSyncFactory} from './AbstractFactory'
 import {Module} from '../module'
 import {IInjectOptions, TClassConstructor, TProvideContext} from '../types'
 import {

@@ -28,6 +28,10 @@ export abstract class Module<Cfg = any> {
   ) {
   }
 
+  /**
+   * This method invokes user defined bindings, imports, export and internal module related init logic.
+   * Any entity initialization logic should be placed in corresponded factory to minimize module initialization time.
+   */
   public async setup(): Promise<void> {
   }
 
@@ -75,6 +79,11 @@ export abstract class Module<Cfg = any> {
     return factory.makeBindContext(this, key)
   }
 
+  /**
+   * Returns sync entity factory by given key.
+   * It will try to find factory from the current module, then from imported modules and finally from global exports.
+   * @param key
+   */
   public getSyncFactory<
     T = any,
     F extends AbstractSyncFactory<T, Module> = AbstractSyncFactory<T, Module>,
@@ -114,6 +123,12 @@ export abstract class Module<Cfg = any> {
     throw makeNoBindingError(this, key)
   }
 
+  /**
+   * Returns async entity factory by given key.
+   * It will try to find factory from the current module, then from imported modules and finally from global exports.
+   * It will also try to resolve sync binding if async binding is not found.
+   * @param key
+   */
   public getAsyncFactory<
     T = any,
     F extends AbstractAsyncFactory<T, Module> = AbstractAsyncFactory<T, Module>
@@ -154,6 +169,13 @@ export abstract class Module<Cfg = any> {
     throw makeNoBindingError(this, key)
   }
 
+  /**
+   * Returns resolved entity by given sync binding or binding ref.
+   * It will try to find binding from the current module, then from imported modules and finally from global exports.
+   * @param key
+   * @param options
+   * @param ctx
+   */
   public provideSync<T>(key: TClassConstructor<T>, options?: Partial<IInjectOptions> | null, ctx?: TProvideContext): T
   public provideSync<T>(key: string | symbol, options?: Partial<IInjectOptions> | null, ctx?: TProvideContext): T
   public provideSync<T>(
@@ -180,6 +202,14 @@ export abstract class Module<Cfg = any> {
     return factory.get(module, options, ctx)
   }
 
+  /**
+   * Returns resolved entity by given async binding or binding ref.
+   * It will try to find binding from the current module, then from imported modules and finally from global exports.
+   * It will also try to resolve sync binding if async binding is not found.
+   * @param key
+   * @param options
+   * @param ctx
+   */
   public provideAsync<T>(key: TClassConstructor<T>, options?: Partial<IInjectOptions> | null, ctx?: TProvideContext): Promise<T>
   public provideAsync<T>(key: string | symbol, options?: Partial<IInjectOptions> | null, ctx?: TProvideContext): Promise<T>
   public async provideAsync<T>(
@@ -229,6 +259,10 @@ export abstract class Module<Cfg = any> {
     return this.factoriesSync.has(key) || this.factoriesAsync.has(key) || this.aliases.has(key)
   }
 
+  /**
+   * Returns true if sync binding is imported from other modules.
+   * @param key
+   */
   public hasImportedSyncBinding(key: TBindKey) {
     for (const mod of this.getSourceModuleInstances()) {
       if (mod instanceof Container) {
@@ -247,6 +281,11 @@ export abstract class Module<Cfg = any> {
     return false
   }
 
+  /**
+   * Returns true if async (or sync) binding is imported from other modules.
+   * @see Module.import
+   * @param key
+   */
   public hasImportedAsyncBinding(key: TBindKey) {
     for (const mod of this.getSourceModuleInstances()) {
       if (mod instanceof Container) {
@@ -265,6 +304,10 @@ export abstract class Module<Cfg = any> {
     return false
   }
 
+  /**
+   * Returns true if binding is exported from this module.
+   * @param key
+   */
   public hasExportedSyncBinding(key: TBindKey) {
     if (!this.exports.has(key)) {
       return false
@@ -285,6 +328,11 @@ export abstract class Module<Cfg = any> {
     return this.hasImportedSyncBinding(key)
   }
 
+  /**
+   * Returns true if binding is exported from this module.
+   * Also includes sync imports check.
+   * @param key
+   */
   public hasExportedAsyncBinding(key: TBindKey) {
     if (!this.exports.has(key)) {
       return false
@@ -316,6 +364,10 @@ export abstract class Module<Cfg = any> {
     return this.hasImportedAsyncBinding(key)
   }
 
+  /**
+   * Defines binding or reference to binding export from this module
+   * @param keys
+   */
   public export(keys: TBindKey | Array<TBindKey>) {
     keys = Array.isArray(keys) ? keys : [keys]
 
@@ -335,6 +387,11 @@ export abstract class Module<Cfg = any> {
     }
   }
 
+  /**
+   * Defines binding or reference to binding global export from this module.
+   * This binding will be available in all modules and by calling `provide*` methods in container.
+   * @param keys
+   */
   public exportGlobal(keys: TBindKey | Array<TBindKey>) {
     keys = Array.isArray(keys) ? keys : [keys]
 
@@ -354,6 +411,13 @@ export abstract class Module<Cfg = any> {
     }
   }
 
+  /**
+   * Defines an alias (aka link) to another binding.
+   * Alias can be used in export and global export to achieve global "scoped" bindings for dynamic modules.
+   * (see `@silvertree/logging` for usage example)
+   * @param key
+   * @param aliasKey
+   */
   public alias(key: TBindKey, aliasKey: TBindKey) {
 
     // resolve alias only if current key exists in bindings or imported from modules
@@ -369,6 +433,10 @@ export abstract class Module<Cfg = any> {
     this.aliases.set(aliasKey, key)
   }
 
+  /**
+   * Returns all aliases pointing to the binding key
+   * @param key
+   */
   public getAliasesPointingTo(key: TBindKey) {
     const pointingAliases: Array<TBindKey> = []
 
@@ -381,6 +449,11 @@ export abstract class Module<Cfg = any> {
     return pointingAliases
   }
 
+  /**
+   * Imports modules into current the current module.
+   * All exported bindings (and/or its aliases) will be available in the current module.
+   * @param modules
+   */
   public async import(
     modules:
       | TClassConstructor<Module>

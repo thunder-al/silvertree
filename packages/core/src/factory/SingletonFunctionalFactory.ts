@@ -1,6 +1,7 @@
-import {AbstractAsyncFactory, AbstractSyncFactory} from './AbstractSyncFactory'
+import {AbstractAsyncFactory, AbstractSyncFactory} from './AbstractFactory'
 import {Module} from '../module'
 import {EMPTY_META_TARGET} from '../injection'
+import {IInjectOptions, TProvideContext} from '../types'
 
 /**
  * A factory that creates a single instance of a value.
@@ -12,7 +13,7 @@ export class SyncFunctionalFactory<T, M extends Module = Module>
 
   public constructor(
     module: M,
-    protected readonly func: (module: M) => T,
+    protected readonly func: (module: M, options: Partial<IInjectOptions> | null, ctx: TProvideContext) => T,
     protected readonly singleton: boolean = true,
     name?: string,
     description?: string,
@@ -20,13 +21,17 @@ export class SyncFunctionalFactory<T, M extends Module = Module>
     super(module, name, description)
   }
 
-  public get(module: M): T {
+  public get(
+    module: M,
+    options: Partial<IInjectOptions> | null,
+    ctx: TProvideContext,
+  ): T {
     if (!this.singleton) {
-      return this.func(module)
+      return this.func(module, options, ctx)
     }
 
     if (!this.value) {
-      this.value = this.func(module)
+      this.value = this.func(module, options, ctx)
     }
 
     return this.value
@@ -47,7 +52,7 @@ export class AsyncFunctionalFactory<T, M extends Module = Module>
 
   public constructor(
     module: M,
-    protected readonly func: (module: M) => Promise<T> | T,
+    protected readonly func: (module: M, options: Partial<IInjectOptions> | null, ctx: TProvideContext) => Promise<T> | T,
     protected readonly singleton: boolean = true,
     name?: string,
     description?: string,
@@ -55,13 +60,17 @@ export class AsyncFunctionalFactory<T, M extends Module = Module>
     super(module, name, description)
   }
 
-  public async get(module: M): Promise<T> {
+  public async get(
+    module: M,
+    options: Partial<IInjectOptions> | null,
+    ctx: TProvideContext,
+  ): Promise<T> {
     if (!this.singleton) {
-      return this.func(module)
+      return this.func(module, options, ctx)
     }
 
     if (!this.value) {
-      this.value = await this.func(module)
+      this.value = await this.func(module, options, ctx)
     }
 
     return this.value

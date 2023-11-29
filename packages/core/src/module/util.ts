@@ -2,6 +2,10 @@ import {TBindKey, TBindKeyRef, TClassConstructor} from '../types'
 import {isClassInstance, resolveBindingKey} from '../util'
 import {Module} from './Module'
 
+/**
+ * Returns human-readable binding key, also resolves binding key reference to the actual binding key.
+ * @param key
+ */
 export function bindingKeyToString(key: TBindKey | TBindKeyRef): string {
 
   key = resolveBindingKey(key)
@@ -35,6 +39,10 @@ export function bindingKeyToString(key: TBindKey | TBindKeyRef): string {
   return `Unknown(${(<any>key).toString()})`
 }
 
+/**
+ * Returns human-readable module name.
+ * @param module
+ */
 export function getModuleName(module: Module | TClassConstructor<Module>): string {
 
   if (!module) {

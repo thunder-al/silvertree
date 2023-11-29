@@ -1,5 +1,5 @@
 import {Module} from './Module'
-import {TBindKey, TClassConstructor} from '../types'
+import {IInjectOptions, TBindKey, TClassConstructor, TProvideContext} from '../types'
 import {SingletonClassAsyncFactory, SingletonClassSyncFactory} from '../factory/SingletonClassFactory'
 import {AsyncFunctionalFactory, SyncFunctionalFactory} from '../factory/SingletonFunctionalFactory'
 
@@ -47,32 +47,47 @@ export class BindManager<M extends Module = Module> implements BindManagerImpl {
   }
 
   /**
-   * Binds sync singleton functional
+   * Creates sync binding by given resolver function.
+   * By default, factory function will be executed only once and the result will be cached (aka singleton),
+   * but you can change this behavior by passing `singleton: false` option.
    * @param key
-   * @param func
+   * @param func Factory function which returns desired entity. It will be executed only if an entity is requested.
    * @param options
    */
   public syncFunctional(
     key: TBindKey,
-    func: (module: M) => unknown,
+    func: (module: M, options: Partial<IInjectOptions> | null, ctx: TProvideContext) => unknown,
     options?: { singleton?: boolean },
   ) {
     return this.module.bindSync(key, new SyncFunctionalFactory(this.module, func, options?.singleton ?? true))
   }
 
+  /**
+   * Creates async binding by given resolver function.
+   * By default, factory function will be executed only once and the result will be cached (aka singleton),
+   * but you can change this behavior by passing `singleton: false` option.
+   * @param key
+   * @param func Factory function which returns desired entity. It will be executed only if an entity is requested.
+   * @param options
+   */
   public functional(
     key: TBindKey,
-    func: (module: M) => Promise<unknown> | unknown,
+    func: (module: M, options: Partial<IInjectOptions> | null, ctx: TProvideContext) => Promise<unknown> | unknown,
     options?: { singleton?: boolean },
   ) {
     return this.module.bindAsync(key, new AsyncFunctionalFactory(this.module, func, options?.singleton ?? true))
   }
 
+  /**
+   * Binds constant value.
+   * @param key
+   * @param value Any static value
+   */
   public constant<V>(
     key: TBindKey,
     value: V,
   ) {
-    return this.module.bindAsync(key, new SyncFunctionalFactory(this.module, () => value, false))
+    return this.syncFunctional(key, () => value, {singleton: false})
   }
 
   /**

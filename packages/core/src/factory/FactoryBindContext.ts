@@ -1,8 +1,12 @@
-import {AbstractAsyncFactory, AbstractSyncFactory} from './AbstractSyncFactory'
+import {AbstractAsyncFactory, AbstractSyncFactory} from './AbstractFactory'
 import {Module} from '../module'
 
 import {TBindKey} from '../types'
 
+/**
+ * Factory bind context.
+ * Used to define aliases, exports and other stuff for current factory.
+ */
 export class FactoryBindContext<
   M extends Module = Module,
   T = any,
@@ -15,6 +19,11 @@ export class FactoryBindContext<
   ) {
   }
 
+  /**
+   * Exports current factory.
+   * Can be used to export all aliases of this binding or/and mark it as global export.
+   * @param opts
+   */
   public export(opts?: { withAliases?: boolean, global?: boolean }) {
     const keys = [
       this.key,
@@ -36,6 +45,10 @@ export class FactoryBindContext<
     return this
   }
 
+  /**
+   * Adding an alias for current factory.
+   * @param aliasKey
+   */
   public alias(aliasKey: TBindKey | Array<TBindKey>) {
     if (Array.isArray(aliasKey)) {
       for (const alias of aliasKey) {
@@ -56,11 +69,19 @@ export class FactoryBindContext<
     return this.factory
   }
 
+  /**
+   * Runs a function with current factory.
+   * @param func
+   */
   public tapFactory(func: (factory: F) => unknown) {
     func(this.factory)
     return this
   }
 
+  /**
+   * Runs an async function with current factory.
+   * @param func
+   */
   public async tapFactoryAsync(func: (factory: F) => Promise<unknown>): Promise<this> {
     await func(this.factory)
     return this
@@ -70,11 +91,19 @@ export class FactoryBindContext<
     return this.module
   }
 
+  /**
+   * Runs a function with current context.
+   * @param func
+   */
   public tap(func: (context: this) => unknown) {
     func(this)
     return this
   }
 
+  /**
+   * Runs an async function with current context.
+   * @param func
+   */
   public async tapAsync(func: (context: this) => Promise<unknown>): Promise<this> {
     await func(this)
     return this
