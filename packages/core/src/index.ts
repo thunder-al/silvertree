@@ -4,4 +4,5 @@ export * from './factory'
 export * from './metadata'
 export * from './injection'
 export * from './util'
-export * from './types'
+
+export type * from './types'

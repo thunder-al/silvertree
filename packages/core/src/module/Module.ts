@@ -5,7 +5,7 @@ import {makeNoBindingError, ModuleBindingError, ModuleError} from './exceptions'
 import {bindingKeyToString, getModuleName} from './util'
 import {IInjectOptions, TBindKey, TClassConstructor, TConfiguredModuleTerm, TProvideContext} from '../types'
 import {INJECT_MODULE_CONFIG_METADATA_KEY, INJECT_MODULE_METADATA_KEY} from '../injection'
-import {extractConfiguredModuleTerm, instanceOf} from '../util'
+import {extractConfiguredModuleTerm, instanceOf} from '../util/keys'
 
 export abstract class Module<Cfg = any> {
 

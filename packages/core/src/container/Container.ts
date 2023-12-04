@@ -8,7 +8,7 @@ import {
   TConfiguredModuleTerm,
   TProvideContext,
 } from '../types'
-import {extractConfiguredModuleTerm, isClassConstructor, resolveBindingKey} from '../util'
+import {extractConfiguredModuleTerm, isClassConstructor, resolveBindingKey} from '../util/keys'
 import {AbstractAsyncFactory, AbstractSyncFactory} from '../factory'
 import {ContainerProviderError} from './exceptions'
 

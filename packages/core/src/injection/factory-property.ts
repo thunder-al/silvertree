@@ -2,7 +2,7 @@ import {TProvideContext} from '../types'
 import {getClassPropertyInjections} from './func'
 import {bindingKeyToString, Module} from '../module'
 import {InjectionError} from './exceptions'
-import {formatProvideChain, resolveBindingKey} from '../util'
+import {formatProvideChain, resolveBindingKey} from '../util/keys'
 
 export function injectBindingsForClassParameterSync<
   M extends Module = Module,

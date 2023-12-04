@@ -4,7 +4,7 @@ import {Module} from '../module'
 import {AbstractAsyncFactory, AbstractSyncFactory} from '../factory/AbstractFactory'
 import {InjectionError} from './exceptions'
 import {bindingKeyToString} from '../module/util'
-import {formatProvideChain, resolveBindingKey} from '../util'
+import {formatProvideChain, resolveBindingKey} from '../util/keys'
 
 /**
  * Creates an instance of class with injected constructor dependencies.

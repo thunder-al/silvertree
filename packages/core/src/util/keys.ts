@@ -1,7 +1,7 @@
-import type {TBindKey, TBindKeyRef, TClassConstructor, TConfiguredModuleTerm, TProvideContext} from './types'
-import {bindingKeyToString, getModuleName} from './module/util'
-import {Module} from './module/Module'
-import {Container} from './container/Container'
+import type {TBindKey, TBindKeyRef, TClassConstructor, TConfiguredModuleTerm, TProvideContext} from '../types'
+import {bindingKeyToString, getModuleName} from '../module/util'
+import {Module} from '../module/Module'
+import {Container} from '../container/Container'
 
 /**
  * Checks if an object is an instance of a class
