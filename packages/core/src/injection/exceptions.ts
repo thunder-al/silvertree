@@ -1,4 +1,4 @@
-import Error from 'nested-error-stacks'
+import {NestedError as Error} from '../util/errors'
 import {Module} from '../module'
 
 export class InjectionError extends Error {

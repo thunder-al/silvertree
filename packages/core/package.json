@@ -53,6 +53,5 @@
     "reflect-metadata": "~0.1.13"
   },
   "dependencies": {
-    "nested-error-stacks": "~2.1.1"
   }
 }
