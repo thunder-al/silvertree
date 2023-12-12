@@ -8,12 +8,13 @@ export default defineConfig(async () => {
   const pkg = JSON.parse(await fs.readFile('./package.json', 'utf-8'))
 
   const externals = [
-    ...Object.keys(pkg.dependencies),
-    ...Object.keys(pkg.peerDependencies),
+    ...Object.keys(pkg.dependencies || {}),
+    ...Object.keys(pkg.peerDependencies || {}),
+    /^node:/,
   ]
 
   return <UserConfig>{
-    // base: './',
+    base: './',
     build: {
       minify: process.env.NODE_ENV === 'production',
       sourcemap: true,
@@ -34,7 +35,11 @@ export default defineConfig(async () => {
       minifyIdentifiers: false,
     },
     plugins: [
-      dts({rollupTypes: true, compilerOptions: {removeComments: false, declaration: true}}),
+      dts({
+        rollupTypes: true,
+        compilerOptions: {removeComments: false, declaration: true},
+        aliasesExclude: externals,
+      }),
       checker({typescript: true}),
     ],
   }

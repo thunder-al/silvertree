@@ -1,15 +1,16 @@
 import 'reflect-metadata'
 import {expect, test} from 'vitest'
-import {DynamicModule, Module} from '../Module'
+import {Module} from '../Module'
 import {configureModule} from '../../util/keys'
 import {Container} from '../../container'
 import {Inject} from '../../injection'
+import {DynamicModule} from '../DynamicModule'
 
 test('dynamic module', async () => {
 
   class DynMod extends DynamicModule<{ key: string, value: any }> {
     async setup(): Promise<void> {
-      this.bind.constant(this.config.key, this.config.value).export()
+      this.bind.constant(this.config?.key!, this.config?.value).export()
     }
   }
 

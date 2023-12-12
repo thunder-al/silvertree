@@ -36,7 +36,7 @@ export function bindingKeyToString(key: TBindKey | TBindKeyRef): string {
     }
   }
 
-  return `Unknown(${(<any>key).toString()})`
+  return `Unknown(${String(key)})`
 }
 
 /**

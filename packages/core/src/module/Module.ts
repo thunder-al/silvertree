@@ -1,13 +1,15 @@
 import {Container} from '../container'
 import {AbstractAsyncFactory, AbstractSyncFactory} from '../factory'
 import {BindManager} from './BindManager'
-import {makeNoBindingError, ModuleBindingError, ModuleError} from './exceptions'
+import {makeAsyncToSyncProvidingError, makeNoBindingError, ModuleBindingError, ModuleError} from './exceptions'
 import {bindingKeyToString, getModuleName} from './util'
 import {IInjectOptions, TBindKey, TClassConstructor, TConfiguredModuleTerm, TProvideContext} from '../types'
 import {INJECT_MODULE_CONFIG_METADATA_KEY, INJECT_MODULE_METADATA_KEY} from '../injection'
 import {extractConfiguredModuleTerm, instanceOf} from '../util/keys'
+import {FiberModule} from './FiberModule'
+import {DynamicModule} from './DynamicModule'
 
-export abstract class Module<Cfg = any> {
+export class Module<Cfg = any> {
 
   protected initialized = false
 
@@ -24,7 +26,7 @@ export abstract class Module<Cfg = any> {
 
   constructor(
     protected container: Container,
-    protected readonly config: Cfg,
+    protected readonly config?: Cfg,
   ) {
   }
 
@@ -40,6 +42,10 @@ export abstract class Module<Cfg = any> {
    */
   public getContainer(): Container {
     return this.container
+  }
+
+  public getModuleConfig() {
+    return this.config
   }
 
   /**
@@ -90,7 +96,7 @@ export abstract class Module<Cfg = any> {
   >(key: TBindKey): [F, Module] {
 
     if (this.factoriesAsync.has(key) || (this.aliases.has(key) && this.factoriesAsync.has(this.aliases.get(key)!))) {
-      throw new ModuleBindingError(this, key, `Cannot get async factory ${bindingKeyToString(key)} as sync in module ${getModuleName(this)}. Use async method instead sync variant`)
+      throw makeAsyncToSyncProvidingError(this, key)
     }
 
     // resolve alias only if current key not exists in bindings
@@ -166,6 +172,13 @@ export abstract class Module<Cfg = any> {
       }
     }
 
+    // fallback to sync
+    try {
+      return this.getSyncFactory(key)
+    } catch (_) {
+      // ignore
+    }
+
     throw makeNoBindingError(this, key)
   }
 
@@ -177,7 +190,8 @@ export abstract class Module<Cfg = any> {
    * @param ctx
    */
   public provideSync<T>(key: TClassConstructor<T>, options?: Partial<IInjectOptions> | null, ctx?: TProvideContext): T
-  public provideSync<T>(key: string | symbol, options?: Partial<IInjectOptions> | null, ctx?: TProvideContext): T
+  public provideSync<T = any>(key: string | symbol, options?: Partial<IInjectOptions> | null, ctx?: TProvideContext): T
+  public provideSync<T = any>(key: TBindKey, options?: Partial<IInjectOptions> | null, ctx?: TProvideContext): T
   public provideSync<T>(
     key: TBindKey,
     options: Partial<IInjectOptions> | null = null,
@@ -211,7 +225,8 @@ export abstract class Module<Cfg = any> {
    * @param ctx
    */
   public provideAsync<T>(key: TClassConstructor<T>, options?: Partial<IInjectOptions> | null, ctx?: TProvideContext): Promise<T>
-  public provideAsync<T>(key: string | symbol, options?: Partial<IInjectOptions> | null, ctx?: TProvideContext): Promise<T>
+  public provideAsync<T = any>(key: string | symbol, options?: Partial<IInjectOptions> | null, ctx?: TProvideContext): Promise<T>
+  public provideAsync<T = any>(key: TBindKey, options?: Partial<IInjectOptions> | null, ctx?: TProvideContext): Promise<T>
   public async provideAsync<T>(
     key: TBindKey,
     options: Partial<IInjectOptions> | null = null,
@@ -252,11 +267,27 @@ export abstract class Module<Cfg = any> {
   }
 
   public hasOwnBindOrAlias(key: TBindKey) {
-    return this.factoriesSync.has(key) || this.factoriesAsync.has(key)
+    return this.factoriesSync.has(key) || this.factoriesAsync.has(key) || this.aliases.has(key)
+  }
+
+  public hasOwnAlias(key: TBindKey) {
+    return this.aliases.has(key)
   }
 
   public hasOwnBind(key: TBindKey) {
-    return this.factoriesSync.has(key) || this.factoriesAsync.has(key) || this.aliases.has(key)
+    return this.factoriesSync.has(key) || this.factoriesAsync.has(key)
+  }
+
+  public hasOwnSyncBind(key: TBindKey) {
+    return this.factoriesSync.has(key)
+  }
+
+  public hasOwnAsyncBind(key: TBindKey) {
+    return this.factoriesAsync.has(key)
+  }
+
+  public getOwnAlias(key: TBindKey) {
+    return this.aliases.get(key)
   }
 
   /**
@@ -470,12 +501,17 @@ export abstract class Module<Cfg = any> {
 
       const [module, configure] = extractConfiguredModuleTerm(rawMod)
 
+      if (instanceOf(module, FiberModule)) {
+        throw new ModuleError(this, `Cannot import ${getModuleName(module)} module because its a FiberModule`)
+      }
+
       // noinspection SuspiciousTypeOfGuard
       if (instanceOf(module, DynamicModule)) {
         const config = configure ? await configure(this.container, this) : null
 
-        const instance = new module(this.container, config)
+        const instance = new module(this.container, config) as DynamicModule
         this.importedDynamicModules.add(instance)
+        instance.setImporter(this)
         await instance.init()
 
       } else {
@@ -508,21 +544,12 @@ export abstract class Module<Cfg = any> {
    * Defines basic bindings such as module config, container, etc.
    */
   protected async setupDefaultBindings() {
-    // inject module config
+    // provide module config
     this.bind.syncFunctional(INJECT_MODULE_CONFIG_METADATA_KEY, () => this.config, {singleton: false})
 
-    // inject current module
+    // provide current module
     this.bind.syncFunctional(INJECT_MODULE_METADATA_KEY, () => this, {singleton: false})
       .alias([Module as TBindKey, this.constructor as TBindKey])
   }
 }
 
-/**
- * This is a special module type designed specially for providing bindings and logic to other modules by its input config.
- * Unlike other modules, this module type is not registered in the container and only be imported only from other modules.
- * Every module import will create a new instance of this module which will be able to process all logic separately.
- * For example, you can register http controllers or database orm models in any module.
- */
-export class DynamicModule<Cfg = any> extends Module<Cfg> {
-
-}

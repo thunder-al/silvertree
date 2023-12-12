@@ -21,6 +21,11 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@silvertree/http",
+      "projectFolder": "packages/http",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@silvertree/lightql",
       "projectFolder": "packages/lightql"
     }

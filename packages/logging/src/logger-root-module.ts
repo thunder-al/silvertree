@@ -1,4 +1,4 @@
-import {DynamicModule} from '@silvertree/core'
+import {configureModule, Container, DynamicModule, Module} from '@silvertree/core'
 import {LoggerFactory} from './logger-factory'
 import {LoggerRootModuleConfig} from './types'
 import {getLoggerFactoryInjectKey, getRootLoggerInjectKey} from './util'
@@ -23,5 +23,11 @@ export class LoggerRootModule extends DynamicModule<LoggerRootModuleConfig> {
       .export({withAliases: true})
 
     this.exportGlobal(rootLoggerKey)
+  }
+
+  static configured(
+    config: LoggerRootModuleConfig | ((container: Container, parentMod: Module<any> | null) => LoggerRootModuleConfig | Promise<LoggerRootModuleConfig>),
+  ) {
+    return configureModule(LoggerRootModule, typeof config === 'object' ? () => config : config)
   }
 }

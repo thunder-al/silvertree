@@ -1,6 +1,6 @@
 import {Container} from './Container'
 
-export class ContainerProviderError extends Error {
+export class ContainerError extends Error {
   constructor(
     public readonly container: Container,
     message?: string,

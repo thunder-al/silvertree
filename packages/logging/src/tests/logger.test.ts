@@ -1,3 +1,4 @@
+import 'reflect-metadata'
 import {expect, test} from 'vitest'
 import {Container, Module} from '@silvertree/core'
 import {LoggerRootModule} from '../logger-root-module'

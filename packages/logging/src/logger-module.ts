@@ -1,14 +1,6 @@
-import {
-  AbstractSyncFactory,
-  DynamicModule,
-  EMPTY_META_TARGET,
-  getModuleName,
-  IInjectOptions,
-  TProvideContext,
-} from '@silvertree/core'
+import {configureModule, Container, DynamicModule, getModuleName, Module} from '@silvertree/core'
 import {LoggerFactory} from './logger-factory'
 import {LoggerModuleConfig} from './types'
-import * as winston from 'winston'
 import {getLocalLoggerInjectKey, getLoggerFactoryInjectKey} from './util'
 
 
@@ -16,32 +8,23 @@ export class LoggerModule extends DynamicModule<LoggerModuleConfig> {
 
   async setup() {
     const provideKey = getLocalLoggerInjectKey(this.config?.scope)
-    this.bindSync(provideKey, new LocalLoggerFactory(this)).export()
-  }
+    const factoryKey = getLoggerFactoryInjectKey(this.config?.scope)
 
-  public getConfig() {
-    return this.config
-  }
-}
+    await this.container.waitFowGlobalBinding(factoryKey)
 
-export class LocalLoggerFactory extends AbstractSyncFactory<winston.Logger, LoggerModule> {
-
-  protected localLogger!: winston.Logger
-
-  public get(module: LoggerModule, options: Partial<IInjectOptions> | null, ctx: TProvideContext): winston.Logger {
-    if (!this.localLogger) {
-      const factoryKey = getLoggerFactoryInjectKey(module.getConfig()?.scope)
-      const factory = module.provideSync<LoggerFactory>(factoryKey)
+    this.bind.syncFunctional(provideKey, (_mod, _options, ctx) => {
+      const factory = this.provideSync<LoggerFactory>(factoryKey)
       const previousModule = ctx.chain[ctx.chain.length - 2]?.module
       const name = previousModule ? getModuleName(previousModule) : 'unknown'
 
-      this.localLogger = factory.getChildLogger(name)
-    }
-
-    return this.localLogger
+      return factory.getChildLogger(name)
+    })
+      .export({global: true})
   }
 
-  public getMetadataTarget(module: LoggerModule): any {
-    return EMPTY_META_TARGET
+  static configured(
+    config: LoggerModuleConfig | ((container: Container, parentMod: Module<any> | null) => LoggerModuleConfig | Promise<LoggerModuleConfig>),
+  ) {
+    return configureModule(LoggerModule, typeof config === 'object' ? () => config : config)
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@silvertree/logging",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "keywords": [
     "silvertree",
     "logger",
@@ -31,7 +31,8 @@
     "types": "./dist/index.d.ts"
   },
   "scripts": {
-    "test": "vitest",
+    "test": "vitest --threads=false --single-thread --run",
+    "test:watch": "vitest --threads=false --single-thread",
     "watch": "vite build -w -m development",
     "dev": "vite build -m development",
     "build": "vite build -m production"

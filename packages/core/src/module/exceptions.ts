@@ -44,3 +44,10 @@ export function makeNoBindingError(
     `Binding "${bindingKeyToString(key)}" not found in bindings or aliases of module ${getModuleName(module)}. Maybe you forgot to import module or provide the value?`,
   )
 }
+
+export function makeAsyncToSyncProvidingError(
+  mod: Module,
+  key: TBindKey,
+) {
+  throw new ModuleBindingError(mod, key, `Cannot get async factory ${bindingKeyToString(key)} as sync in module ${getModuleName(mod)}. Use async method instead sync variant`)
+}

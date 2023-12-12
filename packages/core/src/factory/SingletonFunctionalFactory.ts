@@ -26,7 +26,7 @@ export class SyncFunctionalFactory<T, M extends Module = Module>
     options: Partial<IInjectOptions> | null,
     ctx: TProvideContext,
   ): T {
-    if (!this.singleton) {
+    if (this.singleton) {
       return this.func(module, options, ctx)
     }
 
@@ -49,6 +49,7 @@ export class AsyncFunctionalFactory<T, M extends Module = Module>
   extends AbstractAsyncFactory<Promise<T> | T, M> {
 
   protected value?: T
+  protected promise?: Promise<T>
 
   public constructor(
     module: M,
@@ -65,15 +66,35 @@ export class AsyncFunctionalFactory<T, M extends Module = Module>
     options: Partial<IInjectOptions> | null,
     ctx: TProvideContext,
   ): Promise<T> {
-    if (!this.singleton) {
+    if (this.singleton) {
       return this.func(module, options, ctx)
     }
 
-    if (!this.value) {
-      this.value = await this.func(module, options, ctx)
+    // return value if an entity is already created
+    if (this.value) {
+      return this.value
     }
 
-    return this.value
+    // return existed promise if entity is on the way
+    if (this.promise) {
+      return this.promise
+    }
+
+    // see the same trick at SingletonClassAsyncFactory
+
+    this.promise = new Promise(async (resolve, reject) => {
+      try {
+        this.value = await this.func(module, options, ctx)
+        resolve(this.value)
+      } catch (e) {
+        reject(e)
+      }
+
+      this.promise = undefined
+    })
+
+
+    return this.promise
   }
 
   public getMetadataTarget(module: M): any {
