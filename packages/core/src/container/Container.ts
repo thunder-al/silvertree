@@ -1,5 +1,5 @@
-import {Module} from '../module/Module'
-import {bindingKeyToString, getModuleName} from '../module/util'
+import {Module} from '../module'
+import {bindingKeyToString, getModuleName} from '../module'
 import {
   IInjectOptions,
   TBindKey,
@@ -8,11 +8,11 @@ import {
   TConfiguredModuleTerm,
   TProvideContext,
 } from '../types'
-import {extractConfiguredModuleTerm, instanceOf, isClassConstructor, resolveBindingKey} from '../util/keys'
+import {extractConfiguredModuleTerm, instanceOf, isClassConstructor, resolveBindingKey} from '../util'
 import {AbstractAsyncFactory, AbstractSyncFactory} from '../factory'
 import {ContainerError} from './exceptions'
-import {FiberModule} from '../module/FiberModule'
-import {DynamicModule} from '../module/DynamicModule'
+import {FiberModule} from '../module'
+import {DynamicModule} from '../module'
 
 /**
  * Container is a root object of the DI system.

@@ -1,5 +1,5 @@
 import {METADATA_PREFIX} from '.'
-import {isClassConstructor, isClassInstance} from '../util/keys'
+import {isClassConstructor, isClassInstance} from '../util'
 
 /**
  * Get metadata from a class

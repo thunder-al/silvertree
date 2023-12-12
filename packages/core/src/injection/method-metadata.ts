@@ -2,8 +2,8 @@ import {TClassConstructor, TProvideContext} from '../types'
 import {getClassArgumentInjections} from './func'
 import {Module} from '../module'
 import {InjectionError} from './exceptions'
-import {bindingKeyToString} from '../module/util'
-import {formatProvideChain, resolveBindingKey} from '../util/keys'
+import {bindingKeyToString} from '../module'
+import {formatProvideChain, resolveBindingKey} from '../util'
 
 /**
  * Creates an instance of class with injected constructor dependencies.

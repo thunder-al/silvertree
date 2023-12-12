@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 import {expect, test} from 'vitest'
-import {Module} from '../../module'
+import {Module} from '../Module'
 import {Container} from '../../container'
 import {Inject} from '../../injection'
 

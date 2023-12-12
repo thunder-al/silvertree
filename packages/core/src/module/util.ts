@@ -1,5 +1,5 @@
 import {TBindKey, TBindKeyRef, TClassConstructor} from '../types'
-import {isClassInstance, resolveBindingKey} from '../util/keys'
+import {isClassInstance, resolveBindingKey} from '../util'
 import {Module} from './Module'
 
 /**

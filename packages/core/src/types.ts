@@ -1,6 +1,6 @@
-import type {Module} from './module/Module'
-import type {AbstractSyncFactory} from './factory/AbstractFactory'
-import type {Container} from './container/Container'
+import type {Module} from './module'
+import type {AbstractSyncFactory} from './factory'
+import type {Container} from './container'
 
 /**
  * Helper type for a class constructor.

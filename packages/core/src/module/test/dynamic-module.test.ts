@@ -1,7 +1,7 @@
 import 'reflect-metadata'
 import {expect, test} from 'vitest'
 import {Module} from '../Module'
-import {configureModule} from '../../util/keys'
+import {configureModule} from '../../util'
 import {Container} from '../../container'
 import {Inject} from '../../injection'
 import {DynamicModule} from '../DynamicModule'

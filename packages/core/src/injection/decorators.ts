@@ -11,7 +11,7 @@ import {
   INJECT_CLASS_PROPERTY_METADATA_KEY,
   INJECT_MODULE_CONFIG_METADATA_KEY, INJECT_MODULE_METADATA_KEY,
 } from './const'
-import {bindingRef, isBindingRef, isClassInstance} from '../util/keys'
+import {bindingRef, isBindingRef, isClassInstance} from '../util'
 
 /**
  * Injects a dependency into a class property, method parameter or constructor parameter.
