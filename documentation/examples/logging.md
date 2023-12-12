@@ -94,7 +94,7 @@ start()
 
 Console output will be
 
-```log
+```txt
 2023-12-12T10:16:45.146Z (AppModuleA) info: foo { some: 'data', here: [ 1, 2, 3, 4 ] }
 2023-12-12T10:16:45.148Z (AppModuleA) error: oh no!
 2023-12-12T10:16:45.149Z (AppModuleB) info: bar { some: { data: 'here' } }

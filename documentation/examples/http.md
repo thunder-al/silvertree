@@ -96,7 +96,7 @@ start()
 
 You will see the following output:
 
-```log
+```txt
 2023-12-12T10:33:48.011Z (HttpRootModule) info: Server listening at http://0.0.0.0:8000
 ```
 

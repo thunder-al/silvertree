@@ -10,7 +10,7 @@
   },
   "scripts": {
     "dev": "vitepress dev",
-    "build": "vitepress build",
+    "build": "vitepress build 2>&1",
     "preview": "vitepress preview"
   },
   "devDependencies": {
