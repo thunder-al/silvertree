@@ -1,0 +1,19 @@
+{
+  "name": "@silvertree/documentation",
+  "version": "0.0.0",
+  "author": "ThunderAl <community@thornal.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thunder-al/silvertree.git",
+    "directory": "documentation"
+  },
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "vitepress": "~1.0.0-rc.31"
+  }
+}

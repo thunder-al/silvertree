@@ -28,6 +28,10 @@
     {
       "packageName": "@silvertree/lightql",
       "projectFolder": "packages/lightql"
+    },
+    {
+      "packageName": "@silvertree/documentation",
+      "projectFolder": "documentation"
     }
   ]
 }
