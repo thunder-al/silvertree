@@ -6,7 +6,7 @@ hero:
   name: "Silvertree"
   text: "The silvertree ecosystem documentation"
   image:
-    src: /resources/logo-1.svg
+    src: /logo-1.svg
   actions:
     - theme: brand
       text: Core Concepts
