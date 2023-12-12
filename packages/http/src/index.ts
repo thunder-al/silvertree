@@ -1,7 +1,11 @@
+export * from './const'
+export * from './fastify-logger-adapter'
 export * from './http-module'
+export * from './http-request-fiber-module'
 export * from './http-root-module'
 export * from './http-root-registrar-service'
 export * from './http-root-service'
 export * from './metadata'
+export * from './util'
 
 export type * from './types'
