@@ -8,8 +8,8 @@ export default defineConfig(async () => {
   const pkg = JSON.parse(await fs.readFile('./package.json', 'utf-8'))
 
   const externals = [
-    ...Object.keys(pkg.dependencies),
-    ...Object.keys(pkg.peerDependencies),
+    ...Object.keys(pkg.dependencies ?? {}),
+    ...Object.keys(pkg.peerDependencies ?? {}),
   ]
 
   return <UserConfig>{

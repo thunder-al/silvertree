@@ -31,8 +31,8 @@
     "types": "./dist/index.d.ts"
   },
   "scripts": {
-    "test": "vitest --threads=false --single-thread --run",
-    "test:watch": "vitest --threads=false --single-thread",
+    "test": "vitest run --typecheck.enabled",
+    "test:watch": "vitest watch --typecheck.enabled",
     "watch": "vite build -w -m development",
     "dev": "vite build -m development",
     "build": "vite build -m production",
@@ -40,12 +40,13 @@
   },
   "devDependencies": {
     "@types/nested-error-stacks": "~2.1.1",
-    "reflect-metadata": "~0.1.13",
-    "typescript": "~5.2.2",
-    "vite": "~5.0.2",
+    "reflect-metadata": "~0.1.14",
+    "typescript": "~5.3.3",
+    "vite": "~5.0.7",
     "vite-plugin-checker": "~0.6.2",
-    "vite-plugin-dts": "~3.6.3",
-    "vitest": "~0.34.6"
+    "vite-plugin-dts": "~3.6.4",
+    "vitest": "~1.0.4",
+    "@types/node": "~20.10.4"
   },
   "dependencies": {
     "@silvertree/core": "workspace:*",
