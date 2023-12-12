@@ -110,13 +110,15 @@ export class Container {
   public hasModule(module: Module | TClassConstructor<Module>): boolean {
     if (isClassConstructor(module)) {
       for (const mod of this.modules) {
-        if (mod instanceof module) {
+        if (mod.constructor === module) {
           return true
         }
       }
+
+      return false
     }
 
-    return this.modules.has(module as Module)
+    return this.modules.has(module) || this.dynamicModules.has(module)
   }
 
   /**
