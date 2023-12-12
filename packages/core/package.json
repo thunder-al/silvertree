@@ -1,6 +1,6 @@
 {
   "name": "@silvertree/core",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "keywords": [
     "silvertree",
     "di",
@@ -39,7 +39,8 @@
     "test:watch": "vitest --threads=false --single-thread",
     "watch": "vite build -w -m development",
     "dev": "vite build -m development",
-    "build": "vite build -m production"
+    "build": "vite build -m production",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "vitest": "~0.34.6",

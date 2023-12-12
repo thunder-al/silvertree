@@ -1,6 +1,6 @@
 {
   "name": "@silvertree/logging",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "keywords": [
     "silvertree",
     "logger",
@@ -35,7 +35,8 @@
     "test:watch": "vitest --threads=false --single-thread",
     "watch": "vite build -w -m development",
     "dev": "vite build -m development",
-    "build": "vite build -m production"
+    "build": "vite build -m production",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "@types/nested-error-stacks": "~2.1.1",
