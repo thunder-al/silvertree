@@ -4,6 +4,11 @@ import {defineConfig} from 'vitepress'
 export default defineConfig({
   title: 'Silvertree Documentation',
   description: 'Silvertree Documentation',
+  head: [
+    ['meta', {property: 'og:type', content: 'website'}],
+    ['meta', {property: 'og:image', content: '/logo-1-wide.png'}],
+    ['meta', {property: 'og:site_name', content: 'Silvertree Documentation'}],
+  ],
   vite: {
     server: {
       port: 8080,
