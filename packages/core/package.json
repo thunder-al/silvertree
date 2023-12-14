@@ -15,7 +15,7 @@
     "url": "https://github.com/thunder-al/silvertree.git",
     "directory": "packages/core"
   },
-  "homepage": "https://github.com/thunder-al/silvertree",
+  "homepage": "https://silvertree.thunderal.net/",
   "publishConfig": {
     "access": "public"
   },
