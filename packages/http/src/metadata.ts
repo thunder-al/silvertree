@@ -1,7 +1,14 @@
 import {getClassMetadata, Inject, isClassInstance, tapClassMetadata} from '@silvertree/core'
-import {HTTP_LOCAL_FASTIFY_INJECT_KEY, HTTP_ROUTES_METADATA_KEY, HTTP_SETUP_METADATA_KEY} from './const'
+import {
+  HTTP_FASTIFY_REPLY_INJECT_KEY,
+  HTTP_FASTIFY_REQUEST_EXTRACT_INJECT_KEY,
+  HTTP_FASTIFY_REQUEST_INJECT_KEY,
+  HTTP_LOCAL_FASTIFY_INJECT_KEY,
+  HTTP_ROUTES_METADATA_KEY,
+  HTTP_SETUP_METADATA_KEY,
+} from './const'
 import {IHttpControllerRouteMetadataItem, IHttpControllerSetupMetadataItem} from './types'
-import {RouteOptions} from 'fastify'
+import {FastifyRequest, RouteOptions} from 'fastify'
 
 export function HttpRoute(
   route: Omit<RouteOptions, 'handler'>,
@@ -114,4 +121,41 @@ export function getHttpControllerSetupMetadata(target: Object): Array<IHttpContr
  */
 export function InjectHttpServer(): ParameterDecorator {
   return Inject(HTTP_LOCAL_FASTIFY_INJECT_KEY)
+}
+
+/**
+ * Injects http request instance into route methods as argument.
+ */
+export function InjectHttpRequest(): ParameterDecorator {
+  return Inject(HTTP_FASTIFY_REQUEST_INJECT_KEY)
+}
+
+/**
+ * Injects http reply instance into route methods as argument.
+ */
+export function InjectHttpReply(): ParameterDecorator {
+  return Inject(HTTP_FASTIFY_REPLY_INJECT_KEY)
+}
+
+/**
+ * Injects http request part into route methods as argument.
+ */
+export function InjectHttpRequestPart(
+  extractor: (request: FastifyRequest) => any,
+): ParameterDecorator {
+  return Inject(HTTP_FASTIFY_REQUEST_EXTRACT_INJECT_KEY, {extractor})
+}
+
+/**
+ * Injects http request body into route methods as argument.
+ */
+export function InjectHttpBody(): ParameterDecorator {
+  return InjectHttpRequestPart((request) => request.body)
+}
+
+/**
+ * Injects http request query into route methods as argument.
+ */
+export function InjectHttpQuery(): ParameterDecorator {
+  return InjectHttpRequestPart((request) => request.query)
 }

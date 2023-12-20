@@ -111,6 +111,7 @@ export class HttpRootRegistrarService {
             const mod = new modCls(term.module.getContainer(), term.module)
             mod.bindFastify(server)
             mod.bindRequestPayload(request, reply)
+            mod.init()
 
             return await callClassMethodWithAsyncInjections(
               mod,

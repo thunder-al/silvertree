@@ -6,4 +6,6 @@ export const HTTP_LOCAL_FASTIFY_INJECT_KEY = 'fastify'
 
 export const HTTP_FASTIFY_REQUEST_INJECT_KEY = 'fastify-request'
 
+export const HTTP_FASTIFY_REQUEST_EXTRACT_INJECT_KEY = 'fastify-request-extract'
+
 export const HTTP_FASTIFY_REPLY_INJECT_KEY = 'fastify-reply'
