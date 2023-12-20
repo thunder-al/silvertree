@@ -16,7 +16,7 @@ export class Module<Cfg = any> {
   protected readonly factoriesSync = new Map<TBindKey, AbstractSyncFactory<any>>()
   protected readonly factoriesAsync = new Map<TBindKey, AbstractAsyncFactory<any>>()
   protected readonly aliases = new Map<TBindKey, TBindKey>()
-  protected readonly bindManger = new BindManager(this)
+  protected readonly bindManger: BindManager<this> = new BindManager(this)
 
   protected readonly exports: Set<TBindKey> = new Set()
 
