@@ -10,7 +10,7 @@ hero:
   actions:
     - theme: brand
       text: Core Concepts
-      link: /core/index
+      link: /core/start
     - theme: alt
       text: Examples
       link: /examples/basic

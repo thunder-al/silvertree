@@ -32,9 +32,9 @@ export default defineConfig({
       {
         text: 'Packages',
         items: [
-          {text: '@silvertree/core', link: '/core/index'},
-          {text: '@silvertree/logging', link: '/logging/index'},
-          {text: '@silvertree/http', link: '/http/index'},
+          {text: '@silvertree/core', link: '/core/start'},
+          {text: '@silvertree/logging', link: '/logging/start'},
+          {text: '@silvertree/http', link: '/http/start'},
         ],
       },
     ],
@@ -47,6 +47,14 @@ export default defineConfig({
             {text: 'Basic', link: '/examples/basic'},
             {text: 'Logging', link: '/examples/logging'},
             {text: 'Http', link: '/examples/http'},
+          ],
+        },
+      ],
+      '/core/': [
+        {
+          text: 'Guide',
+          items: [
+            {text: 'Core Concepts', link: '/core/start'},
           ],
         },
       ],
