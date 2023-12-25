@@ -55,6 +55,8 @@ export default defineConfig({
           text: 'Guide',
           items: [
             {text: 'Core Concepts', link: '/core/start'},
+            {text: 'Architecture', link: '/core/architecture'},
+            {text: 'Installation', link: '/core/installation'},
           ],
         },
       ],
