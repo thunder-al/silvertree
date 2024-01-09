@@ -21,11 +21,11 @@ Or use an existing project
 ::: code-group
 
 ```shell [pnpm]
-pnpm add reflect-metadata @silvertree/core @silvertree/logging @silvertree/http
+pnpm add reflect-metadata @silvertree/core
 ```
 
 ```shell [npm]
-npm install reflect-metadata @silvertree/core @silvertree/logging @silvertree/http
+npm install reflect-metadata @silvertree/core
 ```
 
 :::
@@ -37,21 +37,18 @@ npm install reflect-metadata @silvertree/core @silvertree/logging @silvertree/ht
 ```ts [start.ts]
 import 'reflect-metadata'
 import {Container} from '@silvertree/core'
-import {LoggerRootModule} from '@silvertree/logging'
-import {HttpRootModule, getHttpRootServiceInjectKey} from '@silvertree/http'
 import {AppModule} from './app-module'
+import {AppService} from './app-service'
 
 async function start() {
   const c = await Container.make().registerBatch([
-    LoggerRootModule,
-    HttpRootModule,
     AppModule,
   ])
 
-  // get the http server manager directly
-  const svc = await c.provideAsync(getHttpRootServiceInjectKey())
-  // start the server
-  await svc.startHttpServer()
+  // get the service
+  const svc = await c.provideAsync(AppService)
+  // call secrive's function
+  await svc.start()
 }
 
 start()
@@ -59,43 +56,22 @@ start()
 
 ```ts [app-module.ts]
 import {Module} from '@silvertree/core'
-import {LoggerModule} from '@silvertree/logging'
-import {HttpModule} from '@silvertree/http'
-import {AppController} from './app-controller'
+import {AppService} from './app-service'
 
 export class AppModule extends Module {
 
   async setup() {
-
-    await this.import([
-      // getting module scoped logger
-      LoggerModule,
-      // registering http controller
-      HttpModule.configured({
-        controllers: [
-          {controller: AppController},
-        ],
-      }),
-
-    ])
+    this.bind.singletonClass(AppService)
+      .export({global: true})
   }
 }
 ```
 
-```ts [app-controller.ts]
-import {Inject} from '@silvertree/core'
-import {InjectLogger, Logger} from '@silvertree/logging'
-import {HttpRoute} from '@silvertree/http'
+```ts [app-service.ts]
+export class AppService {
 
-export class AppController {
-
-  @InjectLogger()
-  protected readonly logger!: Logger
-
-  @HttpRoute('GET', '/')
   async index() {
-    this.logger.info('Hello world!')
-    return 'Hello world!'
+    console.log('Hello world!')
   }
 }
 ```
