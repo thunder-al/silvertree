@@ -14,5 +14,20 @@ hero:
     - theme: alt
       text: Examples
       link: /examples/basic
+
+features:
+  - icon: 🌳
+    title: Silvertree Core
+    details: Simple and robust DI and initialization system.
+    link: /core/start
+  - icon: 📜
+    title: Silvertree Logging
+    details: Logging for silvertree ecosystem.
+    link: /logging/start
+  - icon: 🌐
+    title: Silvertree Http
+    details: Fast and simple http server.
+    link: /http/start
+
 ---
 
