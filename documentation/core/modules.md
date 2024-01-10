@@ -35,9 +35,6 @@ Here is general module structure:
 
 <mermaid>
 <pre>
----
-title: Processing payments example
----
 stateDiagram-v2
     direction TB
     state SomeModule {
