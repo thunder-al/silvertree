@@ -52,11 +52,16 @@ export default defineConfig({
       ],
       '/core/': [
         {
-          text: 'Guide',
+          text: 'Introduction',
           items: [
             {text: 'Core Concepts', link: '/core/start'},
             {text: 'Architecture', link: '/core/architecture'},
             {text: 'Installation', link: '/core/installation'},
+          ],
+        },
+        {
+          text: 'Core',
+          items: [
             {text: 'Directory Structure', link: '/core/directory-structure'},
             {text: 'Container', link: '/core/container'},
             {text: 'Modules', link: '/core/modules'},
