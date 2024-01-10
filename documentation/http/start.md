@@ -1,36 +1,38 @@
+# Introduction
+
+The `@silvertree/http` module provides a http server implementation based on [fastify](https://fastify.dev/)
+for silvertree applications.
+
+This package creates fastify http server with some essential plugins
+and provides a service to manage the server:formBody
+
+* `@fastiry/multipart` for handling multipart form data
+* `@fastiry/accepts` a set of functions to parse and send HTTP Accept-* headers
+* `@fastiry/cookie` parsing and sending http cookies
+* `@fastiry/cors` for handling cross-origin resource sharing (CORS)
+* `@fastiry/routes` simple plugin which stores all registered
+
+All this plugin is configured with default values, but can be overwritten or disabled.
+
 # Installation
 
-## Create a new project
-
 ::: code-group
 
 ```shell [pnpm]
-pnpm init
+pnpm add @silvertree/http
 ```
 
 ```shell [npm]
-npm init
+npm install @silvertree/http
+```
+
+```shell [yarn]
+yarn add @silvertree/http
 ```
 
 :::
 
-Or use an existing project
-
-## Install package
-
-::: code-group
-
-```shell [pnpm]
-pnpm add reflect-metadata @silvertree/core @silvertree/logging @silvertree/http
-```
-
-```shell [npm]
-npm install reflect-metadata @silvertree/core @silvertree/logging @silvertree/http
-```
-
-:::
-
-## Create basic structure with http server
+# Usage
 
 ::: code-group
 

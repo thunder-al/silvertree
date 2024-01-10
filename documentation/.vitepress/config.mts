@@ -40,6 +40,7 @@ export default defineConfig({
     ],
 
     sidebar: {
+
       '/examples/': [
         {
           text: 'Examples',
@@ -50,6 +51,7 @@ export default defineConfig({
           ],
         },
       ],
+
       '/core/': [
         {
           text: 'Introduction',
@@ -68,6 +70,7 @@ export default defineConfig({
           ],
         },
       ],
+
     },
 
     socialLinks: [
