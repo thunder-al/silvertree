@@ -40,7 +40,7 @@ jobs:
         with:
           node-version: "18.x"
 
-      - name: Build with Vitepress
+      - name: Build documentation
         run: |
           node common/scripts/install-run-rush.js install -t @silvertree/documentation
           node common/scripts/install-run-rush.js build -t @silvertree/documentation
