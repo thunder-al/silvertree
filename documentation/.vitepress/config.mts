@@ -37,6 +37,7 @@ export default defineConfig({
           {text: '@silvertree/http', link: '/http/start'},
         ],
       },
+      {text: 'API', link: '/api/index.html', target: '_self'},
     ],
 
     sidebar: {
