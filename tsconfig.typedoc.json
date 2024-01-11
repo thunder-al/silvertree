@@ -16,13 +16,13 @@
     "baseUrl": ".",
     "paths": {
       "@silvertree/core": [
-        "./packages/core/dist/index.d.ts"
+        "./packages/core/src/index.ts"
       ],
       "@silvertree/logging": [
-        "./packages/logging/dist/index.d.ts"
+        "./packages/logging/src/index.ts"
       ],
       "@silvertree/http": [
-        "./packages/http/dist/index.d.ts"
+        "./packages/http/src/index.ts"
       ]
     }
   },
