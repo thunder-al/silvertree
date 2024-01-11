@@ -13,7 +13,7 @@
     "build": "npm run build:api && npm run build:doc",
     "build:doc": "vitepress build 2>&1",
     "preview": "vitepress preview",
-    "build:api": "typedoc --options ../typedoc.json --tsconfig ../tsconfig.typedoc.json --out ./public/api 2>&1"
+    "build:api": "typedoc --options ../typedoc.json --out ./public/api 2>&1"
   },
   "devDependencies": {
     "typedoc": "~0.25.7",

@@ -1,8 +1,10 @@
 {
+  "$schema": "https://typedoc.org/schema.json",
   "entryPoints": [
     "packages/*"
   ],
   "name": "Silvertree API",
   "entryPointStrategy": "packages",
-  "includeVersion": false
+  "includeVersion": false,
+  "tsconfig": "tsconfig.base.json"
 }
