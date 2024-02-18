@@ -44,7 +44,6 @@ jobs:
       - name: Build documentation
         run: |
           node common/scripts/install-run-rush.js install
-          node common/scripts/install-run-rush.js build -t @silvertree/core -t @silvertree/logging -t @silvertree/http
           node common/scripts/install-run-rush.js build -t @silvertree/documentation
           mv documentation/.vitepress/dist ./_site
 

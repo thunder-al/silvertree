@@ -13,3 +13,4 @@ common/autoinstallers/*/.npmrc
 dist/
 tsconfig.tsbuildinfo
 common/config/rush/.npmrc-publish
+vite.config.ts.timestamp-*

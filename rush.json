@@ -26,6 +26,11 @@
       "shouldPublish": true
     },
     {
+      "packageName": "@silvertree/cli",
+      "projectFolder": "packages/cli",
+      "shouldPublish": true
+    },
+    {
       "packageName": "@silvertree/lightql",
       "projectFolder": "packages/lightql"
     },

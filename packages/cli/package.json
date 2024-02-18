@@ -1,18 +1,22 @@
 {
-  "name": "@silvertree/logging",
-  "version": "0.0.6",
+  "name": "@silvertree/cli",
+  "version": "0.0.1",
   "keywords": [
     "silvertree",
-    "logger",
-    "winston"
+    "di",
+    "ioc",
+    "container",
+    "cmd",
+    "cli",
+    "commander"
   ],
   "author": "ThunderAl <community@thornal.com>",
   "license": "MIT",
-  "description": "Logger package for silvertree framework",
+  "description": "Cli package for Silvertree framework",
   "repository": {
     "type": "git",
     "url": "https://github.com/thunder-al/silvertree.git",
-    "directory": "packages/logging"
+    "directory": "packages/cli"
   },
   "homepage": "https://silvertree.thunderal.net/",
   "publishConfig": {
@@ -23,12 +27,15 @@
   ],
   "type": "module",
   "main": "dist/index.cjs",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
-    "require": "./dist/index.cjs",
-    "import": "./dist/index.js",
-    "default": "./dist/index.umd.cjs",
-    "types": "./dist/index.d.ts"
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js",
+      "default": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
   },
   "scripts": {
     "test": "vitest run --typecheck.enabled",
@@ -39,20 +46,19 @@
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
-    "@silvertree/core": "workspace:*",
-    "reflect-metadata": "~0.2.1",
-    "typescript": "~5.3.3",
-    "vite": "~5.0.12",
-    "vite-plugin-checker": "~0.6.2",
-    "vite-plugin-dts": "~3.7.1",
     "vitest": "~1.2.1",
+    "vite": "~5.0.12",
+    "vite-plugin-dts": "~3.7.1",
+    "vite-plugin-checker": "~0.6.2",
+    "typescript": "~5.3.3",
+    "reflect-metadata": "~0.2.1",
     "@types/node": "~20.10.4"
   },
-  "dependencies": {
-    "winston": "~3.11.0"
-  },
   "peerDependencies": {
-    "@silvertree/core": "workspace:*",
     "reflect-metadata": "^0.1.14"
+  },
+  "dependencies": {
+    "commander": "~11.1.0",
+    "@silvertree/core": "workspace:*"
   }
 }

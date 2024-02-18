@@ -18,7 +18,11 @@
   "devDependencies": {
     "typedoc": "~0.25.7",
     "typescript": "~5.3.3",
-    "vitepress": "1.0.0-rc.36"
+    "vitepress": "1.0.0-rc.36",
+    "@silvertree/cli": "workspace:*",
+    "@silvertree/core": "workspace:*",
+    "@silvertree/http": "workspace:*",
+    "@silvertree/logging": "workspace:*"
   },
   "dependencies": {
     "markdown-it-container": "~4.0.0",

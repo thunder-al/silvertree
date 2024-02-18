@@ -1,6 +1,7 @@
 import {TBindKey, TBindKeyRef, TClassConstructor} from '../types'
 import {isClassInstance, resolveBindingKey} from '../util'
 import {Module} from './Module'
+import {Container} from '../container'
 
 /**
  * Returns human-readable binding key, also resolves binding key reference to the actual binding key.
@@ -43,7 +44,11 @@ export function bindingKeyToString(key: TBindKey | TBindKeyRef): string {
  * Returns human-readable module name.
  * @param module
  */
-export function getModuleName(module: Module | TClassConstructor<Module>): string {
+export function getModuleName(module: Module | TClassConstructor<Module> | Container): string {
+
+  if (module instanceof Container) {
+    return 'Container'
+  }
 
   if (!module) {
     return 'ModuleIsUndefined'

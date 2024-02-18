@@ -23,6 +23,9 @@
       ],
       "@silvertree/http": [
         "./packages/http/dist/index.d.ts"
+      ],
+      "@silvertree/cli": [
+        "./packages/cli/dist/index.d.ts"
       ]
     }
   },

@@ -43,16 +43,15 @@
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
-    "vitest": "~1.0.4",
-    "vite": "~5.0.7",
-    "vite-plugin-dts": "~3.6.4",
+    "vitest": "~1.2.1",
+    "vite": "~5.0.12",
+    "vite-plugin-dts": "~3.7.1",
     "vite-plugin-checker": "~0.6.2",
     "typescript": "~5.3.3",
-    "reflect-metadata": "~0.1.14",
-    "@types/nested-error-stacks": "~2.1.1",
+    "reflect-metadata": "~0.2.1",
     "@types/node": "~20.10.4"
   },
   "peerDependencies": {
-    "reflect-metadata": "~0.1.14"
+    "reflect-metadata": "^0.1.14"
   }
 }
