@@ -7,23 +7,23 @@ import {
   NestedError,
   resolveBindingKey,
 } from '@silvertree/core'
-import {CliRunnerService} from './CliRunnerService'
-import {getRunnerCliServiceInjectKey} from './util'
+import {getRootCliServiceInjectKey} from './util'
 import {ICliModuleConfig} from './types'
+import {CliRootService} from './CliRootService'
 
 export class CliModule extends DynamicModule<ICliModuleConfig> {
 
   public async setup() {
-    let svc: CliRunnerService
+    let svc: CliRootService
 
     if (!(this.importer instanceof Module)) {
       throw new Error(`CliModule can only be imported by a Module`)
     }
 
     try {
-      svc = this.provideSync(getRunnerCliServiceInjectKey(this.config?.scope))
+      svc = this.provideSync(getRootCliServiceInjectKey(this.config?.scope))
     } catch (e: any) {
-      throw new NestedError(`Cannot find CliRegistrarService. Did you forget to import CliRootModule?`, e)
+      throw new NestedError(`Cannot find CliRegistrarService. Did you forget to import CliRootModule in container?`, e)
     }
 
     if (!this.config?.handlers) {

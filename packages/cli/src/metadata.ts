@@ -1,4 +1,4 @@
-import {getClassMetadata, getPropertyMetadata} from '../../core/src'
+import {getClassMetadata} from '@silvertree/core'
 import {ICliCommandDefinitionMetadata, TCliCommandPropertyMetadata} from './types'
 import {CLI_COMMANDS_METADATA_KEY, CLI_PROPERTIES_METADATA_KEY} from './consts'
 
@@ -7,5 +7,6 @@ export function getCommandHandlerCommandMetadata(target: Object): Array<ICliComm
 }
 
 export function getCommandHandlerCommandPropertiesMetadata(target: Object, key: string): Array<TCliCommandPropertyMetadata> {
-  return getPropertyMetadata(target, key, CLI_PROPERTIES_METADATA_KEY) ?? []
+  const props: Array<TCliCommandPropertyMetadata> = getClassMetadata(target, CLI_PROPERTIES_METADATA_KEY) ?? []
+  return props.filter(el => el.method === key)
 }

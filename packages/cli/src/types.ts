@@ -1,5 +1,13 @@
-import {Module, TBindKey, TBindKeyRef} from '@silvertree/core'
-import type {Argument, Option} from 'commander'
+import {Container, Module, TBindKey, TBindKeyRef} from '@silvertree/core'
+
+/**
+ * Command line argument parser result.
+ */
+export interface ICliArgv {
+  options: Record<string, string | number | boolean>
+  optionsShort: Record<string, string | number | boolean>
+  args: Array<string | number | boolean>
+}
 
 export interface ICliRootModuleConfig {
   /**
@@ -28,6 +36,67 @@ export interface ICliModuleConfig {
   handlers?: Array<TBindKey | TBindKeyRef>
 }
 
+/**
+ * Command argument definition config.
+ */
+export interface ICliCommandArgumentConfig {
+  /**
+   * Argument name.
+   */
+  name: string
+  /**
+   * Argument position in the command. Will be used during the command parsing.
+   * Starts from 0.
+   */
+  position: number
+  /**
+   * Argument description.
+   */
+  description?: string
+  /**
+   * Is argument required.
+   */
+  required?: boolean
+  /**
+   * Argument default value factory function.
+   */
+  default?: () => any
+  /**
+   * Optional argument value parser.
+   */
+  parser?: (value: string) => any
+}
+
+/**
+ * Command option definition config.
+ */
+export interface ICliCommandOptionConfig {
+  /**
+   * Option name. Will be used during the command parsing as `--name`.
+   */
+  name: string
+  /**
+   * Option short name. Will be used during the command parsing as `-n`.
+   */
+  shortName?: string
+  /**
+   * Option description. Will be used in the help message.
+   */
+  description?: string
+  /**
+   * Is option required.
+   */
+  required?: boolean
+  /**
+   * Option default value factory function.
+   */
+  default?: () => any
+  /**
+   * Optional option value parser.
+   */
+  parser?: (value: string) => any
+}
+
 export interface ICliCommandConfig {
   /**
    * Command name. Will be used in cli to call this command and in the help message.
@@ -36,24 +105,20 @@ export interface ICliCommandConfig {
   /**
    * Command description. Will be used in the help message.
    */
-  description?: string
-  /**
-   * Command aliases. Will be used in the help message.
-   */
-  aliases?: Array<string>
+  description: string | null
   /**
    * Command arguments. Will be used in the help message.
    */
-  arguments?: Array<Argument>
+  arguments: Array<ICliCommandArgumentConfig>
   /**
    * Command options. Will be used in the help message.
    */
-  options?: Array<Option>
+  options: Array<ICliCommandOptionConfig>
   /**
    * Command action as plain function or as ref to module service. Will be called when the command is executed.
    */
-  action?:
-    | ((...args: any[]) => void | Promise<void>)
+  action:
+    | ((container: Container, args: ICliArgv) => void | Promise<void>)
     | { module: Module, binding: TBindKey | TBindKeyRef, method: string }
 }
 
@@ -69,10 +134,6 @@ export interface ICliCommandDefinitionConfig {
    * Command description. Will be used in the help message.
    */
   description?: string
-  /**
-   * Command aliases. Will be used in the help message.
-   */
-  aliases?: Array<string>
 }
 
 /**
@@ -91,44 +152,18 @@ export interface ICliCommandDefinitionMetadata {
    * Command description. Will be used in the help message.
    */
   description?: string
-  /**
-   * Command aliases. Will be used in the help message.
-   */
-  aliases?: Array<string>
 }
 
-export type TCliCommandPropertyMetadata = ICliCommandPropertyArgumentMetadata
+export type TCliCommandPropertyMetadata = ICliCommandPropertyArgumentMetadata | ICliCommandPropertyOptionMetadata
 
-export interface ICliCommandPropertyArgumentMetadata {
+export interface ICliCommandPropertyArgumentMetadata extends ICliCommandArgumentConfig {
   type: 'argument'
   index: number
-  name: string
-  description?: string
-  required: boolean
-  default?: any
-  parser?: (value: string) => any
+  method: string
 }
 
-export interface ICliCommandPropertyArgumentConfig {
-  /**
-   * Argument name.
-   */
-  name: string
-  /**
-   * Argument description.
-   */
-  description?: string
-  /**
-   * Argument aliases.
-   * @default true
-   */
-  required?: boolean
-  /**
-   * Argument default value.
-   */
-  default?: any
-  /**
-   * Argument value parser.
-   */
-  parser?: (value: string) => any
+export interface ICliCommandPropertyOptionMetadata extends ICliCommandOptionConfig {
+  type: 'option'
+  method: string
 }
+
