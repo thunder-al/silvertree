@@ -1,5 +1,5 @@
-import {Module} from '../module'
-import {bindingKeyToString, getModuleName} from '../module'
+import {DynamicModule, FiberModule, Module} from '../module/Module'
+import {bindingKeyToString, getModuleName} from '../module/util'
 import {
   IInjectOptions,
   TBindKey,
@@ -11,8 +11,6 @@ import {
 import {extractConfiguredModuleTerm, instanceOf, isClassConstructor, resolveBindingKey} from '../util'
 import {AbstractAsyncFactory, AbstractSyncFactory} from '../factory'
 import {ContainerError} from './exceptions'
-import {FiberModule} from '../module'
-import {DynamicModule} from '../module'
 
 /**
  * Container is a root object of the DI system.
@@ -45,6 +43,7 @@ export class Container {
       skipInitPhase?: boolean
     },
   ): Promise<M> {
+    console.log(FiberModule)
     if (instanceOf(module, FiberModule)) {
       throw new ContainerError(this, `Cannot register ${getModuleName(module)} module because its a FiberModule`)
     }

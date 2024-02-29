@@ -1,6 +1,5 @@
 import type {TBindKey, TBindKeyRef, TClassConstructor, TConfiguredModuleTerm, TProvideContext} from '../types'
-import {bindingKeyToString, getModuleName} from '../module'
-import {Module} from '../module'
+import {bindingKeyToString, getModuleName, Module} from '../module'
 import {Container} from '../container'
 
 /**
@@ -142,6 +141,14 @@ export function extractConfiguredModuleTerm<
  * Can check not only class instances, but also class constructor functions.
  */
 export function instanceOf<P>(obj: any, parent: TClassConstructor<P>) {
+  if (!parent) {
+    throw new Error('Parent class is not defined for instanceOf check')
+  }
+
+  if (!obj) {
+    return false
+  }
+
   if (obj instanceof parent) {
     return true
   }

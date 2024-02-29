@@ -1,6 +1,6 @@
 {
   "name": "@silvertree/http",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "keywords": [
     "silvertree",
     "http",
@@ -53,9 +53,9 @@
     "@types/node": "~20.10.4"
   },
   "peerDependencies": {
-    "reflect-metadata": "^0.1.14",
-    "@silvertree/logging": "workspace:*",
-    "@silvertree/core": "workspace:*"
+    "reflect-metadata": "*",
+    "@silvertree/logging": "workspace:^",
+    "@silvertree/core": "workspace:^"
   },
   "dependencies": {
     "@fastify/error": "~3.4.1",
