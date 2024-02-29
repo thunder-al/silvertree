@@ -43,7 +43,6 @@ export class Container {
       skipInitPhase?: boolean
     },
   ): Promise<M> {
-    console.log(FiberModule)
     if (instanceOf(module, FiberModule)) {
       throw new ContainerError(this, `Cannot register ${getModuleName(module)} module because its a FiberModule`)
     }
