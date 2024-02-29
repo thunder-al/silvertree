@@ -1,4 +1,4 @@
-import {configureModule, Container, Module} from '@silvertree/core'
+import {configureModule, Container, DynamicModule, Module} from '@silvertree/core'
 import {getKyselyInjectKey, getKyselyMigratorInjectKey} from './util'
 import {IKyselyRootModuleConfig} from './types'
 import {
@@ -10,7 +10,7 @@ import {
 } from './factories'
 import {attachDbCommands} from './commands'
 
-export class KyselyRootModule extends Module<IKyselyRootModuleConfig> {
+export class KyselyRootModule extends DynamicModule<IKyselyRootModuleConfig> {
 
   async setup() {
     this.bindKyselyLoggerFactory()
