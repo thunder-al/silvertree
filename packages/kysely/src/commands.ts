@@ -6,12 +6,16 @@ export async function attachDbCommands(
   module: Module<any>,
   scope: boolean | string = 'default',
 ) {
+  const scopeStr = typeof scope === 'boolean' ? 'default' : scope
+
   const cliModule = await import('@silvertree/cli')
-  const cli = module.provideSync<CliRootService>(cliModule.getRootCliServiceInjectKey(typeof scope === 'boolean' ? 'default' : scope))
+  const cli = module.provideSync<CliRootService>(cliModule.getRootCliServiceInjectKey(scopeStr))
+
+  const cliSuffix = scopeStr === 'default' ? '' : `-${scopeStr}`
 
   // noinspection TypeScriptValidateJSTypes
   cli.registerCommand({
-    name: 'db migrate',
+    name: `db${cliSuffix} migrate`,
     description: 'Run database migrations',
     arguments: [],
     options: [],
