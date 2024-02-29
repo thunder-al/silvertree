@@ -78,6 +78,7 @@ export class CliRunnerService {
 
     if (typeof command.action === 'function') {
       await this.runFunctionCommand(command, args)
+      return
     }
 
     await this.runModuleCommand(command, args)
