@@ -9,11 +9,11 @@ export default defineConfig(async () => {
 
   const externals = [
     ...Object.keys(pkg.dependencies ?? {}),
+    ...Object.keys(pkg.devDependencies ?? {}),
     ...Object.keys(pkg.peerDependencies ?? {}),
   ]
 
   return <UserConfig>{
-    // base: './',
     build: {
       minify: process.env.NODE_ENV === 'production',
       sourcemap: true,
@@ -34,7 +34,11 @@ export default defineConfig(async () => {
       minifyIdentifiers: false,
     },
     plugins: [
-      dts({rollupTypes: true, compilerOptions: {removeComments: false, declaration: true, aliasesExclude: externals}}),
+      dts({
+        rollupTypes: true,
+        compilerOptions: {removeComments: false, declaration: true},
+        aliasesExclude: externals
+      }),
       checker({typescript: true}),
     ],
   }

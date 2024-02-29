@@ -4,13 +4,7 @@ import {
   CLI_COMMANDS_METADATA_KEY,
   CLI_PROPERTIES_METADATA_KEY,
 } from './consts'
-import {
-  decorateInjectArgument,
-  Inject,
-  isClassInstance,
-  tapClassMetadata,
-  tapClassPropertyMetadata,
-} from '@silvertree/core'
+import {decorateInjectArgument, Inject, isClassInstance, tapClassMetadata} from '@silvertree/core'
 import {
   ICliCommandArgumentConfig,
   ICliCommandDefinitionConfig,
