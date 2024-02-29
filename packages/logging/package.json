@@ -1,6 +1,6 @@
 {
   "name": "@silvertree/logging",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "keywords": [
     "silvertree",
     "logger",
@@ -52,7 +52,7 @@
     "winston": "~3.11.0"
   },
   "peerDependencies": {
-    "@silvertree/core": "workspace:^",
+    "@silvertree/core": "*",
     "reflect-metadata": "*"
   }
 }

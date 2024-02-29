@@ -1,6 +1,6 @@
 {
   "name": "@silvertree/kysely",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "keywords": [
     "silvertree",
     "di",
@@ -68,12 +68,12 @@
     "pg": "^8.11.3",
     "better-sqlite3": "^9.4.3",
     "mysql2": "^3.9.2",
-    "@silvertree/logging": "workspace:*",
-    "@silvertree/cli": "workspace:*"
+    "@silvertree/logging": "*",
+    "@silvertree/cli": "*"
   },
   "peerDependencies": {
-    "@silvertree/core": "workspace:^",
+    "@silvertree/core": "*",
     "reflect-metadata": "*",
-    "kysely": "^0.27.2"
+    "kysely": "*"
   }
 }

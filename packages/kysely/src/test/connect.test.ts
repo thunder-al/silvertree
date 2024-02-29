@@ -5,7 +5,6 @@ import {InjectKysely} from '../decorators'
 import {KyselyGlobal} from '../types'
 import {KyselyRootModule} from '../KyselyRootModule'
 import * as kysely from 'kysely'
-import {LoggerRootModule} from '@silvertree/logging'
 
 test('connect', async () => {
 
@@ -25,7 +24,6 @@ test('connect', async () => {
   }
 
   const c = await Container.make().registerBatch([
-    LoggerRootModule,
     KyselyRootModule.configuredFromEnv({
       modify: (container, parentMod, config) => {
         return {
@@ -33,6 +31,7 @@ test('connect', async () => {
           dialect: 'postgres',
           url: config?.url ?? 'postgres://postgres:postgres@localhost:5432/postgres',
           attachCommands: false,
+          logger: 'console',
         }
       },
     }),

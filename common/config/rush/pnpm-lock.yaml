@@ -77,7 +77,7 @@ importers:
       '@fastify/formbody': ~7.4.0
       '@fastify/multipart': ~8.0.0
       '@fastify/routes': ~5.1.0
-      '@silvertree/cli': workspace:*
+      '@silvertree/cli': '*'
       '@silvertree/core': workspace:*
       '@silvertree/logging': workspace:*
       '@types/node': ~20.10.4
@@ -98,7 +98,7 @@ importers:
       '@fastify/routes': 5.1.0
       fastify: 4.24.3
     optionalDependencies:
-      '@silvertree/cli': link:../cli
+      '@silvertree/cli': 0.0.5_reflect-metadata@0.2.1
     devDependencies:
       '@silvertree/core': link:../core
       '@silvertree/logging': link:../logging
@@ -112,9 +112,9 @@ importers:
 
   ../../packages/kysely:
     specifiers:
-      '@silvertree/cli': workspace:*
+      '@silvertree/cli': '*'
       '@silvertree/core': workspace:*
-      '@silvertree/logging': workspace:*
+      '@silvertree/logging': '*'
       '@types/better-sqlite3': ~7.6.9
       '@types/node': ~20.10.4
       '@types/pg': ~8.11.2
@@ -129,8 +129,8 @@ importers:
       vite-plugin-dts: ~3.7.1
       vitest: ~1.3.0
     optionalDependencies:
-      '@silvertree/cli': link:../cli
-      '@silvertree/logging': link:../logging
+      '@silvertree/cli': 0.0.5_reflect-metadata@0.2.1
+      '@silvertree/logging': 0.0.7_reflect-metadata@0.2.1
       better-sqlite3: 9.4.3
       mysql2: 3.9.2
       pg: 8.11.3
@@ -965,6 +965,27 @@ packages:
       colors: 1.2.5
       string-argv: 0.3.2
     dev: true
+
+  /@silvertree/cli/0.0.5_reflect-metadata@0.2.1:
+    resolution: {integrity: sha512-BHxadjj0+lPEmRB29IberMj5CN7P788MsaEXY1czi0nWzrqIMneCUm0xXV6p++f4MM0cgd1oSjFDJmfFxayOOQ==}
+    peerDependencies:
+      '@silvertree/core': ^0.0.7
+      reflect-metadata: '*'
+    dependencies:
+      reflect-metadata: 0.2.1
+    dev: false
+    optional: true
+
+  /@silvertree/logging/0.0.7_reflect-metadata@0.2.1:
+    resolution: {integrity: sha512-XOId1LZJve0E6VyRslgAkVvubKtmu0TkwPwslbSiuSuAAOmJVpFyhMmOAWd99pXXCaWlRbUyJfe+fy/MklK1MQ==}
+    peerDependencies:
+      '@silvertree/core': ^0.0.7
+      reflect-metadata: '*'
+    dependencies:
+      reflect-metadata: 0.2.1
+      winston: 3.11.0
+    dev: false
+    optional: true
 
   /@sinclair/typebox/0.27.8:
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
@@ -4075,7 +4096,7 @@ packages:
       strip-ansi: 6.0.1
       tiny-invariant: 1.3.1
       typescript: 5.3.3
-      vite: 5.0.12
+      vite: 5.0.12_@types+node@20.10.4
       vscode-languageclient: 7.0.0
       vscode-languageserver: 7.0.0
       vscode-languageserver-textdocument: 1.0.11

@@ -1,6 +1,6 @@
 {
   "name": "@silvertree/cli",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "keywords": [
     "silvertree",
     "di",
@@ -56,7 +56,7 @@
     "@types/node": "~20.10.4"
   },
   "peerDependencies": {
-    "@silvertree/core": "workspace:^",
+    "@silvertree/core": "*",
     "reflect-metadata": "*"
   }
 }
