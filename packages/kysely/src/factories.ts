@@ -107,7 +107,7 @@ export function makeKyselyDialectFactory() {
     }
 
     if (dialect === 'postgres') {
-      const pgModule = await import('pg')
+      const {default: pgModule} = await import('pg')
       const connectionConfig: ConstructorParameters<typeof pgModule.Pool>[0] = {
         connectionString: config?.url,
         host: config?.host,
