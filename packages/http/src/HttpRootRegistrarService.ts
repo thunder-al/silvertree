@@ -1,4 +1,4 @@
-import {HttpRootService} from './http-root-service'
+import {HttpRootService} from './HttpRootService'
 import {
   bindingKeyToString,
   callClassMethodWithAsyncInjections,
@@ -15,9 +15,9 @@ import {
 import {InjectLogger, Logger} from '@silvertree/logging'
 import {IHttpControllerRegistrationTerm, IHttpRootModuleConfig} from './types'
 import {FastifyInstance} from 'fastify'
-import {HttpRootModule} from './http-root-module'
+import {HttpRootModule} from './HttpRootModule'
 import {getHttpControllerSetupMetadata, getHttpRoutesMetadata} from './metadata'
-import {HttpRequestFiberModule} from './http-request-fiber-module'
+import {HttpRequestFiberModule} from './HttpRequestFiberModule'
 import {TClassConstructor} from '@silvertree/core/src'
 
 export class HttpRootRegistrarService {

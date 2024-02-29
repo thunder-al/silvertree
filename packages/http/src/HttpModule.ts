@@ -1,8 +1,8 @@
 import {configureModule, Container, DynamicModule, Module, ModuleError} from '@silvertree/core'
 import {IHttpModuleConfig} from './types'
 import {getHttpRootRegistrarInjectKey, getHttpRootServiceInjectKey} from './util'
-import {HttpRootService} from './http-root-service'
-import {HttpRootRegistrarService} from './http-root-registrar-service'
+import {HttpRootService} from './HttpRootService'
+import {HttpRootRegistrarService} from './HttpRootRegistrarService'
 
 
 export class HttpModule extends DynamicModule<IHttpModuleConfig> {

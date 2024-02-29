@@ -1,10 +1,11 @@
-import {configureModule, Container, DynamicModule, Module, TConfiguredModuleTerm} from '@silvertree/core'
+import {configureModule, Container, DynamicModule, Module} from '@silvertree/core'
 import {IHttpRootModuleConfig} from './types'
-import {HttpRootService} from './http-root-service'
+import {HttpRootService} from './HttpRootService'
 import {getFastifyInjectKey, getHttpRootRegistrarInjectKey, getHttpRootServiceInjectKey} from './util'
-import {FastifyLoggerAdapter} from './fastify-logger-adapter'
-import {HttpRootRegistrarService} from './http-root-registrar-service'
+import {FastifyLoggerAdapter} from './FastifyLoggerAdapter'
+import {HttpRootRegistrarService} from './HttpRootRegistrarService'
 import {LoggerModule} from '@silvertree/logging'
+import {attachHttpCommands} from './commands'
 
 export class HttpRootModule extends DynamicModule<IHttpRootModuleConfig> {
 
@@ -41,6 +42,16 @@ export class HttpRootModule extends DynamicModule<IHttpRootModuleConfig> {
       .alias('fastify')
       .export({global: true})
 
+    // register commands
+    if (this.config?.attachCommands ?? true) {
+      try {
+        await attachHttpCommands(this, this.config?.scope)
+      } catch (e: any) {
+        if (this.config?.attachCommands !== undefined) {
+          console.error('Failed to attach http commands. Did you register the cli module?')
+        }
+      }
+    }
   }
 
   static configured(

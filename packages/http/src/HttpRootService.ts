@@ -1,6 +1,6 @@
 import {Inject, InjectModule, InjectModuleConfig, Module, objectPick} from '@silvertree/core'
 import {IHttpRootModuleConfig} from './types'
-import {FastifyLoggerAdapter} from './fastify-logger-adapter'
+import {FastifyLoggerAdapter} from './FastifyLoggerAdapter'
 import {fastify, FastifyInstance} from 'fastify'
 import fastifyFormBody from '@fastify/formbody'
 import fastifyMultipart from '@fastify/multipart'
@@ -9,7 +9,7 @@ import fastifyCors from '@fastify/cors'
 import fastifyRoutes from '@fastify/routes'
 import fastifyCookie from '@fastify/cookie'
 import {InjectLogger, Logger} from '@silvertree/logging'
-import {HttpRootRegistrarService} from './http-root-registrar-service'
+import {HttpRootRegistrarService} from './HttpRootRegistrarService'
 
 const defaultFastifyConfig: Parameters<typeof fastify>[0] = {
   disableRequestLogging: true,
@@ -169,6 +169,10 @@ export class HttpRootService {
   }
 
   public async startHttpServer() {
+    if (this.isStarted) {
+      return
+    }
+
     this.isStarted = true
 
     const server = this.module.provideSync<FastifyInstance>('fastify')

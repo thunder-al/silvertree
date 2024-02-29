@@ -1,14 +1,14 @@
 import 'reflect-metadata'
 import {expect, test} from 'vitest'
 import {Container, Module, wait} from '@silvertree/core'
-import {HttpRootModule} from '../http-root-module'
+import {HttpRootModule} from '../HttpRootModule'
 import {getFastifyInjectKey, getHttpRootRegistrarInjectKey, getHttpRootServiceInjectKey} from '../util'
-import {HttpRootRegistrarService} from '../http-root-registrar-service'
+import {HttpRootRegistrarService} from '../HttpRootRegistrarService'
 import {FastifyInstance, FastifyRequest} from 'fastify'
 import {LoggerRootModule} from '@silvertree/logging'
-import {HttpModule} from '../http-module'
+import {HttpModule} from '../HttpModule'
 import {HttpControllerSetup, HttpRoute, InjectHttpBody, InjectHttpRequest, InjectHttpServer} from '../metadata'
-import {HttpRootService} from '../http-root-service'
+import {HttpRootService} from '../HttpRootService'
 
 test('http-server-routes', async () => {
 

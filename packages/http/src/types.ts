@@ -7,10 +7,9 @@ import {
 } from '@fastify/multipart'
 import {FastifyAcceptsOptions} from '@fastify/accepts'
 import {FastifyCookieOptions} from '@fastify/cookie'
-import {FastifyCorsOptions, FastifyCorsOptionsDelegate} from '@fastify/cors'
-import {Module, TBindKey, TBindKeyRef} from '@silvertree/core'
-import {HttpRequestFiberModule} from './http-request-fiber-module'
-import {TClassConstructor} from '@silvertree/core'
+import {FastifyCorsOptions} from '@fastify/cors'
+import {Module, TBindKey, TBindKeyRef, TClassConstructor} from '@silvertree/core'
+import {HttpRequestFiberModule} from './HttpRequestFiberModule'
 
 /**
  * A root http module for configuring the http server.
@@ -65,6 +64,12 @@ export interface IHttpRootModuleConfig {
    * Module class for creating fiber modules for each request.
    */
   requestFiberModuleClass?: TClassConstructor<HttpRequestFiberModule>
+  /**
+   * If `true`, it will try to create commands for @silvertree/cli package.
+   * If `string`, it will use it as a scope for the cli module.
+   * @default true
+   */
+  attachCommands?: boolean | string
   /**
    * Configuration for build-in plugins. Pass `false` to any of it to disable it.
    */

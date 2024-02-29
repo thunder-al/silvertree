@@ -77,6 +77,7 @@ importers:
       '@fastify/formbody': ~7.4.0
       '@fastify/multipart': ~8.0.0
       '@fastify/routes': ~5.1.0
+      '@silvertree/cli': workspace:*
       '@silvertree/core': workspace:*
       '@silvertree/logging': workspace:*
       '@types/node': ~20.10.4
@@ -96,6 +97,8 @@ importers:
       '@fastify/multipart': 8.0.0
       '@fastify/routes': 5.1.0
       fastify: 4.24.3
+    optionalDependencies:
+      '@silvertree/cli': link:../cli
     devDependencies:
       '@silvertree/core': link:../core
       '@silvertree/logging': link:../logging
