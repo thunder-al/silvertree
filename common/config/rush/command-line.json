@@ -4,7 +4,6 @@
  */
 {
   "$schema": "https://developer.microsoft.com/json-schemas/rush/v5/command-line.schema.json",
-
   "commands": [
     {
       "commandKind": "bulk",
@@ -19,6 +18,14 @@
       "summary": "Test all packages",
       "enableParallelism": true,
       "ignoreMissingScript": true
+    },
+    {
+      "commandKind": "global",
+      "name": "bulk-publish",
+      "summary": "Publishe all modified packages",
+      "safeForSimultaneousRushProcesses": false,
+      "shellCommand": "node common/autoinstallers/bulk-publish/publish.mjs",
+      "autoinstallerName": "bulk-publish"
     }
   ],
   "parameters": [
