@@ -1,6 +1,6 @@
 {
   "name": "@silvertree/kysely",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "keywords": [
     "silvertree",
     "di",
@@ -64,16 +64,31 @@
     "mysql2": "^3.9.2",
     "@types/better-sqlite3": "~7.6.9"
   },
-  "optionalDependencies": {
+  "peerDependencies": {
+    "reflect-metadata": "*",
+    "@silvertree/core": "*",
+    "kysely": "*",
+    "@silvertree/logging": "*",
+    "@silvertree/cli": "*",
     "pg": "^8.11.3",
     "better-sqlite3": "^9.4.3",
-    "mysql2": "^3.9.2",
-    "@silvertree/logging": "*",
-    "@silvertree/cli": "*"
+    "mysql2": "^3.9.2"
   },
-  "peerDependencies": {
-    "@silvertree/core": "*",
-    "reflect-metadata": "*",
-    "kysely": "*"
+  "peerDependenciesMeta": {
+    "@silvertree/logging": {
+      "optional": true
+    },
+    "@silvertree/cli": {
+      "optional": true
+    },
+    "pg": {
+      "optional": true
+    },
+    "better-sqlite3": {
+      "optional": true
+    },
+    "mysql2": {
+      "optional": true
+    }
   }
 }

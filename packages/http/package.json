@@ -1,6 +1,6 @@
 {
   "name": "@silvertree/http",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "keywords": [
     "silvertree",
     "http",
@@ -56,10 +56,13 @@
   "peerDependencies": {
     "reflect-metadata": "*",
     "@silvertree/logging": "*",
-    "@silvertree/core": "*"
-  },
-  "optionalDependencies": {
+    "@silvertree/core": "*",
     "@silvertree/cli": "*"
+  },
+  "peerDependenciesMeta": {
+    "@silvertree/cli": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@fastify/error": "~3.4.1",
