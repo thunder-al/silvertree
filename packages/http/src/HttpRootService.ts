@@ -1,5 +1,5 @@
 import {Inject, InjectModule, InjectModuleConfig, Module, objectPick} from '@silvertree/core'
-import {IHttpRootModuleConfig} from './types'
+import {IHttpControllerRegistrationTerm, IHttpRootModuleConfig, THttpControllerDebugItem} from './types'
 import {FastifyLoggerAdapter} from './FastifyLoggerAdapter'
 import {fastify, FastifyInstance} from 'fastify'
 import fastifyFormBody from '@fastify/formbody'
@@ -10,6 +10,7 @@ import fastifyRoutes from '@fastify/routes'
 import fastifyCookie from '@fastify/cookie'
 import {InjectLogger, Logger} from '@silvertree/logging'
 import {HttpRootRegistrarService} from './HttpRootRegistrarService'
+import {getHttpControllerSetupMetadata, getHttpRoutesMetadata} from './metadata'
 
 const defaultFastifyConfig: Parameters<typeof fastify>[0] = {
   disableRequestLogging: true,
@@ -204,5 +205,48 @@ export class HttpRootService {
 
   public getScope() {
     return this.config?.scope ?? 'default'
+  }
+
+  public* getRoutes(): IterableIterator<THttpControllerDebugItem> {
+    function* generateRoutes(term: IHttpControllerRegistrationTerm): IterableIterator<THttpControllerDebugItem> {
+      const routesMeta = getHttpRoutesMetadata(term.controller)
+
+      for (const route of routesMeta) {
+        yield {
+          type: 'route',
+          method: route.r.method,
+          url: term.urlPrefix ? `${term.urlPrefix}${route.r.url}` : route.r.url,
+          controller: term.controller,
+          module: term.module,
+          controllerFunctionName: route.m,
+        }
+      }
+
+      const setupMeta = getHttpControllerSetupMetadata(term.controller)
+
+      for (const setup of setupMeta) {
+        yield {
+          type: 'function',
+          controller: term.controller,
+          module: term.module,
+          controllerFunctionName: setup.m,
+        }
+      }
+    }
+
+    const routes = this.module.provideSync(HttpRootRegistrarService)
+    const controllers = new Set<IHttpControllerRegistrationTerm>()
+
+    for (const controller of routes.getPendingControllers()) {
+      if (!controllers.has(controller)) {
+        yield* generateRoutes(controller)
+      }
+    }
+
+    for (const controller of routes.getRegisteredControllers()) {
+      if (!controllers.has(controller)) {
+        yield* generateRoutes(controller)
+      }
+    }
   }
 }

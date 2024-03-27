@@ -1,6 +1,6 @@
 import 'reflect-metadata'
 import {expect, test} from 'vitest'
-import {Container, Module, wait} from '@silvertree/core'
+import {bindingKeyToString, Container, getModuleName, Module, wait} from '@silvertree/core'
 import {HttpRootModule} from '../HttpRootModule'
 import {getFastifyInjectKey, getHttpRootRegistrarInjectKey, getHttpRootServiceInjectKey} from '../util'
 import {HttpRootRegistrarService} from '../HttpRootRegistrarService'

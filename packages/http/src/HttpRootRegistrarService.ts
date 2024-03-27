@@ -41,7 +41,12 @@ export class HttpRootRegistrarService {
    * Registers a controller to be attached to the server.
    * This call will not create a controller until the server is started
    */
-  public registerHttpController(controller: TBindKey | TBindKeyRef, module: Module, useFastifyRegister: boolean = true) {
+  public registerHttpController(
+    controller: TBindKey | TBindKeyRef,
+    module: Module,
+    useFastifyRegister: boolean = true,
+    urlPrefix?: string,
+  ) {
     const controllerKey = resolveBindingKey(controller)
 
     if (!module.hasOwnBindOrAlias(controllerKey)) {
@@ -52,7 +57,7 @@ export class HttpRootRegistrarService {
       module.bind.singletonClass(controller as TClassConstructor)
     }
 
-    this.pendingControllers.add({controller, module, useFastifyRegister})
+    this.pendingControllers.add({controller, module, useFastifyRegister, urlPrefix})
     this.logger.debug(`Registered controller ${bindingKeyToString(controller)} for module ${getModuleName(module)} in scope ${this.svc.getScope()}`)
   }
 
@@ -107,6 +112,7 @@ export class HttpRootRegistrarService {
       for (const meta of routesMeta) {
         server.route({
           ...meta.r,
+          url: term.urlPrefix ? `${term.urlPrefix}${meta.r.url}` : meta.r.url,
           async handler(request, reply) {
             const mod = new modCls(term.module.getContainer(), term.module)
             mod.bindFastify(server)
@@ -137,5 +143,19 @@ export class HttpRootRegistrarService {
       }
 
     }
+  }
+
+  /**
+   * Returns all registered controllers
+   */
+  public getRegisteredControllers() {
+    return this.registeredControllers
+  }
+
+  /**
+   * Returns all pending controllers
+   */
+  public getPendingControllers() {
+    return this.pendingControllers
   }
 }

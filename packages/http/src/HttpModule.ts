@@ -23,7 +23,12 @@ export class HttpModule extends DynamicModule<IHttpModuleConfig> {
       const httpSvc = this.provideSync<HttpRootService>(serviceKey)
 
       for (const term of this.config.controllers) {
-        routesSvc.registerHttpController(term.controller, this.importer, this.config?.useFastifyRegister)
+        routesSvc.registerHttpController(
+          term.controller,
+          this.importer,
+          this.config?.useFastifyRegister,
+          this.config?.urlPrefix,
+        )
       }
 
       if (httpSvc.isServerStarted()) {

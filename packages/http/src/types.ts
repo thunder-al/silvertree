@@ -10,6 +10,7 @@ import {FastifyCookieOptions} from '@fastify/cookie'
 import {FastifyCorsOptions} from '@fastify/cors'
 import {Module, TBindKey, TBindKeyRef, TClassConstructor} from '@silvertree/core'
 import {HttpRequestFiberModule} from './HttpRequestFiberModule'
+import {HTTPMethods} from 'fastify/types/utils'
 
 /**
  * A root http module for configuring the http server.
@@ -123,6 +124,10 @@ export interface IHttpModuleConfig {
    */
   useFastifyRegister?: boolean
   /**
+   * The prefix for all routes in all controllers registered by this module.
+   */
+  urlPrefix?: string
+  /**
    * Array of controllers to register.
    * These controllers should be already registered or imported in this module.
    */
@@ -134,6 +139,7 @@ export interface IHttpControllerRegistrationTerm {
   controller: TBindKey | TBindKeyRef
   module: Module
   useFastifyRegister: boolean
+  urlPrefix?: string
 }
 
 
@@ -153,4 +159,22 @@ export interface IHttpControllerSetupMetadataItem {
    * Method name
    */
   m: string
+}
+
+export type THttpControllerDebugItem = IHttpControllerRouteDebugItem | IHttpControllerSetupDebugItem
+
+export interface IHttpControllerRouteDebugItem {
+  type: 'route'
+  method: HTTPMethods | HTTPMethods[],
+  url: string,
+  controller: TBindKey | TBindKeyRef
+  module: Module
+  controllerFunctionName: string
+}
+
+export interface IHttpControllerSetupDebugItem {
+  type: 'function'
+  controller: TBindKey | TBindKeyRef
+  module: Module
+  controllerFunctionName: string
 }
