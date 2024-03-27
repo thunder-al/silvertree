@@ -3,7 +3,7 @@
   "rushVersion": "5.101.0",
   "pnpmVersion": "6.7.1",
   "nodeSupportedVersionRange": ">=14.15.0 <15.0.0 || >=16.13.0 <17.0.0 || >=18.15.0 <19.0.0",
-  "ensureConsistentVersions": false,
+  "ensureConsistentVersions": true,
   "repository": {
     // "url": "https://github.com/microsoft/rush-example",
     // "defaultBranch": "main",
@@ -34,6 +34,11 @@
       "packageName": "@silvertree/kysely",
       "projectFolder": "packages/kysely",
       "shouldPublish": true
+    },
+    {
+      "packageName": "@silvertree/drive",
+      "projectFolder": "packages/drive",
+      "shouldPublish": false
     },
     {
       "packageName": "@silvertree/lightql",
