@@ -22,7 +22,8 @@
     "@silvertree/cli": "workspace:*",
     "@silvertree/core": "workspace:*",
     "@silvertree/http": "workspace:*",
-    "@silvertree/logging": "workspace:*"
+    "@silvertree/logging": "workspace:*",
+    "@silvertree/storage": "workspace:*"
   },
   "dependencies": {
     "markdown-it-container": "~4.0.0",
