@@ -17,8 +17,16 @@ async function safeReadJson(path, def = null) {
  * @return {Promise<string>}
  */
 async function getPackageVersion(packageName, tag = 'latest') {
-  const {data} = await axios.get(`https://registry.npmjs.org/${packageName}/${tag}`)
-  return data.version
+  try {
+    const {data} = await axios.get(`https://registry.npmjs.org/${packageName}/${tag}`)
+    return data.version
+  } catch (e) {
+    if (e.response.status === 404) {
+      return '0.0.0'
+    }
+
+    throw e
+  }
 }
 
 async function getGitChangedFiles() {
