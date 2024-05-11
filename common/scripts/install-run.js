@@ -24,7 +24,7 @@
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-                /* harmony export */   'isVariableSetInNpmrcFile': () => (/* binding */ isVariableSetInNpmrcFile),
+/* harmony export */   "isVariableSetInNpmrcFile": () => (/* binding */ isVariableSetInNpmrcFile),
 /* harmony export */   "syncNpmrc": () => (/* binding */ syncNpmrc)
 /* harmony export */ });
 /* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! fs */ 657147);
@@ -44,24 +44,23 @@ __webpack_require__.r(__webpack_exports__);
  * The text of the the .npmrc.
  */
 // create a global _combinedNpmrc for cache purpose
-            const _combinedNpmrcMap = new Map();
-
-            function _trimNpmrcFile(options) {
-                const {sourceNpmrcPath, linesToPrepend, linesToAppend} = options
-                const combinedNpmrcFromCache = _combinedNpmrcMap.get(sourceNpmrcPath)
-                if (combinedNpmrcFromCache !== undefined) {
-                    return combinedNpmrcFromCache
-                }
-                let npmrcFileLines = []
-                if (linesToPrepend) {
-                    npmrcFileLines.push(...linesToPrepend)
-                }
-                if (fs__WEBPACK_IMPORTED_MODULE_0__.existsSync(sourceNpmrcPath)) {
-                    npmrcFileLines.push(...fs__WEBPACK_IMPORTED_MODULE_0__.readFileSync(sourceNpmrcPath).toString().split('\n'))
-                }
-                if (linesToAppend) {
-                    npmrcFileLines.push(...linesToAppend)
-                }
+const _combinedNpmrcMap = new Map();
+function _trimNpmrcFile(options) {
+    const { sourceNpmrcPath, linesToPrepend, linesToAppend } = options;
+    const combinedNpmrcFromCache = _combinedNpmrcMap.get(sourceNpmrcPath);
+    if (combinedNpmrcFromCache !== undefined) {
+        return combinedNpmrcFromCache;
+    }
+    let npmrcFileLines = [];
+    if (linesToPrepend) {
+        npmrcFileLines.push(...linesToPrepend);
+    }
+    if (fs__WEBPACK_IMPORTED_MODULE_0__.existsSync(sourceNpmrcPath)) {
+        npmrcFileLines.push(...fs__WEBPACK_IMPORTED_MODULE_0__.readFileSync(sourceNpmrcPath).toString().split('\n'));
+    }
+    if (linesToAppend) {
+        npmrcFileLines.push(...linesToAppend);
+    }
     npmrcFileLines = npmrcFileLines.map((line) => (line || '').trim());
     const resultLines = [];
     // This finds environment variable tokens that look like "${VAR_NAME}"
@@ -69,13 +68,13 @@ __webpack_require__.r(__webpack_exports__);
     // Comment lines start with "#" or ";"
     const commentRegExp = /^\s*[#;]/;
     // Trim out lines that reference environment variables that aren't defined
-                for (let line of npmrcFileLines) {
+    for (let line of npmrcFileLines) {
         let lineShouldBeTrimmed = false;
-                    //remove spaces before or after key and value
-                    line = line
-                      .split('=')
-                      .map((lineToTrim) => lineToTrim.trim())
-                      .join('=')
+        //remove spaces before or after key and value
+        line = line
+            .split('=')
+            .map((lineToTrim) => lineToTrim.trim())
+            .join('=');
         // Ignore comment lines
         if (!commentRegExp.test(line)) {
             const environmentVariables = line.match(expansionRegExp);
@@ -102,48 +101,44 @@ __webpack_require__.r(__webpack_exports__);
         }
     }
     const combinedNpmrc = resultLines.join('\n');
-                //save the cache
-                _combinedNpmrcMap.set(sourceNpmrcPath, combinedNpmrc)
-                return combinedNpmrc
-            }
-
-            function _copyAndTrimNpmrcFile(options) {
-                const {logger, sourceNpmrcPath, targetNpmrcPath, linesToPrepend, linesToAppend} = options
-                logger.info(`Transforming ${sourceNpmrcPath}`) // Verbose
-                logger.info(`  --> "${targetNpmrcPath}"`)
-                const combinedNpmrc = _trimNpmrcFile({
-                    sourceNpmrcPath,
-                    linesToPrepend,
-                    linesToAppend,
-                })
+    //save the cache
+    _combinedNpmrcMap.set(sourceNpmrcPath, combinedNpmrc);
+    return combinedNpmrc;
+}
+function _copyAndTrimNpmrcFile(options) {
+    const { logger, sourceNpmrcPath, targetNpmrcPath, linesToPrepend, linesToAppend } = options;
+    logger.info(`Transforming ${sourceNpmrcPath}`); // Verbose
+    logger.info(`  --> "${targetNpmrcPath}"`);
+    const combinedNpmrc = _trimNpmrcFile({
+        sourceNpmrcPath,
+        linesToPrepend,
+        linesToAppend
+    });
     fs__WEBPACK_IMPORTED_MODULE_0__.writeFileSync(targetNpmrcPath, combinedNpmrc);
     return combinedNpmrc;
 }
-
-            function syncNpmrc(options) {
-                const {
-                    sourceNpmrcFolder, targetNpmrcFolder, useNpmrcPublish, logger = {
-                        // eslint-disable-next-line no-console
-                        info: console.log,
-                        // eslint-disable-next-line no-console
-                        error: console.error,
-                    }, createIfMissing = false, linesToAppend, linesToPrepend,
-                } = options
+function syncNpmrc(options) {
+    const { sourceNpmrcFolder, targetNpmrcFolder, useNpmrcPublish, logger = {
+        // eslint-disable-next-line no-console
+        info: console.log,
+        // eslint-disable-next-line no-console
+        error: console.error
+    }, createIfMissing = false, linesToAppend, linesToPrepend } = options;
     const sourceNpmrcPath = path__WEBPACK_IMPORTED_MODULE_1__.join(sourceNpmrcFolder, !useNpmrcPublish ? '.npmrc' : '.npmrc-publish');
     const targetNpmrcPath = path__WEBPACK_IMPORTED_MODULE_1__.join(targetNpmrcFolder, '.npmrc');
     try {
         if (fs__WEBPACK_IMPORTED_MODULE_0__.existsSync(sourceNpmrcPath) || createIfMissing) {
             // Ensure the target folder exists
             if (!fs__WEBPACK_IMPORTED_MODULE_0__.existsSync(targetNpmrcFolder)) {
-                fs__WEBPACK_IMPORTED_MODULE_0__.mkdirSync(targetNpmrcFolder, {recursive: true})
+                fs__WEBPACK_IMPORTED_MODULE_0__.mkdirSync(targetNpmrcFolder, { recursive: true });
             }
             return _copyAndTrimNpmrcFile({
                 sourceNpmrcPath,
                 targetNpmrcPath,
                 logger,
                 linesToAppend,
-                linesToPrepend,
-            })
+                linesToPrepend
+            });
         }
         else if (fs__WEBPACK_IMPORTED_MODULE_0__.existsSync(targetNpmrcPath)) {
             // If the source .npmrc doesn't exist and there is one in the target, delete the one in the target
@@ -155,17 +150,16 @@ __webpack_require__.r(__webpack_exports__);
         throw new Error(`Error syncing .npmrc file: ${e}`);
     }
 }
-
-            function isVariableSetInNpmrcFile(sourceNpmrcFolder, variableKey) {
-                const sourceNpmrcPath = `${sourceNpmrcFolder}/.npmrc`
-                //if .npmrc file does not exist, return false directly
-                if (!fs__WEBPACK_IMPORTED_MODULE_0__.existsSync(sourceNpmrcPath)) {
-                    return false
-                }
-                const trimmedNpmrcFile = _trimNpmrcFile({sourceNpmrcPath})
-                const variableKeyRegExp = new RegExp(`^${variableKey}=`, 'm')
-                return trimmedNpmrcFile.match(variableKeyRegExp) !== null
-            }
+function isVariableSetInNpmrcFile(sourceNpmrcFolder, variableKey) {
+    const sourceNpmrcPath = `${sourceNpmrcFolder}/.npmrc`;
+    //if .npmrc file does not exist, return false directly
+    if (!fs__WEBPACK_IMPORTED_MODULE_0__.existsSync(sourceNpmrcPath)) {
+        return false;
+    }
+    const trimmedNpmrcFile = _trimNpmrcFile({ sourceNpmrcPath });
+    const variableKeyRegExp = new RegExp(`^${variableKey}=`, 'm');
+    return trimmedNpmrcFile.match(variableKeyRegExp) !== null;
+}
 //# sourceMappingURL=npmrcUtilities.js.map
 
 /***/ }),
@@ -303,7 +297,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utilities_npmrcUtilities__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../utilities/npmrcUtilities */ 679877);
 // Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
 // See LICENSE in the project root for license information.
-    /* eslint-disable no-console */
+/* eslint-disable no-console */
 
 
 
@@ -443,11 +437,11 @@ function _resolvePackageVersion(logger, rushCommonFolder, { name, version }) {
         try {
             const rushTempFolder = _getRushTempFolder(rushCommonFolder);
             const sourceNpmrcFolder = path__WEBPACK_IMPORTED_MODULE_3__.join(rushCommonFolder, 'config', 'rush');
-            (0, _utilities_npmrcUtilities__WEBPACK_IMPORTED_MODULE_4__.syncNpmrc)({
+            (0,_utilities_npmrcUtilities__WEBPACK_IMPORTED_MODULE_4__.syncNpmrc)({
                 sourceNpmrcFolder,
                 targetNpmrcFolder: rushTempFolder,
-                logger,
-            })
+                logger
+            });
             const npmPath = getNpmPath();
             // This returns something that looks like:
             // ```
@@ -469,10 +463,10 @@ function _resolvePackageVersion(logger, rushCommonFolder, { name, version }) {
             const spawnSyncOptions = {
                 cwd: rushTempFolder,
                 stdio: [],
-                shell: _isWindows(),
+                shell: _isWindows()
             };
-            const platformNpmPath = _getPlatformPath(npmPath)
-            const npmVersionSpawnResult = child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync(platformNpmPath, ['view', `${name}@${version}`, 'version', '--no-update-notifier', '--json'], spawnSyncOptions)
+            const platformNpmPath = _getPlatformPath(npmPath);
+            const npmVersionSpawnResult = child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync(platformNpmPath, ['view', `${name}@${version}`, 'version', '--no-update-notifier', '--json'], spawnSyncOptions);
             if (npmVersionSpawnResult.status !== 0) {
                 throw new Error(`"npm view" returned error code ${npmVersionSpawnResult.status}`);
             }
@@ -483,9 +477,9 @@ function _resolvePackageVersion(logger, rushCommonFolder, { name, version }) {
                 : [parsedVersionOutput];
             let latestVersion = versions[0];
             for (let i = 1; i < versions.length; i++) {
-                const latestVersionCandidate = versions[i]
+                const latestVersionCandidate = versions[i];
                 if (_compareVersionStrings(latestVersionCandidate, latestVersion) > 0) {
-                    latestVersion = latestVersionCandidate
+                    latestVersion = latestVersionCandidate;
                 }
             }
             if (!latestVersion) {
@@ -517,7 +511,7 @@ function findRushJsonFolder() {
             }
         } while (basePath !== (tempPath = path__WEBPACK_IMPORTED_MODULE_3__.dirname(basePath))); // Exit the loop when we hit the disk root
         if (!_rushJsonFolder) {
-            throw new Error(`Unable to find ${RUSH_JSON_FILENAME}.`)
+            throw new Error(`Unable to find ${RUSH_JSON_FILENAME}.`);
         }
     }
     return _rushJsonFolder;
@@ -605,12 +599,12 @@ function _installPackage(logger, packageInstallFolder, name, version, command) {
     try {
         logger.info(`Installing ${name}...`);
         const npmPath = getNpmPath();
-        const platformNpmPath = _getPlatformPath(npmPath)
+        const platformNpmPath = _getPlatformPath(npmPath);
         const result = child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync(platformNpmPath, [command], {
             stdio: 'inherit',
             cwd: packageInstallFolder,
             env: process.env,
-            shell: _isWindows(),
+            shell: _isWindows()
         });
         if (result.status !== 0) {
             throw new Error(`"npm ${command}" encountered an error`);
@@ -626,21 +620,19 @@ function _installPackage(logger, packageInstallFolder, name, version, command) {
  */
 function _getBinPath(packageInstallFolder, binName) {
     const binFolderPath = path__WEBPACK_IMPORTED_MODULE_3__.resolve(packageInstallFolder, NODE_MODULES_FOLDER_NAME, '.bin');
-    const resolvedBinName = _isWindows() ? `${binName}.cmd` : binName
+    const resolvedBinName = _isWindows() ? `${binName}.cmd` : binName;
     return path__WEBPACK_IMPORTED_MODULE_3__.resolve(binFolderPath, resolvedBinName);
 }
 /**
  * Returns a cross-platform path - windows must enclose any path containing spaces within double quotes.
  */
 function _getPlatformPath(platformPath) {
-    return _isWindows() && platformPath.includes(' ') ? `"${platformPath}"` : platformPath
+    return _isWindows() && platformPath.includes(' ') ? `"${platformPath}"` : platformPath;
 }
-
-    function _isWindows() {
-        return os__WEBPACK_IMPORTED_MODULE_2__.platform() === 'win32'
-    }
-
-    /**
+function _isWindows() {
+    return os__WEBPACK_IMPORTED_MODULE_2__.platform() === 'win32';
+}
+/**
  * Write a flag file to the package's install directory, signifying that the install was successful.
  */
 function _writeFlagFile(packageInstallFolder) {
@@ -661,11 +653,11 @@ function installAndRun(logger, packageName, packageVersion, packageBinName, pack
         // The package isn't already installed
         _cleanInstallFolder(rushTempFolder, packageInstallFolder, lockFilePath);
         const sourceNpmrcFolder = path__WEBPACK_IMPORTED_MODULE_3__.join(rushCommonFolder, 'config', 'rush');
-        (0, _utilities_npmrcUtilities__WEBPACK_IMPORTED_MODULE_4__.syncNpmrc)({
+        (0,_utilities_npmrcUtilities__WEBPACK_IMPORTED_MODULE_4__.syncNpmrc)({
             sourceNpmrcFolder,
             targetNpmrcFolder: packageInstallFolder,
-            logger,
-        })
+            logger
+        });
         _createPackageJson(packageInstallFolder, packageName, packageVersion);
         const command = lockFilePath ? 'ci' : 'install';
         _installPackage(logger, packageInstallFolder, packageName, packageVersion, command);
@@ -683,7 +675,7 @@ function installAndRun(logger, packageName, packageVersion, packageBinName, pack
     try {
         // `npm` bin stubs on Windows are `.cmd` files
         // Node.js will not directly invoke a `.cmd` file unless `shell` is set to `true`
-        const platformBinPath = _getPlatformPath(binPath)
+        const platformBinPath = _getPlatformPath(binPath);
         process.env.PATH = [binFolderPath, originalEnvPath].join(path__WEBPACK_IMPORTED_MODULE_3__.delimiter);
         result = child_process__WEBPACK_IMPORTED_MODULE_0__.spawnSync(platformBinPath, packageBinArgs, {
             stdio: 'inherit',
