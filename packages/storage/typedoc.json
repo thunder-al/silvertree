@@ -1,0 +1,10 @@
+{
+  "extends": [
+    "../../typedoc.base.json"
+  ],
+  "entryPoints": [
+    "src/index.ts",
+    "src/drivers/FilesystemStorageDriver.ts",
+    "src/drivers/InMemoryStorageDriver.ts"
+  ]
+}
