@@ -1,6 +1,7 @@
 name: Deploy the documentation to github pages
 
 on:
+  workflow_dispatch: { }
   push:
     branches:
       - "main"
