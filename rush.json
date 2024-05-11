@@ -36,9 +36,9 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@silvertree/drive",
-      "projectFolder": "packages/drive",
-      "shouldPublish": false
+      "packageName": "@silvertree/storage",
+      "projectFolder": "packages/storage",
+      "shouldPublish": true
     },
     {
       "packageName": "@silvertree/lightql",

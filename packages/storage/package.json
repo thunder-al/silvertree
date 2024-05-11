@@ -1,0 +1,88 @@
+{
+  "name": "@silvertree/storage",
+  "version": "0.0.1",
+  "keywords": [
+    "silvertree",
+    "di",
+    "ioc",
+    "container",
+    "drive",
+    "drive",
+    "fs",
+    "filesystem",
+    "s3"
+  ],
+  "author": "ThunderAl <community@thornal.com>",
+  "license": "MIT",
+  "description": "Abstraction around filesystem drives for Silvertree",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thunder-al/silvertree.git",
+    "directory": "packages/drive"
+  },
+  "homepage": "https://silvertree.thunderal.net/",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js",
+      "default": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./standalone": {
+      "require": "./dist/standalone.cjs",
+      "import": "./dist/standalone.js",
+      "default": "./dist/standalone.cjs",
+      "types": "./dist/standalone.d.ts"
+    },
+    "./in-memory-driver": {
+      "require": "./dist/in-memory-driver.cjs",
+      "import": "./dist/in-memory-driver.js",
+      "default": "./dist/in-memory-driver.cjs",
+      "types": "./dist/in-memory-driver.d.ts"
+    },
+    "./filesystem-driver": {
+      "require": "./dist/filesystem-driver.cjs",
+      "import": "./dist/filesystem-driver.js",
+      "default": "./dist/filesystem-driver.cjs",
+      "types": "./dist/filesystem-driver.d.ts"
+    }
+  },
+  "scripts": {
+    "test": "vitest run --typecheck.enabled",
+    "test:watch": "vitest watch --typecheck.enabled",
+    "watch": "vite build -w -m development",
+    "dev": "vite build -m development",
+    "build": "vite build -m production",
+    "prepublishOnly": "npm run test && npm run build"
+  },
+  "devDependencies": {
+    "@silvertree/core": "workspace:*",
+    "vitest": "~1.3.0",
+    "vite": "~5.0.12",
+    "vite-plugin-dts": "~3.7.1",
+    "vite-plugin-checker": "~0.6.2",
+    "typescript": "~5.3.3",
+    "reflect-metadata": "~0.2.1",
+    "@types/node": "~20.10.4"
+  },
+  "peerDependencies": {
+    "reflect-metadata": "*",
+    "@silvertree/core": "*",
+    "minio": "^7.1.3"
+  },
+  "peerDependenciesMeta": {
+    "minio": {
+      "optional": true
+    }
+  }
+}

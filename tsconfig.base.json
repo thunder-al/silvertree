@@ -27,6 +27,9 @@
       ],
       "@silvertree/cli": [
         "./packages/cli/dist/index.d.ts"
+      ],
+      "@silvertree/storage": [
+        "./packages/storage/dist/index.d.ts"
       ]
     }
   },
