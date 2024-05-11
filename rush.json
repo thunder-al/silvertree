@@ -5,9 +5,9 @@
   "nodeSupportedVersionRange": ">=20.12.2 <21.0.0 || >=21.7.3 <22.0.0 || >=22.0.1 <23.0.0",
   "ensureConsistentVersions": true,
   "repository": {
-    // "url": "https://github.com/microsoft/rush-example",
-    // "defaultBranch": "main",
-    // "defaultRemote": "origin"
+    "url": "https://github.com/thunder-al/silvertree",
+    "defaultBranch": "main",
+    "defaultRemote": "origin"
   },
   "projects": [
     {
