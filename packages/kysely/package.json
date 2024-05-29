@@ -1,6 +1,6 @@
 {
   "name": "@silvertree/kysely",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "keywords": [
     "silvertree",
     "di",
@@ -50,29 +50,29 @@
     "@silvertree/core": "workspace:*",
     "@silvertree/cli": "workspace:*",
     "@silvertree/logging": "workspace:*",
-    "vitest": "~1.3.0",
-    "vite": "~5.0.12",
-    "vite-plugin-dts": "~3.7.1",
-    "vite-plugin-checker": "~0.6.2",
+    "vitest": "~1.6.0",
+    "vite": "~5.2.12",
+    "vite-plugin-dts": "~3.9.1",
+    "vite-plugin-checker": "~0.6.4",
     "typescript": "~5.3.3",
-    "reflect-metadata": "~0.2.1",
+    "reflect-metadata": "~0.2.2",
     "@types/node": "~20.10.4",
-    "pg": "^8.11.3",
+    "pg": "~8.11.5",
     "@types/pg": "~8.11.2",
-    "kysely": "~0.27.2",
-    "better-sqlite3": "^9.4.3",
-    "mysql2": "^3.9.2",
+    "kysely": "~0.27.3",
+    "better-sqlite3": "~10.0.0",
+    "mysql2": "~3.9.9",
     "@types/better-sqlite3": "~7.6.9"
   },
   "peerDependencies": {
     "reflect-metadata": "*",
     "@silvertree/core": "*",
-    "kysely": "*",
+    "kysely": "^0.27.3",
     "@silvertree/logging": "*",
     "@silvertree/cli": "*",
-    "pg": "^8.11.3",
-    "better-sqlite3": "^9.4.3",
-    "mysql2": "^3.9.2"
+    "pg": "^8.11.5",
+    "better-sqlite3": "^10.0.0",
+    "mysql2": "^3.9.9"
   },
   "peerDependenciesMeta": {
     "@silvertree/logging": {
