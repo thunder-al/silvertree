@@ -1,5 +1,4 @@
-import {DynamicModule, FiberModule, Module} from '../module/Module'
-import {bindingKeyToString, getModuleName} from '../module/util'
+import {bindingKeyToString, FiberModule, getModuleName, isSvtModuleHasTrait, Module} from '../module'
 import {
   IInjectOptions,
   TBindKey,
@@ -55,8 +54,7 @@ export class Container {
 
     const instance = new module(this, config)
 
-    // noinspection SuspiciousTypeOfGuard
-    if (instance instanceof DynamicModule) {
+    if (isSvtModuleHasTrait(instance, 'dynamic')) {
       // dynamic module instances will go to a separated set
       this.dynamicModules.add(instance)
     } else {

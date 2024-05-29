@@ -1,7 +1,11 @@
 import {Module} from './Module'
 import {IInjectOptions, TBindKey, TClassConstructor, TProvideContext} from '../types'
-import {SingletonClassAsyncFactory, SingletonClassSyncFactory} from '../factory'
-import {AsyncFunctionalFactory, SyncFunctionalFactory} from '../factory'
+import {
+  AsyncFunctionalFactory,
+  SingletonClassAsyncFactory,
+  SingletonClassSyncFactory,
+  SyncFunctionalFactory,
+} from '../factory'
 
 
 /**

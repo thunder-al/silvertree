@@ -60,3 +60,63 @@ export function getModuleName(module: Module | TClassConstructor<Module> | Conta
 
   return module.name
 }
+
+/**
+ * Returns true if the module has any of the specified traits.
+ */
+export function isSvtModuleHasAnyTraits(module: any, traits: Array<'dynamic' | 'fiber' | string>): boolean {
+  const constr: TClassConstructor<Module> = isClassInstance(module)
+    ? module.constructor
+    : module
+
+  if ('__svt_module_traits' in constr && Array.isArray(constr.__svt_module_traits)) {
+    const hasAny = constr.__svt_module_traits.some(trait => traits.includes(trait))
+    if (hasAny) {
+      return true
+    }
+  }
+
+  // go deeper
+  const parent = Object.getPrototypeOf(constr)
+
+  // if null or empty object
+  if (!parent || parent === Object.prototype) {
+    return false
+  }
+
+  return isSvtModuleHasAnyTraits(parent, traits)
+}
+
+/**
+ * Returns true if the module has all the specified traits.
+ */
+export function isSvtModuleHasEveryTraits(module: any, traits: Array<'dynamic' | 'fiber' | string>): boolean {
+  const constr: TClassConstructor<Module> = isClassInstance(module)
+    ? module.constructor
+    : module
+
+  if ('__svt_module_traits' in constr && Array.isArray(constr.__svt_module_traits)) {
+    const currentTraits: Array<string> = constr.__svt_module_traits
+    traits = traits.filter(trait => currentTraits.includes(trait))
+    if (traits.length === 0) {
+      return true
+    }
+  }
+
+  // go deeper
+  const parent = Object.getPrototypeOf(constr)
+
+  // if null or empty object
+  if (!parent || parent === Object.prototype) {
+    return false
+  }
+
+  return isSvtModuleHasEveryTraits(parent, traits)
+}
+
+/**
+ * Returns true if the module has the specified trait.
+ */
+export function isSvtModuleHasTrait(module: any, trait: 'dynamic' | 'fiber' | string): boolean {
+  return isSvtModuleHasAnyTraits(module, [trait])
+}

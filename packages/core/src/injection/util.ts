@@ -1,5 +1,5 @@
 import {Module} from '../module'
-import {IInjectOptions, TBindKey, TClassConstructor, TProvideContext} from '../types'
+import {TBindKey, TClassConstructor, TProvideContext} from '../types'
 import {getBindingArgumentsForClassMethodAsync, getBindingArgumentsForClassMethodSync} from './method-metadata'
 
 /**

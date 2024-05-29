@@ -1,8 +1,7 @@
 import {TClassConstructor, TProvideContext} from '../types'
 import {getClassArgumentInjections} from './func'
-import {Module} from '../module'
+import {bindingKeyToString, Module} from '../module'
 import {InjectionError} from './exceptions'
-import {bindingKeyToString} from '../module'
 import {formatProvideChain, resolveBindingKey} from '../util'
 
 /**

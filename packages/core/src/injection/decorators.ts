@@ -9,7 +9,8 @@ import {tapClassMetadata} from '../metadata'
 import {
   INJECT_CLASS_ARGUMENT_METADATA_KEY,
   INJECT_CLASS_PROPERTY_METADATA_KEY,
-  INJECT_MODULE_CONFIG_METADATA_KEY, INJECT_MODULE_METADATA_KEY,
+  INJECT_MODULE_CONFIG_METADATA_KEY,
+  INJECT_MODULE_METADATA_KEY,
 } from './const'
 import {bindingRef, isBindingRef, isClassInstance} from '../util'
 

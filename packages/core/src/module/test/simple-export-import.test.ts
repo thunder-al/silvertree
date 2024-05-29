@@ -1,5 +1,5 @@
 import {expect, test} from 'vitest'
-import {Module} from '../Module'
+import {Module} from '..'
 import {Container} from '../../container'
 
 test('modules export export', async () => {

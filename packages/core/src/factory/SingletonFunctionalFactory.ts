@@ -36,11 +36,11 @@ export class SyncFunctionalFactory<T, M extends Module = Module>
   }
 
   public getModule(): M {
-    throw this.module
+    return this.module
   }
 
   public makeBindContext(module: M, key: TBindKey): FactoryBindContext<M, T, this> {
-    throw new FactoryBindContext(module, key, this)
+    return new FactoryBindContext(module, key, this)
   }
 }
 
@@ -97,10 +97,10 @@ export class AsyncFunctionalFactory<T, M extends Module = Module>
   }
 
   public getModule(): M {
-    throw this.module
+    return this.module
   }
 
   public makeBindContext(module: M, key: TBindKey): FactoryBindContext<M, T, this> {
-    throw new FactoryBindContext(module, key, this)
+    return new FactoryBindContext(module, key, this)
   }
 }
