@@ -15,7 +15,6 @@
     "types": "./dist/index.d.ts"
   },
   "scripts": {
-    "test": "vitest",
     "watch": "vite build -w -m development",
     "dev": "vite build -m development",
     "build": "vite build -m production"

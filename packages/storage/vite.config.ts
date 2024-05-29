@@ -15,7 +15,7 @@ export default defineConfig(async () => {
 
   return <UserConfig>{
     build: {
-      minify: process.env.NODE_ENV === 'production',
+      minify: false,
       sourcemap: true,
       lib: {
         entry: {

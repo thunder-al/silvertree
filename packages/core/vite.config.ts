@@ -13,9 +13,8 @@ export default defineConfig(async () => {
   ]
 
   return <UserConfig>{
-    // base: './',
     build: {
-      minify: process.env.NODE_ENV === 'production',
+      minify: false,
       sourcemap: true,
       lib: {
         entry: {index: './src/index.ts'},
