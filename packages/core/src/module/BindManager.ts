@@ -34,20 +34,20 @@ export class BindManager<M extends Module = Module> implements BindManagerImpl {
    * Binds sync singleton class
    * @param cls
    */
-  public syncSingletonClass(
-    cls: TClassConstructor,
+  public syncSingletonClass<T>(
+    cls: TClassConstructor<T>,
   ) {
-    return this.module.bindSync(cls, new SingletonClassSyncFactory(this.module, cls))
+    return this.module.bindSync(cls, new SingletonClassSyncFactory<T, M>(this.module, cls))
   }
 
   /**
    * Binds sync singleton class
    * @param cls
    */
-  public singletonClass(
-    cls: TClassConstructor,
+  public singletonClass<T>(
+    cls: TClassConstructor<T>,
   ) {
-    return this.module.bindAsync(cls, new SingletonClassAsyncFactory(this.module, cls))
+    return this.module.bindAsync(cls, new SingletonClassAsyncFactory<T, M>(this.module, cls))
   }
 
   /**
