@@ -1,5 +1,7 @@
 export const HTTP_ROUTES_METADATA_KEY = 'http-routes'
 
+export const HTTP_ROUTES_MODIFIERS_METADATA_KEY = 'http-routes-modifiers'
+
 export const HTTP_SETUP_METADATA_KEY = 'http-setup'
 
 export const HTTP_LOCAL_FASTIFY_INJECT_KEY = 'fastify'

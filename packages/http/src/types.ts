@@ -154,6 +154,17 @@ export interface IHttpControllerRouteMetadataItem {
   r: Omit<RouteOptions, 'handler'>
 }
 
+export interface IHttpControllerRouteModifierMetadataItem<T = any> {
+  /**
+   * Method name
+   */
+  m: string
+  /**
+   * Modifier function
+   */
+  f: (route: RouteOptions, controller: T) => Promise<unknown> | unknown
+}
+
 export interface IHttpControllerSetupMetadataItem {
   /**
    * Method name
@@ -177,4 +188,11 @@ export interface IHttpControllerSetupDebugItem {
   controller: TBindKey | TBindKeyRef
   module: Module
   controllerFunctionName: string
+}
+
+declare module 'fastify' {
+  interface FastifyContextConfig {
+    module: Module
+    controller: any
+  }
 }

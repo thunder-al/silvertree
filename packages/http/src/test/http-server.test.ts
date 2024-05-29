@@ -1,13 +1,20 @@
 import 'reflect-metadata'
 import {expect, test} from 'vitest'
-import {bindingKeyToString, Container, getModuleName, Module, wait} from '@silvertree/core'
+import {Container, Module, wait} from '@silvertree/core'
 import {HttpRootModule} from '../HttpRootModule'
 import {getFastifyInjectKey, getHttpRootRegistrarInjectKey, getHttpRootServiceInjectKey} from '../util'
 import {HttpRootRegistrarService} from '../HttpRootRegistrarService'
 import {FastifyInstance, FastifyRequest} from 'fastify'
 import {LoggerRootModule} from '@silvertree/logging'
 import {HttpModule} from '../HttpModule'
-import {HttpControllerSetup, HttpRoute, InjectHttpBody, InjectHttpRequest, InjectHttpServer} from '../metadata'
+import {
+  HttpControllerSetup,
+  HttpRoute,
+  HttpRouteSchema,
+  InjectHttpBody,
+  InjectHttpRequest,
+  InjectHttpServer,
+} from '../metadata'
 import {HttpRootService} from '../HttpRootService'
 
 test('http-server-routes', async () => {
@@ -41,9 +48,13 @@ test('http-server-routes', async () => {
     async hello3(
       @InjectHttpRequest() request: FastifyRequest,
     ) {
+      expect(request.routeOptions.config.controller).toBeInstanceOf(AppController)
+      expect(request.routeOptions.config.module).toBeInstanceOf(AppMod)
+
       return request.body
     }
 
+    @HttpRouteSchema('body', {type: 'object', required: ['test'], properties: {test: {type: 'string'}}})
     @HttpRoute('POST', '/hello4')
     async hello4(
       @InjectHttpBody() body: any,
@@ -96,6 +107,9 @@ test('http-server-routes', async () => {
 
   expect(await fastify.inject({method: 'POST', url: '/hello4', body: {test: 'body2'}}))
     .toSatisfy((res: any) => res.statusCode === 200 && res.body === '{"test":"body2"}')
+
+  expect(await fastify.inject({method: 'POST', url: '/hello4', body: {otherKey: 'val'}}))
+    .toSatisfy((res: any) => res.statusCode === 400)
 
   expect(await fastify.inject({method: 'POST', url: '/hello-setup'}))
     .toEqual(expect.objectContaining({statusCode: 200, body: 'response-setup'}))

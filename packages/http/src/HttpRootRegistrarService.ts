@@ -14,11 +14,12 @@ import {
 } from '@silvertree/core'
 import {InjectLogger, Logger} from '@silvertree/logging'
 import {IHttpControllerRegistrationTerm, IHttpRootModuleConfig} from './types'
-import {FastifyInstance} from 'fastify'
+import {FastifyInstance, FastifyReply, FastifyRequest} from 'fastify'
 import {HttpRootModule} from './HttpRootModule'
-import {getHttpControllerSetupMetadata, getHttpRoutesMetadata} from './metadata'
+import {getHttpControllerSetupMetadata, getHttpRouteModifiers, getHttpRoutesMetadata} from './metadata'
 import {HttpRequestFiberModule} from './HttpRequestFiberModule'
 import {TClassConstructor} from '@silvertree/core/src'
+import {RouteOptions} from 'fastify/types/route'
 
 export class HttpRootRegistrarService {
 
@@ -100,6 +101,7 @@ export class HttpRootRegistrarService {
 
     const routesMeta = getHttpRoutesMetadata(term.controller)
     const setupMeta = getHttpControllerSetupMetadata(term.controller)
+    const modifiers = getHttpRouteModifiers(term.controller)
 
     // save `this` context on HttpRootRegisterService
     return async (server: FastifyInstance) => {
@@ -110,10 +112,14 @@ export class HttpRootRegistrarService {
 
       // register routes
       for (const meta of routesMeta) {
-        server.route({
+        const routeConfig: RouteOptions = {
           ...meta.r,
           url: term.urlPrefix ? `${term.urlPrefix}${meta.r.url}` : meta.r.url,
-          async handler(request, reply) {
+          config: {
+            controller: instance,
+            module: term.module,
+          },
+          async handler(request: FastifyRequest, reply: FastifyReply) {
             const mod = new modCls(term.module.getContainer(), term.module)
             mod.bindFastify(server)
             mod.bindRequestPayload(request, reply)
@@ -126,7 +132,17 @@ export class HttpRootRegistrarService {
               meta.m,
             )
           },
-        })
+        }
+
+        // apply modifiers
+        for (const mod of modifiers) {
+          if (mod && mod.m === meta.m) {
+            await mod.f(routeConfig, instance)
+          }
+        }
+
+        // register fastify route
+        server.route(routeConfig)
       }
 
       // apply setup functions
