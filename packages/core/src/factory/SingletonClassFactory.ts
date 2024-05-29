@@ -1,29 +1,26 @@
-import {AbstractAsyncFactory, AbstractSyncFactory} from './AbstractFactory'
+import {IAsyncFactory, ISyncFactory} from './Factory'
 import {Module} from '../module'
-import {IInjectOptions, TClassConstructor, TProvideContext} from '../types'
+import {IInjectOptions, TBindKey, TClassConstructor, TProvideContext} from '../types'
 import {
   getBindingArgumentsForClassMethodAsync,
   getBindingArgumentsForClassMethodSync,
   injectBindingsForClassParameterAsync,
   injectBindingsForClassParameterSync,
 } from '../injection'
+import {FactoryBindContext} from './FactoryBindContext'
 
 /**
  * A factory that creates a single instance of a class.
  */
 export class SingletonClassSyncFactory<T, M extends Module = Module>
-  extends AbstractSyncFactory<T, M> {
+  implements ISyncFactory<T, M> {
 
   protected value?: T
 
   public constructor(
-    module: M,
-    protected cls: TClassConstructor<T>,
-    name?: string,
-    description?: string,
+    protected readonly module: M,
+    protected readonly cls: TClassConstructor<T>,
   ) {
-    name = name ?? cls.name
-    super(module, name, description)
   }
 
   public get(
@@ -61,8 +58,12 @@ export class SingletonClassSyncFactory<T, M extends Module = Module>
     return this.value
   }
 
-  public getMetadataTarget(module: M): any {
-    return this.cls
+  public getModule(): M {
+    return this.module
+  }
+
+  public makeBindContext(module: M, key: TBindKey): FactoryBindContext<M, T, this> {
+    return new FactoryBindContext(module, key, this)
   }
 }
 
@@ -70,19 +71,15 @@ export class SingletonClassSyncFactory<T, M extends Module = Module>
  * A factory that creates a single instance of a class.
  */
 export class SingletonClassAsyncFactory<T, M extends Module = Module>
-  extends AbstractAsyncFactory<Promise<T> | T, M> {
+  implements IAsyncFactory<Promise<T> | T, M> {
 
   protected value?: T
   protected promise?: Promise<T>
 
   public constructor(
-    module: M,
-    protected cls: TClassConstructor<T>,
-    name?: string,
-    description?: string,
+    protected readonly module: M,
+    protected readonly cls: TClassConstructor<T>,
   ) {
-    name = name ?? cls.name
-    super(module, name, description)
   }
 
   public async get(
@@ -141,7 +138,11 @@ export class SingletonClassAsyncFactory<T, M extends Module = Module>
     return this.promise
   }
 
-  public getMetadataTarget(module: M): any {
-    return this.cls
+  getModule(): M {
+    return this.module
+  }
+
+  makeBindContext(module: M, key: TBindKey): FactoryBindContext<M, Promise<T> | T, this> {
+    return new FactoryBindContext(module, key, this)
   }
 }

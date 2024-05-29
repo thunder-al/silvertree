@@ -1,4 +1,4 @@
-import {AbstractAsyncFactory, AbstractSyncFactory} from './AbstractFactory'
+import {IAsyncFactory, ISyncFactory} from './Factory'
 import {Module} from '../module'
 
 import {TBindKey} from '../types'
@@ -10,7 +10,7 @@ import {TBindKey} from '../types'
 export class FactoryBindContext<
   M extends Module = Module,
   T = any,
-  F extends AbstractSyncFactory<T> | AbstractAsyncFactory<T> = AbstractSyncFactory<T> | AbstractAsyncFactory<T>
+  F extends (ISyncFactory<T> | IAsyncFactory<T>) = (ISyncFactory<T> | IAsyncFactory<T>)
 > {
   constructor(
     protected module: M,

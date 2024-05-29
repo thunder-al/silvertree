@@ -1,5 +1,5 @@
 import type {Module} from './module'
-import type {AbstractSyncFactory} from './factory'
+import type {ISyncFactory} from './factory'
 import type {Container} from './container'
 
 /**
@@ -83,5 +83,5 @@ export interface TClassInjectArgumentMetadataItem {
  */
 export interface TProvideContext {
   key: TBindKey
-  chain: Array<{ module: Module, factory: AbstractSyncFactory<any>, key: TBindKey }>
+  chain: Array<{ module: Module, factory: ISyncFactory<any>, key: TBindKey }>
 }

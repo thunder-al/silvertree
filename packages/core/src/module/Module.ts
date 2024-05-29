@@ -1,5 +1,5 @@
 import {Container} from '../container'
-import {AbstractAsyncFactory, AbstractSyncFactory} from '../factory'
+import {IAsyncFactory, ISyncFactory} from '../factory'
 import {BindManager} from './BindManager'
 import {makeAsyncToSyncProvidingError, makeNoBindingError, ModuleBindingError, ModuleError} from './exceptions'
 import {bindingKeyToString, getModuleName} from './util'
@@ -11,8 +11,8 @@ export class Module<Cfg = any> {
 
   protected initialized = false
 
-  protected readonly factoriesSync = new Map<TBindKey, AbstractSyncFactory<any>>()
-  protected readonly factoriesAsync = new Map<TBindKey, AbstractAsyncFactory<any>>()
+  protected readonly factoriesSync = new Map<TBindKey, ISyncFactory<any>>()
+  protected readonly factoriesAsync = new Map<TBindKey, IAsyncFactory<any>>()
   protected readonly aliases = new Map<TBindKey, TBindKey>()
   protected readonly bindManger: BindManager<this> = new BindManager(this)
 
@@ -58,7 +58,7 @@ export class Module<Cfg = any> {
    * @param key
    * @param factory
    */
-  public bindSync<F extends AbstractSyncFactory<any>>(key: TBindKey, factory: F) {
+  public bindSync<F extends ISyncFactory<any>>(key: TBindKey, factory: F) {
     if (this.factoriesAsync.has(key) || (this.aliases.has(key) && this.factoriesAsync.has(this.aliases.get(key)!))) {
       throw new ModuleBindingError(this, key, `Cannot bind ${bindingKeyToString(key)} as sync because it is already bound as async in module ${getModuleName(this)}}. You should drop it with dropBinding(key) before binding it as sync`)
     }
@@ -73,7 +73,7 @@ export class Module<Cfg = any> {
    * @param key
    * @param factory
    */
-  public bindAsync<F extends AbstractAsyncFactory<any>>(key: TBindKey, factory: F) {
+  public bindAsync<F extends IAsyncFactory<any>>(key: TBindKey, factory: F) {
     if (this.factoriesSync.has(key) || (this.aliases.has(key) && this.factoriesSync.has(this.aliases.get(key)!))) {
       throw new ModuleBindingError(this, key, `Cannot bind ${bindingKeyToString(key)} as async because it is already bound as sync in container ${getModuleName(this)}}. You should drop it with dropBinding(key) before binding it as async`)
     }
@@ -90,7 +90,7 @@ export class Module<Cfg = any> {
    */
   public getSyncFactory<
     T = any,
-    F extends AbstractSyncFactory<T, Module> = AbstractSyncFactory<T, Module>,
+    F extends ISyncFactory<T, Module> = ISyncFactory<T, Module>,
   >(key: TBindKey): [F, Module] {
 
     if (this.factoriesAsync.has(key) || (this.aliases.has(key) && this.factoriesAsync.has(this.aliases.get(key)!))) {
@@ -135,7 +135,7 @@ export class Module<Cfg = any> {
    */
   public getAsyncFactory<
     T = any,
-    F extends AbstractAsyncFactory<T, Module> = AbstractAsyncFactory<T, Module>
+    F extends IAsyncFactory<T, Module> = IAsyncFactory<T, Module>
   >(key: TBindKey): [F, Module] {
 
     // if sync factory exists, return it
@@ -577,7 +577,7 @@ export class FiberModule<PM extends Module = Module> extends Module<void> {
 
   public getSyncFactory<
     T = any,
-    F extends AbstractSyncFactory<T, Module> = AbstractSyncFactory<T, Module>,
+    F extends ISyncFactory<T> = (ISyncFactory<T, this> | ISyncFactory<T, Module>),
   >(key: TBindKey): [F, Module] {
     if (this.factoriesAsync.has(key) || (this.aliases.has(key) && this.factoriesAsync.has(this.aliases.get(key)!))) {
       throw makeAsyncToSyncProvidingError(this, key)
@@ -606,15 +606,15 @@ export class FiberModule<PM extends Module = Module> extends Module<void> {
     for (const module of this.getSourceModuleInstances()) {
       // noinspection SuspiciousTypeOfGuard
       if (module instanceof Container) {
-        if (module.hasAsyncBinding(key)) {
-          return module.getAsyncModuleFactory<T, Module, F>(key)
+        if (module.hasSyncBinding(key)) {
+          return module.getSyncModuleFactory<T, Module, F>(key)
         } else {
           continue
         }
       }
 
-      if (module.hasExportedAsyncBinding(key)) {
-        return module.getAsyncFactory(key)
+      if (module.hasExportedSyncBinding(key)) {
+        return module.getSyncFactory(key)
       }
     }
 
@@ -624,7 +624,7 @@ export class FiberModule<PM extends Module = Module> extends Module<void> {
 
   public getAsyncFactory<
     T = any,
-    F extends AbstractAsyncFactory<T, Module> = AbstractAsyncFactory<T, Module>
+    F extends IAsyncFactory<T, Module> = IAsyncFactory<T, Module>
   >(key: TBindKey): [F, Module] {
     // resolve alias only if current key not exists in bindings of current and parent module
     if (!this.factoriesAsync.has(key) && (this.aliases.has(key)) || this.parentModule.hasOwnAlias(key)) {

@@ -1,25 +1,23 @@
-import {AbstractAsyncFactory, AbstractSyncFactory} from './AbstractFactory'
+import {IAsyncFactory, ISyncFactory} from './Factory'
 import {Module} from '../module'
-import {EMPTY_META_TARGET} from '../injection'
-import {IInjectOptions, TProvideContext} from '../types'
+import {IInjectOptions, TBindKey, TProvideContext} from '../types'
+import {FactoryBindContext} from './FactoryBindContext'
 
 /**
  * A factory that creates a single instance of a value.
  */
 export class SyncFunctionalFactory<T, M extends Module = Module>
-  extends AbstractSyncFactory<T, M> {
+  implements ISyncFactory<T, M> {
 
   protected value?: T
 
   public constructor(
-    module: M,
+    protected readonly module: M,
     protected readonly func: (module: M, options: Partial<IInjectOptions> | null, ctx: TProvideContext) => T,
     protected readonly singleton: boolean = true,
-    name?: string,
-    description?: string,
   ) {
-    super(module, name, description)
   }
+
 
   public get(
     module: M,
@@ -37,8 +35,12 @@ export class SyncFunctionalFactory<T, M extends Module = Module>
     return this.value
   }
 
-  public getMetadataTarget(module: M): any {
-    return EMPTY_META_TARGET
+  public getModule(): M {
+    throw this.module
+  }
+
+  public makeBindContext(module: M, key: TBindKey): FactoryBindContext<M, T, this> {
+    throw new FactoryBindContext(module, key, this)
   }
 }
 
@@ -46,19 +48,16 @@ export class SyncFunctionalFactory<T, M extends Module = Module>
  * A factory that creates a single instance of a value.
  */
 export class AsyncFunctionalFactory<T, M extends Module = Module>
-  extends AbstractAsyncFactory<Promise<T> | T, M> {
+  implements IAsyncFactory<T, M> {
 
   protected value?: T
   protected promise?: Promise<T>
 
   public constructor(
-    module: M,
+    protected readonly module: M,
     protected readonly func: (module: M, options: Partial<IInjectOptions> | null, ctx: TProvideContext) => Promise<T> | T,
     protected readonly singleton: boolean = true,
-    name?: string,
-    description?: string,
   ) {
-    super(module, name, description)
   }
 
   public async get(
@@ -97,7 +96,11 @@ export class AsyncFunctionalFactory<T, M extends Module = Module>
     return this.promise
   }
 
-  public getMetadataTarget(module: M): any {
-    return EMPTY_META_TARGET
+  public getModule(): M {
+    throw this.module
+  }
+
+  public makeBindContext(module: M, key: TBindKey): FactoryBindContext<M, T, this> {
+    throw new FactoryBindContext(module, key, this)
   }
 }

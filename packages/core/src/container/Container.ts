@@ -9,7 +9,7 @@ import {
   TProvideContext,
 } from '../types'
 import {extractConfiguredModuleTerm, instanceOf, isClassConstructor, resolveBindingKey} from '../util'
-import {AbstractAsyncFactory, AbstractSyncFactory} from '../factory'
+import {IAsyncFactory, ISyncFactory} from '../factory'
 import {ContainerError} from './exceptions'
 
 /**
@@ -189,7 +189,7 @@ export class Container {
   public getSyncModuleFactory<
     T = any,
     M extends Module = Module,
-    F extends AbstractSyncFactory<T, M> = AbstractSyncFactory<T, M>
+    F extends ISyncFactory<T, M> = ISyncFactory<T, M>
   >(key: TBindKey): [F, M] {
 
     for (let module of this.globalFactoryRefs.keys()) {
@@ -214,7 +214,7 @@ export class Container {
   public getAsyncModuleFactory<
     T = any,
     M extends Module = Module,
-    F extends AbstractAsyncFactory<T, M> = AbstractAsyncFactory<T, M>
+    F extends IAsyncFactory<T, M> = IAsyncFactory<T, M>
   >(key: TBindKey): [F, M] {
 
     for (let module of this.globalFactoryRefs.keys()) {
