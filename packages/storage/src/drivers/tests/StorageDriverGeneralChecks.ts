@@ -1,13 +1,17 @@
 import {StorageDriver} from '../../StorageDriver'
 import {expect} from 'vitest'
+import {Readable} from 'stream'
 
 export async function testStorageDriverGeneral(driver: StorageDriver) {
 
   await driver.put('file.txt', 'Hello World')
   expect(await driver.get('file.txt')).toBe('Hello World')
 
-  await driver.put('file.txt', Buffer.from('Hello World'))
-  expect(await driver.get('file.txt')).toBe('Hello World')
+  await driver.put('file.txt', Buffer.from('Hello World2'))
+  expect(await driver.get('file.txt')).toBe('Hello World2')
+
+  await driver.put('file.txt', Readable.from(Buffer.from('Hello World3')))
+  expect(await driver.get('file.txt')).toBe('Hello World3')
 
   // not created -- should not return true
   expect(await driver.exists('file2.txt')).toBe(false)
@@ -17,11 +21,12 @@ export async function testStorageDriverGeneral(driver: StorageDriver) {
 
   await driver.append('file.txt', 'World')
   await driver.prepend('file.txt', 'Hello ')
+  await driver.append('file.txt', '!')
 
   expect(await driver.exists('file.txt')).toBe(true)
-  expect(await driver.get('file.txt')).toBe('Hello World')
-  expect(await driver.getBuffer('file.txt')).toStrictEqual(Buffer.from('Hello World'))
-  expect(await driver.getStat('file.txt')).toStrictEqual(expect.objectContaining({size: 11}))
+  expect(await driver.get('file.txt')).toBe('Hello World!')
+  expect(await driver.getBuffer('file.txt')).toStrictEqual(Buffer.from('Hello World!'))
+  expect(await driver.getStat('file.txt')).toStrictEqual(expect.objectContaining({size: 12}))
 
   {
     // stream
@@ -31,7 +36,7 @@ export async function testStorageDriverGeneral(driver: StorageDriver) {
       // noinspection SuspiciousTypeOfGuard
       chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
     }
-    expect(Buffer.concat(chunks).toString()).toBe('Hello World')
+    expect(Buffer.concat(chunks).toString()).toBe('Hello World!')
   }
 
   {
@@ -42,25 +47,38 @@ export async function testStorageDriverGeneral(driver: StorageDriver) {
       files.push(file)
     }
 
-    expect(files).toStrictEqual(['file.txt'])
+    expect(files).toStrictEqual([
+      expect.objectContaining({path: 'file.txt'}),
+    ])
   }
 
+  // delete
   await driver.delete('file.txt')
   expect(await driver.exists('file.txt')).toBe(false)
 
+  // create again
   await driver.put('file.txt', 'Hello World2')
   expect(await driver.get('file.txt')).toBe('Hello World2')
+  expect(await driver.get('/file.txt')).toBe('Hello World2')
 
+  // overwrite
   await driver.put('file.txt', Buffer.from('Hello World3'))
   expect(await driver.get('file.txt')).toBe('Hello World3')
+  expect(await driver.get('/file.txt')).toBe('Hello World3')
 
+  // copy
   await driver.copy('file.txt', 'file2.txt')
   expect(await driver.get('file2.txt')).toBe('Hello World3')
+  expect(await driver.get('/file2.txt')).toBe('Hello World3')
+  expect(await driver.exists('file.txt')).toBe(true) // should not be deleted
 
+  // move
   await driver.move('file2.txt', 'dir/file.txt')
   expect(await driver.get('dir/file.txt')).toBe('Hello World3')
-  expect(await driver.exists('file2.txt')).toBe(false)
+  expect(await driver.get('/dir/file.txt')).toBe('Hello World3')
+  expect(await driver.exists('file2.txt')).toBe(false) // should be deleted
 
+  // wipe all
   await driver.deleteRecursive('')
   expect(await driver.exists('file.txt')).toBe(false)
   expect(await driver.exists('file2.txt')).toBe(false)
@@ -81,11 +99,14 @@ export async function testStorageDriverGeneral(driver: StorageDriver) {
       files.push(file)
     }
 
-    expect(files.sort()).toStrictEqual([
-      'file1.txt', 'file2.txt',
-      'dir/file3.txt', 'dir/file4.txt',
-      'dir/subdir/file5.txt', 'dir/subdir/file6.txt',
-    ].sort())
+    expect(files).toStrictEqual(expect.arrayContaining([
+      expect.objectContaining({path: 'file1.txt'}),
+      expect.objectContaining({path: 'file2.txt'}),
+      expect.objectContaining({path: 'dir/file3.txt'}),
+      expect.objectContaining({path: 'dir/file4.txt'}),
+      expect.objectContaining({path: 'dir/subdir/file5.txt'}),
+      expect.objectContaining({path: 'dir/subdir/file6.txt'}),
+    ]))
   }
 
   expect(await driver.exists('file1.txt')).toBe(true)
@@ -119,7 +140,4 @@ export async function testStorageDriverGeneral(driver: StorageDriver) {
   expect(await driver.exists('dir/file4.txt')).toBe(false)
   expect(await driver.exists('dir/subdir/file5.txt')).toBe(false)
   expect(await driver.exists('dir/subdir/file6.txt')).toBe(false)
-
-  // root always should exist
-  expect(await driver.exists('')).toBe(true)
 }

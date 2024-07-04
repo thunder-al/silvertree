@@ -1,0 +1,497 @@
+import {StorageDriver} from '../StorageDriver'
+import {Client, ClientOptions, S3Error} from 'minio'
+import {normalizePath} from '../util'
+import {ObjectNotFound, StorageDriverError} from '../exceptions'
+import {DeleteResponse, FileListResponse, Response, SignedUrlOptions, StatResponse} from '../response-types'
+import * as stream from 'node:stream'
+import type {BucketItemStat, CopyObjectResult, UploadedObjectInfo} from 'minio/src/internal/type'
+import * as Path from 'node:path/posix'
+
+export interface IS3StorageDriverConfig extends ClientOptions {
+  /**
+   * S3 bucket name
+   */
+  basket: string
+  /**
+   * Root path inside the bucket without leading and tailing slash.
+   * If not defined, the root of the bucket will be used.
+   */
+  rootPath?: string
+  /**
+   * Alive check list path relative to `rootPath`.
+   * If not defined, the driver will use the root path.
+   */
+  aliveCheckPath?: string
+}
+
+export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Client> {
+
+  protected client: Client
+
+  public constructor(config: IS3StorageDriverConfig) {
+    super(config)
+    this.processConfig()
+    this.client = this.makeClient()
+  }
+
+  protected processConfig() {
+    if (this.config.rootPath) {
+      try {
+        this.config.rootPath = normalizePath(this.config.rootPath)
+      } catch (err: any) {
+        throw new StorageDriverError(`Invalid root path: ${this.config.rootPath}`, err)
+      }
+    }
+  }
+
+  /**
+   * Creates a new S3 client.
+   */
+  protected makeClient() {
+    return new Client(this.config)
+  }
+
+  /**
+   * Normalizes the path by adding the root path if it's defined.
+   */
+  protected normalizePath(path: string) {
+    const userPath = normalizePath(path)
+
+    if (this.config.rootPath) {
+
+      if (userPath.startsWith(this.config.rootPath)) {
+        return userPath
+      }
+
+      return normalizePath(this.config.rootPath + '/' + userPath)
+    }
+
+    return userPath
+  }
+
+  protected wrapError(error: Error, objectPath: string) {
+
+    if (error instanceof StorageDriverError) {
+      return error
+    }
+
+    if (error instanceof S3Error) {
+      if (error.code === 'NoSuchKey' || error.code === 'NotFound') {
+        return new ObjectNotFound(objectPath, error)
+      }
+    }
+
+    return new StorageDriverError(error.message, error)
+  }
+
+  /**
+   * Appends content to a file.
+   *
+   */
+  public async append(location: string, content: Buffer | string): Promise<Response<UploadedObjectInfo>> {
+    const path = this.normalizePath(location)
+
+    try {
+      // if the source file exists, make a buffer and append the content
+
+      const srcBuffer = await this.getBuffer(path)
+      const destStream = new stream.PassThrough()
+
+      const putPromise = this.put(location, destStream)
+
+      // write the original content
+      destStream.write(srcBuffer)
+
+      // append the new content
+      destStream.write(content)
+
+      // end the stream
+      destStream.end()
+
+      return await putPromise
+
+    } catch (e: any) {
+      const err = this.wrapError(e, path)
+
+      if (err instanceof ObjectNotFound) {
+
+        // if source file does not exist, create a new file with the content
+        return await this.put(location, content)
+
+      } else {
+
+        // if error is not ObjectNotFound, rethrow it
+        throw err
+      }
+    }
+  }
+
+  /**
+   * Copy a file to a location.
+   */
+  public async copy(src: string, dest: string): Promise<Response<CopyObjectResult>> {
+    const sourcePath = this.normalizePath(src)
+    const destinationPath = this.normalizePath(dest)
+
+    try {
+      const copy = await this.client.copyObject(
+        this.config.basket,
+        destinationPath,
+        `/${this.config.basket}/${sourcePath}`,
+      )
+
+      return {raw: copy}
+
+    } catch (e: any) {
+      throw this.wrapError(e, sourcePath)
+    }
+  }
+
+  /**
+   * Delete existing file.
+   */
+  public async delete(location: string): Promise<DeleteResponse> {
+    const path = this.normalizePath(location)
+
+    try {
+      await this.client.removeObject(this.config.basket, path)
+    } catch (e: any) {
+      throw this.wrapError(e, path)
+    }
+
+    return {raw: null, wasDeleted: null}
+  }
+
+  /**
+   * Delete all files in a directory.
+   */
+  public async deleteRecursive(location: string): Promise<Response<null>> {
+    const path = this.normalizePath(location)
+    const deleteObjects: Array<string> = []
+
+    const iter = this.listFilesRecursive(path)
+
+    for await (const file of iter) {
+      deleteObjects.push(this.normalizePath(file.path))
+    }
+
+    await this.client.removeObjects(this.config.basket, deleteObjects)
+
+    return {raw: null}
+  }
+
+  /**
+   * Returns the driver.
+   */
+  public getDriver(): Client {
+    return this.client
+  }
+
+  /**
+   * Determines if a file or folder already exists.
+   *
+   * NOTE: Prefer using `get*` and handle the error instead of using this method.
+   */
+  public async exists(location: string): Promise<boolean> {
+    const path = this.normalizePath(location)
+
+    try {
+
+      await this.getStat(path)
+
+      return true
+
+    } catch (e: any) {
+      const err = this.wrapError(e, path)
+
+      if (err instanceof ObjectNotFound) {
+        return false
+      }
+
+      throw e
+    }
+  }
+
+  /**
+   * Returns the file contents as a string.
+   */
+  public async get(location: string, encoding?: BufferEncoding): Promise<string> {
+    const path = this.normalizePath(location)
+    const buffer = await this.getBuffer(path)
+    return buffer.toString(encoding || 'utf-8')
+  }
+
+  /**
+   * Returns the file contents as a Buffer.
+   */
+  public async getBuffer(location: string): Promise<Buffer> {
+    const path = this.normalizePath(location)
+
+    const stream = await this.getStream(path)
+
+    return new Promise((resolve, reject) => {
+      const buffer: Array<Buffer> = []
+
+      // collect all chunks
+      stream.on('data', (chunk) => {
+        if (typeof chunk === 'string') {
+          buffer.push(Buffer.from(chunk))
+          return
+        }
+
+        if (Buffer.isBuffer(chunk)) {
+          buffer.push(chunk)
+          return
+        }
+
+        throw new StorageDriverError('Invalid chunk type: ' + typeof chunk)
+      })
+
+      // resolve the promise when the stream ends
+      stream.on('end', () => {
+        resolve(Buffer.concat(buffer))
+      })
+
+      // reject the promise when an error occurs
+      stream.on('error', (error) => {
+        reject(this.wrapError(error, path))
+      })
+    })
+  }
+
+  /**
+   * **WARNING**: This method is not supported by the S3 driver
+   *   and may return an invalid link.
+   *
+   * @inheritdoc
+   */
+  public getUrl(location: string): string {
+    return (this.config.useSSL === false ? 'http' : 'https')
+      // domain part
+      + `://${this.config.endPoint}/`
+      // basket part
+      + `${this.config.basket}/`
+      // object part
+      + this.normalizePath(location)
+  }
+
+  /**
+   * Returns signed url for an existing file.
+   */
+  public async getSignedUrl(location: string, options?: SignedUrlOptions): Promise<string> {
+    const path = this.normalizePath(location)
+
+    try {
+      return await this.client.presignedUrl(
+        'GET',
+        this.config.basket,
+        path,
+        options?.expiry || 60_000 * 60, // 1 hour by default
+      )
+    } catch (e: any) {
+      throw this.wrapError(e, path)
+    }
+  }
+
+  /**
+   * Returns file's size and modification date.
+   */
+  public async getStat(location: string): Promise<StatResponse<BucketItemStat>> {
+    const path = this.normalizePath(location)
+
+    try {
+      const stat = await this.client.statObject(this.config.basket, path)
+
+      return {
+        raw: stat,
+        size: stat.size,
+        modified: stat.lastModified,
+        etag: stat.etag,
+      }
+
+    } catch (e: any) {
+      throw this.wrapError(e, path)
+    }
+  }
+
+  /**
+   * Returns the stream for the given file.
+   */
+  public async getStream(location: string): Promise<stream.Readable> {
+    const path = this.normalizePath(location)
+
+    try {
+      return await this.client.getObject(this.config.basket, path)
+    } catch (e: any) {
+      throw this.wrapError(e, path)
+    }
+  }
+
+  /**
+   * Move file to a new location.
+   */
+  public async move(src: string, dest: string): Promise<Response> {
+    const sourcePath = this.normalizePath(src)
+    const destinationPath = this.normalizePath(dest)
+
+    try {
+      /**
+       * S3 v1 copy
+       * @see https://min.io/docs/minio/linux/developers/javascript/API.html#copyobject-targetbucketname-targetobjectname-sourcebucketnameandobjectname-conditions
+       */
+      const copy = await this.client.copyObject(
+        this.config.basket,
+        destinationPath,
+        `/${this.config.basket}/${sourcePath}`,
+      )
+
+      await this.client.removeObject(
+        this.config.basket,
+        sourcePath,
+      )
+
+      return {raw: copy}
+
+    } catch (e: any) {
+      throw this.wrapError(e, sourcePath)
+    }
+  }
+
+  /**
+   * Creates a new file.
+   * This method will create missing directories on the fly.
+   */
+  public async put(location: string, content: Buffer | stream.Readable | string): Promise<Response<UploadedObjectInfo>> {
+    const path = this.normalizePath(location)
+
+    try {
+      const raw = await this.client.putObject(this.config.basket, path, content)
+
+      return {raw}
+
+    } catch (e: any) {
+      throw this.wrapError(e, path)
+    }
+  }
+
+  /**
+   * Prepends content to a file.
+   *
+   * **WARNING**: It's pretty inefficient as it copies the file to a temp file and then back to the original file. Try to avoid using this method at least for large files.
+   */
+  public async prepend(location: string, content: Buffer | string): Promise<Response> {
+    const path = this.normalizePath(location)
+
+    try {
+      // if the source file exists, make a buffer and prepend the content
+
+      const srcBuffer = await this.getBuffer(path)
+      const destStream = new stream.PassThrough()
+
+      const putPromise = this.put(location, destStream)
+
+      // prepend the new content
+      destStream.write(content)
+
+      // write the original content
+      destStream.write(srcBuffer)
+
+      // end the stream
+      destStream.end()
+
+      return await putPromise
+
+    } catch (e: any) {
+      const err = this.wrapError(e, path)
+
+      if (err instanceof ObjectNotFound) {
+
+        // if the source file does not exist, create a new file with the content
+        return await this.put(location, content)
+
+      } else {
+
+        // if error is not ObjectNotFound, rethrow it
+        throw err
+      }
+    }
+  }
+
+  /**
+   * List all files with a given prefix.
+   */
+  public async* listFilesRecursive(prefix?: string): AsyncIterable<FileListResponse> {
+    const path = this.normalizePath((prefix || '') + '/')
+    const root = this.normalizePath('')
+
+    try {
+      const iter = this.client.listObjects(
+        this.config.basket,
+        path,
+        true, // recursive
+      )
+
+      for await (const el of iter) {
+        if (!el.name) {
+          continue
+        }
+
+        yield {
+          raw: el,
+          path: Path.relative(root, el.name),
+        }
+      }
+
+    } catch (e: any) {
+      throw this.wrapError(e, path)
+    }
+  }
+
+  /**
+   * List all files in current directory.
+   */
+  public async* listFiles(prefix?: string): AsyncIterable<FileListResponse> {
+    const path = this.normalizePath((prefix || '') + '/')
+    const root = this.normalizePath('')
+
+    try {
+      const iter = this.client.listObjects(
+        this.config.basket,
+        path,
+        false, // not recursive
+      )
+
+      for await (const el of iter) {
+        if (!el.name) {
+          continue
+        }
+
+        yield {
+          raw: el,
+          path: Path.relative(root, el.name),
+        }
+      }
+
+    } catch (e: any) {
+      throw this.wrapError(e, path)
+    }
+  }
+
+  /**
+   * Checks if the driver is alive or throw an exception.
+   */
+  public async alive(): Promise<void> {
+    const path = this.normalizePath(this.config.aliveCheckPath || '')
+    try {
+      const iter = this.listFiles(path)
+      // trigger the iteration and return even if there are no files
+      // noinspection LoopStatementThatDoesntLoopJS
+      for await (const _ of iter) {
+        return
+      }
+    } catch (e: any) {
+      throw new StorageDriverError(`Failed to check if the driver is alive: stat ${path}`, e)
+    }
+  }
+}
+

@@ -1,5 +1,5 @@
 import {StorageDriver} from '../StorageDriver'
-import {DeleteResponse, Response, StatResponse} from '../response-types'
+import {DeleteResponse, FileListResponse, Response, StatResponse} from '../response-types'
 import {normalizePath} from '../util'
 import * as posixPath from 'node:path/posix'
 import * as platformPath from 'node:path'
@@ -8,6 +8,7 @@ import * as fss from 'node:fs'
 import {ObjectNotFound, StorageDriverError} from '../exceptions'
 import os from 'node:os'
 import * as util from 'node:util'
+import stream from 'node:stream'
 
 export interface IFilesystemStorageDriverConfig {
   rootPath: string
@@ -108,7 +109,7 @@ export class FilesystemStorageDriver extends StorageDriver<IFilesystemStorageDri
     }
   }
 
-  public driver() {
+  public getDriver() {
     return null
   }
 
@@ -130,7 +131,7 @@ export class FilesystemStorageDriver extends StorageDriver<IFilesystemStorageDri
     }
   }
 
-  public async get(location: string, encoding?: string): Promise<string> {
+  public async get(location: string, encoding?: BufferEncoding): Promise<string> {
     const path = posixPath.join(this.config.rootPath, normalizePath(location))
 
     if (encoding && !Buffer.isEncoding(encoding)) {
@@ -142,7 +143,7 @@ export class FilesystemStorageDriver extends StorageDriver<IFilesystemStorageDri
     }
 
     try {
-      return await fs.readFile(path, encoding as BufferEncoding)
+      return await fs.readFile(path, encoding as 'utf-8')
     } catch (e: any) {
       if (e.code === 'ENOENT') {
         throw new ObjectNotFound(location, e)
@@ -186,7 +187,7 @@ export class FilesystemStorageDriver extends StorageDriver<IFilesystemStorageDri
     }
   }
 
-  public async getStream(location: string): Promise<NodeJS.ReadableStream> {
+  public async getStream(location: string): Promise<stream.Readable> {
     const path = posixPath.join(this.config.rootPath, normalizePath(location))
 
     try {
@@ -230,7 +231,7 @@ export class FilesystemStorageDriver extends StorageDriver<IFilesystemStorageDri
     return {raw: null}
   }
 
-  public async put(location: string, content: Buffer | NodeJS.ReadableStream | string): Promise<Response> {
+  public async put(location: string, content: Buffer | stream.Readable | string): Promise<Response> {
     const path = posixPath.join(this.config.rootPath, normalizePath(location))
 
     try {
@@ -307,7 +308,7 @@ export class FilesystemStorageDriver extends StorageDriver<IFilesystemStorageDri
     return {raw: null}
   }
 
-  public async* listFilesRecursive(prefix?: string): AsyncIterable<string> {
+  public async* listFilesRecursive(prefix?: string): AsyncIterable<FileListResponse<fss.Dirent>> {
     const prefixPath = normalizePath(prefix || '')
     const path = posixPath.join(this.config.rootPath, prefixPath)
 
@@ -319,7 +320,10 @@ export class FilesystemStorageDriver extends StorageDriver<IFilesystemStorageDri
           continue
         }
         const relativePath = platformPath.join(platformPath.relative(path, file.path), file.name)
-        yield normalizePath(relativePath)
+        yield {
+          raw: file,
+          path: normalizePath(relativePath),
+        }
       }
     } catch (e: any) {
       if (e.code === 'ENOENT') {

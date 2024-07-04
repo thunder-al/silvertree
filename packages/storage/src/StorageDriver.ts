@@ -6,9 +6,10 @@ import {
   FileListResponse,
   Response,
   SignedUrlOptions,
-  SignedUrlResponse,
   StatResponse,
 } from './response-types'
+import * as fs from 'node:fs'
+import stream from 'node:stream'
 
 export abstract class StorageDriver<C = any, D = any> {
 
@@ -52,12 +53,14 @@ export abstract class StorageDriver<C = any, D = any> {
   /**
    * Returns the driver.
    */
-  public driver(): D {
+  public getDriver(): D {
     throw new MethodNotSupported('driver', this.constructor.name)
   }
 
   /**
    * Determines if a file or folder already exists.
+   *
+   * NOTE: Prefer using `get*` and handle the error instead of using this method.
    */
   public exists(location: string): Promise<boolean> {
     throw new MethodNotSupported('exists', this.constructor.name)
@@ -66,7 +69,7 @@ export abstract class StorageDriver<C = any, D = any> {
   /**
    * Returns the file contents as a string.
    */
-  public get(location: string, encoding?: string): Promise<string> {
+  public get(location: string, encoding?: BufferEncoding): Promise<string> {
     throw new MethodNotSupported('get', this.constructor.name)
   }
 
@@ -80,7 +83,7 @@ export abstract class StorageDriver<C = any, D = any> {
   /**
    * Returns signed url for an existing file.
    */
-  public async getSignedUrl(location: string, options?: SignedUrlOptions): Promise<SignedUrlResponse> {
+  public async getSignedUrl(location: string, options?: SignedUrlOptions): Promise<string> {
     throw new MethodNotSupported('getSignedUrl', this.constructor.name)
   }
 
@@ -94,7 +97,7 @@ export abstract class StorageDriver<C = any, D = any> {
   /**
    * Returns the stream for the given file.
    */
-  public getStream(location: string): Promise<NodeJS.ReadableStream> {
+  public getStream(location: string): Promise<stream.Readable> {
     throw new MethodNotSupported('getStream', this.constructor.name)
   }
 
@@ -118,7 +121,7 @@ export abstract class StorageDriver<C = any, D = any> {
    * Creates a new file.
    * This method will create missing directories on the fly.
    */
-  public async put(location: string, content: Buffer | NodeJS.ReadableStream | string): Promise<Response> {
+  public async put(location: string, content: Buffer | stream.Readable | string): Promise<Response> {
     throw new MethodNotSupported('put', this.constructor.name)
   }
 
@@ -134,8 +137,15 @@ export abstract class StorageDriver<C = any, D = any> {
   /**
    * List all files with a given prefix.
    */
-  public async* listFilesRecursive(prefix?: string): AsyncIterable<string> {
-    throw new MethodNotSupported('list', this.constructor.name)
+  public async* listFilesRecursive(prefix?: string): AsyncIterable<FileListResponse> {
+    throw new MethodNotSupported('listFilesRecursive', this.constructor.name)
+  }
+
+  /**
+   * List all files in current directory.
+   */
+  public async* listFiles(prefix?: string): AsyncIterable<FileListResponse> {
+    throw new MethodNotSupported('listFiles', this.constructor.name)
   }
 
   /**

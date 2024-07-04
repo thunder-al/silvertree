@@ -1,7 +1,7 @@
 import {StorageDriver} from '../StorageDriver'
-import {DeleteResponse, Response, StatResponse} from '../response-types'
+import {DeleteResponse, FileListResponse, Response, StatResponse} from '../response-types'
 import {ObjectNotFound, StorageDriverError} from '../exceptions'
-import {Readable} from 'node:stream'
+import stream, {Readable} from 'node:stream'
 import {normalizePath} from '../util'
 
 
@@ -63,7 +63,7 @@ export class InMemoryStorageDriver extends StorageDriver<null, null> {
     return {raw: null}
   }
 
-  public driver(): null {
+  public getDriver(): null {
     // there is no real driver
     return null
   }
@@ -89,7 +89,7 @@ export class InMemoryStorageDriver extends StorageDriver<null, null> {
     return false
   }
 
-  public async get(location: string, encoding?: string): Promise<string> {
+  public async get(location: string, encoding?: BufferEncoding): Promise<string> {
     const data = this.blobs.get(normalizePath(location))
     if (!data) {
       throw new ObjectNotFound(location)
@@ -135,7 +135,7 @@ export class InMemoryStorageDriver extends StorageDriver<null, null> {
     }
   }
 
-  public async getStream(location: string): Promise<NodeJS.ReadableStream> {
+  public async getStream(location: string): Promise<stream.Readable> {
     const data = this.blobs.get(normalizePath(location))
     if (!data) {
       throw new ObjectNotFound(location)
@@ -165,7 +165,7 @@ export class InMemoryStorageDriver extends StorageDriver<null, null> {
     return {raw: null}
   }
 
-  public async put(location: string, content: Buffer | NodeJS.ReadableStream | string): Promise<Response> {
+  public async put(location: string, content: Buffer | stream.Readable | string): Promise<Response> {
     const path = normalizePath(location)
 
     if (typeof content === 'string') {
@@ -214,12 +214,15 @@ export class InMemoryStorageDriver extends StorageDriver<null, null> {
     return {raw: null}
   }
 
-  public async* listFilesRecursive(prefix?: string): AsyncIterable<string> {
+  public async* listFilesRecursive(prefix?: string): AsyncIterable<FileListResponse> {
     const normalizedPrefix = normalizePath(prefix || '')
 
     for (const key of this.blobs.keys()) {
       if (key.startsWith(normalizedPrefix)) {
-        yield key
+        yield {
+          raw: null,
+          path: key,
+        }
       }
     }
   }

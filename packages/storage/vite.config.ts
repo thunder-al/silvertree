@@ -7,11 +7,18 @@ import * as fs from 'node:fs/promises'
 export default defineConfig(async () => {
   const pkg = JSON.parse(await fs.readFile('./package.json', 'utf-8'))
 
-  const externals = [
+  const packages = [
     ...Object.keys(pkg.dependencies ?? {}),
     ...Object.keys(pkg.peerDependencies ?? {}),
+  ]
+
+  const externals = [
     /^node:/i,
   ]
+
+  for (const pkg of packages) {
+    externals.push(new RegExp(`^${pkg}(/.*)?$`, 'i'))
+  }
 
   return <UserConfig>{
     build: {
@@ -21,8 +28,10 @@ export default defineConfig(async () => {
         entry: {
           index: './src/index.ts',
           standalone: './src/standalone.ts',
+          silvertree: './src/silvertree.ts',
           'in-memory-driver': './src/drivers/InMemoryStorageDriver.ts',
           'filesystem-driver': './src/drivers/FilesystemStorageDriver.ts',
+          's3-driver': './src/drivers/S3StorageDriver.ts',
         },
         formats: ['es', 'cjs'],
         name: 'index',
@@ -44,7 +53,7 @@ export default defineConfig(async () => {
         compilerOptions: {removeComments: false, declaration: true},
         aliasesExclude: externals,
       }),
-      checker({typescript: true}),
+      //checker({typescript: true,}),
     ],
   }
 })

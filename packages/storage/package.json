@@ -44,6 +44,12 @@
       "default": "./dist/standalone.cjs",
       "types": "./dist/standalone.d.ts"
     },
+    "./silvertree": {
+      "require": "./dist/silvertree.cjs",
+      "import": "./dist/silvertree.js",
+      "default": "./dist/silvertree.cjs",
+      "types": "./dist/silvertree.d.ts"
+    },
     "./in-memory-driver": {
       "require": "./dist/in-memory-driver.cjs",
       "import": "./dist/in-memory-driver.js",
@@ -73,7 +79,8 @@
     "vite-plugin-checker": "~0.6.4",
     "typescript": "~5.3.3",
     "reflect-metadata": "~0.2.2",
-    "@types/node": "~20.10.4"
+    "@types/node": "~20.10.4",
+    "minio": "~8.0.0"
   },
   "peerDependencies": {
     "reflect-metadata": "*",
@@ -82,6 +89,12 @@
   },
   "peerDependenciesMeta": {
     "minio": {
+      "optional": true
+    },
+    "@silvertree/core": {
+      "optional": true
+    },
+    "reflect-metadata": {
       "optional": true
     }
   }

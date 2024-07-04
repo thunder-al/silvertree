@@ -1,12 +1,12 @@
-export interface Response {
-  raw: any
+export interface Response<R = any> {
+  raw: R
 }
 
-export interface ExistsResponse extends Response {
+export interface ExistsResponse<R = any> extends Response<R> {
   exists: boolean
 }
 
-export interface ContentResponse<ContentType> extends Response {
+export interface ContentResponse<ContentType, Raw = any> extends Response<Raw> {
   content: ContentType
 }
 
@@ -19,20 +19,17 @@ export interface SignedUrlOptions {
   expiry?: number
 }
 
-export interface SignedUrlResponse extends Response {
-  signedUrl: string
-}
-
-export interface StatResponse extends Response {
+export interface StatResponse<R = any> extends Response<R> {
   size: number
   modified: Date
+  etag?: string
 }
 
-export interface FileListResponse extends Response {
+export interface FileListResponse<R = any> extends Response<R> {
   path: string
 }
 
-export interface DeleteResponse extends Response {
+export interface DeleteResponse<R = any> extends Response<R> {
   /**
    * `true` if a file was deleted, `false` if there was no file to delete.
    * `null` if no information about the file is available.

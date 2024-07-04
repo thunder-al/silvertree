@@ -2,8 +2,8 @@ import {IllegalRelativePath} from './exceptions'
 
 export function normalizePath(path: string, silent: boolean = false): string {
   path = path
-    .replace(/^\/*/, '') // remove leading slashes
     .replace(/[\/\\]+/g, '/') // replace backslashes or duplicated slashes with single slash
+    .replace(/^\/*/, '') // remove leading slashes
 
   // resolve relative paths
   const result = []
