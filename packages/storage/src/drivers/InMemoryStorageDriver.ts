@@ -3,6 +3,7 @@ import {DeleteResponse, FileListResponse, Response, StatResponse} from '../respo
 import {ObjectNotFound, StorageDriverError} from '../exceptions'
 import stream, {Readable} from 'node:stream'
 import {normalizePath} from '../util'
+import {IS3StorageDriverConfig} from './S3StorageDriver'
 
 
 /**
@@ -12,6 +13,14 @@ import {normalizePath} from '../util'
 export class InMemoryStorageDriver extends StorageDriver<null, null> {
 
   protected readonly blobs: Map<string, string | Buffer> = new Map()
+
+  /**
+   * Create a new in-memory storage driver config from env.
+   * Exists only for compatibility.
+   */
+  public static fromEnv(envPrefix: string): null {
+    return null
+  }
 
   public async append(location: string, content: Buffer | string): Promise<Response> {
     const path = normalizePath(location)

@@ -1,4 +1,4 @@
-export * from './StorageRootModule'
+export * from './silvertree'
 export * from './StorageManager'
 export * from './StorageDriver'
 export * from './exceptions'

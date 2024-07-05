@@ -26,7 +26,7 @@ export default class StorageManager {
   protected defaultStorageName: string
 
   constructor(
-    protected readonly config: IStorageManagerConfig,
+    protected readonly config: IStorageManagerConfig = {},
   ) {
     this.defaultStorageName = config.default ?? 'default'
 
@@ -62,6 +62,10 @@ export default class StorageManager {
 
     if (this.disks.has(name)) {
       throw new InvalidConfig('Disk already instantiated, you cannot override its configuration')
+    }
+
+    if (typeof config.driver === 'string' && !this.drivers.has(config.driver)) {
+      throw new InvalidConfig(`Driver ${config.driver} not registered`)
     }
 
     this.disksConfig.set(name, config)

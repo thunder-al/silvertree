@@ -1,14 +1,5 @@
 import {MethodNotSupported} from './exceptions'
-import {
-  ContentResponse,
-  DeleteResponse,
-  ExistsResponse,
-  FileListResponse,
-  Response,
-  SignedUrlOptions,
-  StatResponse,
-} from './response-types'
-import * as fs from 'node:fs'
+import {DeleteResponse, FileListResponse, Response, SignedUrlOptions, StatResponse} from './response-types'
 import stream from 'node:stream'
 
 export abstract class StorageDriver<C = any, D = any> {

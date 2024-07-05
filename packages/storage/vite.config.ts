@@ -28,7 +28,7 @@ export default defineConfig(async () => {
         entry: {
           index: './src/index.ts',
           standalone: './src/standalone.ts',
-          silvertree: './src/silvertree.ts',
+          silvertree: './src/silvertree/index.ts',
           'in-memory-driver': './src/drivers/InMemoryStorageDriver.ts',
           'filesystem-driver': './src/drivers/FilesystemStorageDriver.ts',
           's3-driver': './src/drivers/S3StorageDriver.ts',

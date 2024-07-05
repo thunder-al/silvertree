@@ -19,6 +19,24 @@ export interface IFilesystemStorageDriverConfig {
  */
 export class FilesystemStorageDriver extends StorageDriver<IFilesystemStorageDriverConfig, null> {
 
+
+  /**
+   * Create a new instance of the filesystem storage driver.
+   *
+   * `PREFIX_LOCAL_PATH` is the path to the storage.
+   */
+  public static fromEnv(envPrefix: string): IFilesystemStorageDriverConfig {
+    const path = process.env[`${envPrefix}LOCAL_PATH`]
+
+    if (!path) {
+      throw new Error(`Missing environment variable: ${envPrefix}LOCAL_PATH`)
+    }
+
+    return {
+      rootPath: path,
+    }
+  }
+
   public async append(location: string, content: Buffer | string): Promise<Response> {
     const path = posixPath.join(this.config.rootPath, normalizePath(location))
 

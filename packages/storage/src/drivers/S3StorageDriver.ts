@@ -34,6 +34,78 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
     this.client = this.makeClient()
   }
 
+  /**
+   * Here is two ways to create a new S3StorageDriver instance:
+   * 1. By passing url at `PREFIX_S3_CONNECTION_URL` environment variable with the following format:
+   * ```
+   * s3://<accessKey>:<secretKey>@<endPoint>[:<port>]/<bucket>[?rootPath=<rootPath>][&aliveCheckPath=<aliveCheckPath>][&useSSL=<useSSL>][&pathStyle=<pathStyle>][&sessionToken=<sessionToken>]
+   * ```
+   * 2. By passing the following environment variables:
+   * * `PREFIX_S3_ACCESS_KEY` (required)
+   * * `PREFIX_S3_SECRET_KEY` (required)
+   * * `PREFIX_S3_ENDPOINT` (required)
+   * * `PREFIX_S3_BUCKET` (required)
+   * * `PREFIX_S3_ROOT_PATH`
+   * * `PREFIX_S3_ALIVE_CHECK_PATH`
+   * * `PREFIX_S3_USE_SSL` true/false
+   * * `PREFIX_S3_PATH_STYLE` true/false
+   * * `PREFIX_S3_SESSION_TOKEN`
+   */
+  public static fromEnv(envPrefix: string): IS3StorageDriverConfig {
+    function env(name: string, required = false) {
+      const key = envPrefix + name
+      const val = process.env[key]
+
+      if (required && val === undefined) {
+        throw new StorageDriverError(`Missing required environment variable: ${key}`)
+      }
+
+      return val
+    }
+
+    function parseFromUrl(): IS3StorageDriverConfig {
+      const url = new URL(env('CONNECTION_URL')!)
+
+      if (url.protocol !== 's3:') {
+        throw new StorageDriverError(`Invalid s3 connection url protocol. Expected s3, got ${url.protocol}`)
+      }
+
+      if (!url.username || !url.password) {
+        throw new StorageDriverError('Missing access key or secret key in the connection url')
+      }
+
+      return {
+        endPoint: url.hostname,
+        port: parseInt(url.port || '443'),
+        accessKey: url.username,
+        secretKey: url.password,
+        basket: url.pathname.slice(1),
+        rootPath: url.searchParams.get('rootPath') || undefined,
+        aliveCheckPath: url.searchParams.get('aliveCheckPath') || undefined,
+        useSSL: url.searchParams.get('useSSL') !== 'false',
+        sessionToken: url.searchParams.get('sessionToken') || undefined,
+        pathStyle: url.searchParams.get('pathStyle') !== 'false',
+      }
+    }
+
+    if (env('CONNECTION_URL')) {
+      return parseFromUrl()
+    }
+
+    // if connection url is not defined, use individual env variables
+    return {
+      accessKey: env('S3_ACCESS_KEY', true)!,
+      secretKey: env('S3_SECRET_KEY', true)!,
+      endPoint: env('S3_ENDPOINT', true)!,
+      port: parseInt(env('S3_PORT') || '443'),
+      basket: env('S3_BUCKET', true)!,
+      rootPath: env('S3_ROOT_PATH'),
+      aliveCheckPath: env('S3_ALIVE_CHECK_PATH'),
+      useSSL: env('S3_USE_SSL') !== 'false',
+      sessionToken: env('S3_SESSION_TOKEN'),
+    }
+  }
+
   protected processConfig() {
     if (this.config.rootPath) {
       try {

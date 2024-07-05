@@ -21,7 +21,7 @@ export interface IStorageManagerConfig {
   /**
    * Storages configuration
    */
-  disks: Record<string, IStorageManagerSingleDiskConfig>
+  disks?: Record<string, IStorageManagerSingleDiskConfig>
   /**
    * Drivers configuration
    */
