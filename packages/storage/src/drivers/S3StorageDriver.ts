@@ -51,19 +51,13 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
    * * `PREFIX_S3_PATH_STYLE` true/false
    * * `PREFIX_S3_SESSION_TOKEN`
    */
-  public static fromEnv(envPrefix: string): IS3StorageDriverConfig {
-    function env(name: string, required = false) {
-      const key = envPrefix + name
-      const val = process.env[key]
-
-      if (required && val === undefined) {
-        throw new StorageDriverError(`Missing required environment variable: ${key}`)
-      }
-
-      return val
+  public static fromEnv(envPrefix: string): Partial<IS3StorageDriverConfig> {
+    function env(name: string) {
+      return process.env[envPrefix + name]
     }
 
-    function parseFromUrl(): IS3StorageDriverConfig {
+    if (env('CONNECTION_URL')) {
+      const config: Partial<IS3StorageDriverConfig> = {}
       const url = new URL(env('CONNECTION_URL')!)
 
       if (url.protocol !== 's3:') {
@@ -74,36 +68,84 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
         throw new StorageDriverError('Missing access key or secret key in the connection url')
       }
 
-      return {
-        endPoint: url.hostname,
-        port: parseInt(url.port || '443'),
-        accessKey: url.username,
-        secretKey: url.password,
-        basket: url.pathname.slice(1),
-        rootPath: url.searchParams.get('rootPath') || undefined,
-        aliveCheckPath: url.searchParams.get('aliveCheckPath') || undefined,
-        useSSL: url.searchParams.get('useSSL') !== 'false',
-        sessionToken: url.searchParams.get('sessionToken') || undefined,
-        pathStyle: url.searchParams.get('pathStyle') !== 'false',
-      }
-    }
+      config.endPoint = url.hostname
+      config.port = parseInt(url.port || '443')
+      config.accessKey = url.username
+      config.secretKey = url.password
+      config.basket = url.pathname.slice(1)
 
-    if (env('CONNECTION_URL')) {
-      return parseFromUrl()
+      if (url.searchParams.has('rootPath')) {
+        config.rootPath = url.searchParams.get('rootPath')!
+      }
+
+      if (url.searchParams.has('aliveCheckPath')) {
+        config.aliveCheckPath = url.searchParams.get('aliveCheckPath')!
+      }
+
+      if (url.searchParams.has('useSSL')) {
+        config.useSSL = url.searchParams.get('useSSL') !== 'false'
+      }
+
+      if (url.searchParams.has('sessionToken')) {
+        config.sessionToken = url.searchParams.get('sessionToken')!
+      }
+
+      if (url.searchParams.has('pathStyle')) {
+        config.pathStyle = url.searchParams.get('pathStyle') !== 'false'
+      }
+
+      return config
     }
 
     // if connection url is not defined, use individual env variables
-    return {
-      accessKey: env('S3_ACCESS_KEY', true)!,
-      secretKey: env('S3_SECRET_KEY', true)!,
-      endPoint: env('S3_ENDPOINT', true)!,
-      port: parseInt(env('S3_PORT') || '443'),
-      basket: env('S3_BUCKET', true)!,
-      rootPath: env('S3_ROOT_PATH'),
-      aliveCheckPath: env('S3_ALIVE_CHECK_PATH'),
-      useSSL: env('S3_USE_SSL') !== 'false',
-      sessionToken: env('S3_SESSION_TOKEN'),
+    const config: Partial<IS3StorageDriverConfig> = {}
+
+    const accessKey = env('ACCESS_KEY')
+    if (accessKey) {
+      config.accessKey = accessKey
     }
+
+    const secretKey = env('SECRET_KEY')
+    if (secretKey) {
+      config.secretKey = secretKey
+    }
+
+    const endPoint = env('ENDPOINT')
+    if (endPoint) {
+      config.endPoint = endPoint
+    }
+
+    const port = env('PORT')
+    if (port) {
+      config.port = parseInt(port)
+    }
+
+    const basket = env('BUCKET')
+    if (basket) {
+      config.basket = basket
+    }
+
+    const rootPath = env('ROOT_PATH')
+    if (rootPath) {
+      config.rootPath = rootPath
+    }
+
+    const aliveCheckPath = env('ALIVE_CHECK_PATH')
+    if (aliveCheckPath) {
+      config.aliveCheckPath = aliveCheckPath
+    }
+
+    const useSSL = env('USE_SSL')
+    if (useSSL) {
+      config.useSSL = useSSL !== 'false'
+    }
+
+    const sessionToken = env('SESSION_TOKEN')
+    if (sessionToken) {
+      config.sessionToken = sessionToken
+    }
+
+    return config
   }
 
   protected processConfig() {
@@ -156,10 +198,6 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
     return new StorageDriverError(error.message, error)
   }
 
-  /**
-   * Appends content to a file.
-   *
-   */
   public async append(location: string, content: Buffer | string): Promise<Response<UploadedObjectInfo>> {
     const path = this.normalizePath(location)
 
@@ -198,9 +236,6 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
     }
   }
 
-  /**
-   * Copy a file to a location.
-   */
   public async copy(src: string, dest: string): Promise<Response<CopyObjectResult>> {
     const sourcePath = this.normalizePath(src)
     const destinationPath = this.normalizePath(dest)
@@ -219,9 +254,6 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
     }
   }
 
-  /**
-   * Delete existing file.
-   */
   public async delete(location: string): Promise<DeleteResponse> {
     const path = this.normalizePath(location)
 
@@ -234,9 +266,6 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
     return {raw: null, wasDeleted: null}
   }
 
-  /**
-   * Delete all files in a directory.
-   */
   public async deleteRecursive(location: string): Promise<Response<null>> {
     const path = this.normalizePath(location)
     const deleteObjects: Array<string> = []
@@ -252,18 +281,10 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
     return {raw: null}
   }
 
-  /**
-   * Returns the driver.
-   */
   public getDriver(): Client {
     return this.client
   }
 
-  /**
-   * Determines if a file or folder already exists.
-   *
-   * NOTE: Prefer using `get*` and handle the error instead of using this method.
-   */
   public async exists(location: string): Promise<boolean> {
     const path = this.normalizePath(location)
 
@@ -284,18 +305,12 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
     }
   }
 
-  /**
-   * Returns the file contents as a string.
-   */
   public async get(location: string, encoding?: BufferEncoding): Promise<string> {
     const path = this.normalizePath(location)
     const buffer = await this.getBuffer(path)
     return buffer.toString(encoding || 'utf-8')
   }
 
-  /**
-   * Returns the file contents as a Buffer.
-   */
   public async getBuffer(location: string): Promise<Buffer> {
     const path = this.normalizePath(location)
 
@@ -331,12 +346,6 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
     })
   }
 
-  /**
-   * **WARNING**: This method is not supported by the S3 driver
-   *   and may return an invalid link.
-   *
-   * @inheritdoc
-   */
   public getUrl(location: string): string {
     return (this.config.useSSL === false ? 'http' : 'https')
       // domain part
@@ -347,9 +356,6 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
       + this.normalizePath(location)
   }
 
-  /**
-   * Returns signed url for an existing file.
-   */
   public async getSignedUrl(location: string, options?: SignedUrlOptions): Promise<string> {
     const path = this.normalizePath(location)
 
@@ -365,9 +371,6 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
     }
   }
 
-  /**
-   * Returns file's size and modification date.
-   */
   public async getStat(location: string): Promise<StatResponse<BucketItemStat>> {
     const path = this.normalizePath(location)
 
@@ -386,9 +389,6 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
     }
   }
 
-  /**
-   * Returns the stream for the given file.
-   */
   public async getStream(location: string): Promise<stream.Readable> {
     const path = this.normalizePath(location)
 
@@ -399,9 +399,6 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
     }
   }
 
-  /**
-   * Move file to a new location.
-   */
   public async move(src: string, dest: string): Promise<Response> {
     const sourcePath = this.normalizePath(src)
     const destinationPath = this.normalizePath(dest)
@@ -429,10 +426,6 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
     }
   }
 
-  /**
-   * Creates a new file.
-   * This method will create missing directories on the fly.
-   */
   public async put(location: string, content: Buffer | stream.Readable | string): Promise<Response<UploadedObjectInfo>> {
     const path = this.normalizePath(location)
 
@@ -446,11 +439,6 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
     }
   }
 
-  /**
-   * Prepends content to a file.
-   *
-   * **WARNING**: It's pretty inefficient as it copies the file to a temp file and then back to the original file. Try to avoid using this method at least for large files.
-   */
   public async prepend(location: string, content: Buffer | string): Promise<Response> {
     const path = this.normalizePath(location)
 
@@ -489,9 +477,6 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
     }
   }
 
-  /**
-   * List all files with a given prefix.
-   */
   public async* listFilesRecursive(prefix?: string): AsyncIterable<FileListResponse> {
     const path = this.normalizePath((prefix || '') + '/')
     const root = this.normalizePath('')
@@ -519,9 +504,6 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
     }
   }
 
-  /**
-   * List all files in current directory.
-   */
   public async* listFiles(prefix?: string): AsyncIterable<FileListResponse> {
     const path = this.normalizePath((prefix || '') + '/')
     const root = this.normalizePath('')
@@ -549,9 +531,6 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
     }
   }
 
-  /**
-   * Checks if the driver is alive or throw an exception.
-   */
   public async alive(): Promise<void> {
     const path = this.normalizePath(this.config.aliveCheckPath || '')
     try {

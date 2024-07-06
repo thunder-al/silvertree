@@ -25,11 +25,11 @@ export class FilesystemStorageDriver extends StorageDriver<IFilesystemStorageDri
    *
    * `PREFIX_LOCAL_PATH` is the path to the storage.
    */
-  public static fromEnv(envPrefix: string): IFilesystemStorageDriverConfig {
+  public static fromEnv(envPrefix: string): Partial<IFilesystemStorageDriverConfig> {
     const path = process.env[`${envPrefix}LOCAL_PATH`]
 
     if (!path) {
-      throw new Error(`Missing environment variable: ${envPrefix}LOCAL_PATH`)
+      return {}
     }
 
     return {

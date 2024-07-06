@@ -54,7 +54,7 @@ export class StorageRootModuleConfigurator implements TConfiguredModuleTerm<Stor
       discs: [],
       drivers: this.drivers,
       scope: 'default',
-      ...this.staticConfig,
+      ...(this.staticConfig || {}),
     }
 
     // doing that because we need to wait for all (possible) discs to generate their config
@@ -128,11 +128,24 @@ export class StorageRootModuleConfigurator implements TConfiguredModuleTerm<Stor
       throw new Error('Cannot add disk after module has been configured')
     }
 
+    // generate a prefix for the environment variables
+    const moduleScopeEnvPrefix = !this.staticConfig.scope || this.staticConfig.scope === 'default'
+      ? ''
+      : this.staticConfig.scope.toUpperCase().replace(/-/g, '_') + '_'
+
+    const envPrefix = 'STORAGE_'
+      // module scope
+      + moduleScopeEnvPrefix
+      // storage name
+      + diskName.toUpperCase().replace(/-/g, '_') + '_'
+
+    //'STORAGE_' + diskName.toUpperCase().replace(/-/g, '_') + '_'
+
     this.discs.push({
       name: diskName,
       driverName: defaultDriverName || '', // will throw an error later if it is not set and don't have an env variable
       config: defaultConfig || {},
-      fromEnv: diskName.toUpperCase().replace(/-/g, '_') + '_',
+      fromEnv: envPrefix,
     })
 
     return this
