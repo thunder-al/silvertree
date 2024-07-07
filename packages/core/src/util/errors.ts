@@ -28,20 +28,14 @@ export class NestedError extends Error {
     options: INestedErrorOptions = {},
   ) {
     super(message)
-    this.originalMessage = message
-    this.name = 'NestedError'
     caused ??= null
 
-    // Prevent `options` and `caused` from being serialized to http responses, logs, etc.
-    Object.defineProperty(this, 'options', {
-      value: options,
-      enumerable: false,
-      writable: true,
-    })
-    Object.defineProperty(this, 'caused', {
-      value: caused,
-      enumerable: false,
-      writable: true,
+    // Prevent properties from being serialized to http responses, logs, etc.
+    Object.defineProperties(this, {
+      name: {value: 'NestedError', enumerable: false, writable: true},
+      originalMessage: {value: message, enumerable: false, writable: true},
+      options: {value: options, enumerable: false, writable: true},
+      caused: {value: caused, enumerable: false, writable: true},
     })
 
     this.message = buildMessage(this, caused, message)

@@ -44,24 +44,22 @@ export function objectPick<
 >(
   obj: T,
   keys: Array<K> | Set<K> | Iterable<K>,
-): T {
-  const allowedKeys = new Set<any>()
+): Partial<T> {
+  const allowedKeys = new Set<K>()
 
   for (const key of keys) {
-    allowedKeys.add(`${key}`)
+    allowedKeys.add(key)
   }
 
   if (Array.isArray(obj)) {
-    const result: Array<any> = [...obj]
-
-    return (<Array<any>>result).filter((_, i) => allowedKeys.has(`${i}`)) as T
+    return (<Array<any>>obj).filter((_, i) => allowedKeys.has(i as any)) as T
   }
 
-  const result: any = {...obj}
+  const result: any = {}
 
-  for (const key in obj) {
-    if (!allowedKeys.has(key)) {
-      delete result[`${key}`]
+  for (const key of allowedKeys) {
+    if (key in obj) {
+      result[key] = (<any>obj)[key]
     }
   }
 
