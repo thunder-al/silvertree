@@ -45,11 +45,13 @@ export class HttpRootModule extends DynamicModule<IHttpRootModuleConfig> {
     // register commands
     if (this.config?.attachCommands ?? true) {
       try {
-        await attachHttpCommands(this, this.config?.scope)
+        const cliScope = typeof this.config?.attachCommands === 'boolean'
+          ? 'default'
+          : this.config?.attachCommands
+
+        await attachHttpCommands(this, this.config?.scope, cliScope)
       } catch (e: any) {
-        if (this.config?.attachCommands !== undefined) {
-          console.error('Failed to attach http commands. Did you register the cli module?')
-        }
+        console.error('Failed to attach http commands. Did you register the cli module? If you don\'t want to attach commands, set attachCommands: false in the http module config.')
       }
     }
   }

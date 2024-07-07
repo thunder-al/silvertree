@@ -5,11 +5,13 @@ import {HttpRootService} from './HttpRootService'
 export async function attachHttpCommands(
   module: Module<any>,
   scope: boolean | string = 'default',
+  cliScope?: string,
 ) {
   const scopeStr = typeof scope === 'boolean' ? 'default' : scope
 
   const cliModule = await import('@silvertree/cli')
-  const cli = module.provideSync<CliRootService>(cliModule.getRootCliServiceInjectKey(scopeStr))
+
+  const cli = module.provideSync<CliRootService>(cliModule.getRootCliServiceInjectKey(cliScope))
 
   const cliSuffix = scopeStr === 'default' ? '' : `-${scopeStr}`
 
