@@ -154,11 +154,10 @@ export class HttpRootService {
       if (statusCode >= 500) {
         this.logger.error(
           error ? error.message : 'Error',
-          {
-            req: objectPick(request, ['id', 'params', 'query', 'body']),
-            err: error,
-          },
-        )
+          objectPick(request, ['id', 'params', 'query', 'body']),
+        );
+
+        this.logger.error(error.stack)
 
         const message = show5xxErrors ? error.message : 'Internal Server Error'
         reply.status(statusCode).send({message})
