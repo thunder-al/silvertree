@@ -1,4 +1,4 @@
-import {FiberModule} from '@silvertree/core'
+import {FiberModule, objectOmit} from '@silvertree/core'
 import {FastifyInstance, FastifyReply, FastifyRequest} from 'fastify'
 import {
   HTTP_FASTIFY_REPLY_INJECT_KEY,
@@ -20,19 +20,20 @@ export class HttpRequestFiberModule extends FiberModule {
     request: FastifyRequest,
     reply: FastifyReply,
   ) {
-    this.bind.syncFunctional(
+    this.bind.constant(
       HTTP_FASTIFY_REQUEST_INJECT_KEY,
       () => request,
     )
 
-    this.bind.syncFunctional(
+    // TODO: fastidy reply has `then` method, which stops injection cycle until request ends
+    this.bind.constant(
       HTTP_FASTIFY_REPLY_INJECT_KEY,
-      () => reply,
+      objectOmit(reply, ['then']),
     )
   }
 
   protected async setupDefaultBindings() {
-    super.setupDefaultBindings()
+    await super.setupDefaultBindings()
 
     this.bind.syncFunctional(
       HTTP_FASTIFY_REQUEST_EXTRACT_INJECT_KEY,
