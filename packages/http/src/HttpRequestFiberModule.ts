@@ -22,13 +22,13 @@ export class HttpRequestFiberModule extends FiberModule {
   ) {
     this.bind.constant(
       HTTP_FASTIFY_REQUEST_INJECT_KEY,
-      () => request,
+      request,
     )
 
     // TODO: fastidy reply has `then` method, which stops injection cycle until request ends
     this.bind.constant(
       HTTP_FASTIFY_REPLY_INJECT_KEY,
-      objectOmit(reply, ['then']),
+      () => reply,
     )
   }
 
