@@ -1,13 +1,13 @@
 import {StorageDriver} from '../StorageDriver'
 import {DeleteResponse, FileListResponse, Response, StatResponse} from '../response-types'
 import {normalizePath} from '../util'
-import * as posixPath from 'node:path/posix'
-import * as platformPath from 'node:path'
-import * as fs from 'node:fs/promises'
-import * as fss from 'node:fs'
+import posixPath from 'node:path/posix'
+import platformPath from 'node:path'
+import fs from 'node:fs/promises'
+import fss from 'node:fs'
 import {ObjectNotFound, StorageDriverError} from '../exceptions'
 import os from 'node:os'
-import * as util from 'node:util'
+import util from 'node:util'
 import stream from 'node:stream'
 
 export interface IFilesystemStorageDriverConfig {

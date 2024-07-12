@@ -3,9 +3,9 @@ import {Client, ClientOptions, S3Error} from 'minio'
 import {normalizePath} from '../util'
 import {ObjectNotFound, StorageDriverError} from '../exceptions'
 import {DeleteResponse, FileListResponse, Response, SignedUrlOptions, StatResponse} from '../response-types'
-import * as stream from 'node:stream'
+import stream from 'node:stream'
 import type {BucketItemStat, CopyObjectResult, UploadedObjectInfo} from 'minio/src/internal/type'
-import * as Path from 'node:path/posix'
+import Path from 'node:path/posix'
 
 export interface IS3StorageDriverConfig extends ClientOptions {
   /**
