@@ -208,6 +208,11 @@ export class FilesystemStorageDriver extends StorageDriver<IFilesystemStorageDri
   public async getStream(location: string): Promise<stream.Readable> {
     const path = posixPath.join(this.config.rootPath, normalizePath(location))
 
+    // prevent ENOENT while reading stream
+    if (!await this.exists(location)) {
+      throw new ObjectNotFound(location)
+    }
+
     try {
       return fss.createReadStream(path)
     } catch (e: any) {
