@@ -1,6 +1,6 @@
 {
   "name": "@silvertree/storage",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "keywords": [
     "silvertree",
     "di",
@@ -61,6 +61,12 @@
       "import": "./dist/filesystem-driver.js",
       "default": "./dist/filesystem-driver.cjs",
       "types": "./dist/filesystem-driver.d.ts"
+    },
+    "./s3-driver": {
+      "require": "./dist/s3-driver.cjs",
+      "import": "./dist/s3-driver.js",
+      "default": "./dist/s3-driver.cjs",
+      "types": "./dist/s3-driver.d.ts"
     }
   },
   "scripts": {

@@ -35,6 +35,57 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
   }
 
   /**
+   * Creates a new S3StorageDriver instance from the connection url.
+   * Format:
+   * ```
+   * s3://<accessKey>:<secretKey>@<endPoint>[:<port>]/<bucket>[?rootPath=<rootPath>][&aliveCheckPath=<aliveCheckPath>][&useSSL=<useSSL>][&pathStyle=<pathStyle>][&sessionToken=<sessionToken>]
+   * ```
+   */
+  public static fromConnectionUrl(connectionUrl: string | URL): IS3StorageDriverConfig {
+    const url = connectionUrl instanceof URL
+      ? connectionUrl
+      : new URL(connectionUrl)
+
+    const config: IS3StorageDriverConfig = {} as any
+
+    if (url.protocol !== 's3:') {
+      throw new StorageDriverError(`Invalid s3 connection url protocol. Expected s3, got ${url.protocol}`)
+    }
+
+    if (!url.username || !url.password) {
+      throw new StorageDriverError('Missing access key or secret key in the connection url')
+    }
+
+    config.endPoint = url.hostname
+    config.port = parseInt(url.port || '443')
+    config.accessKey = url.username
+    config.secretKey = url.password
+    config.basket = url.pathname.slice(1)
+
+    if (url.searchParams.has('rootPath')) {
+      config.rootPath = url.searchParams.get('rootPath')!
+    }
+
+    if (url.searchParams.has('aliveCheckPath')) {
+      config.aliveCheckPath = url.searchParams.get('aliveCheckPath')!
+    }
+
+    if (url.searchParams.has('useSSL')) {
+      config.useSSL = url.searchParams.get('useSSL') !== 'false'
+    }
+
+    if (url.searchParams.has('sessionToken')) {
+      config.sessionToken = url.searchParams.get('sessionToken')!
+    }
+
+    if (url.searchParams.has('pathStyle')) {
+      config.pathStyle = url.searchParams.get('pathStyle') !== 'false'
+    }
+
+    return config
+  }
+
+  /**
    * Here is two ways to create a new S3StorageDriver instance:
    * 1. By passing url at `PREFIX_S3_CONNECTION_URL` environment variable with the following format:
    * ```
@@ -51,54 +102,18 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
    * * `PREFIX_S3_PATH_STYLE` true/false
    * * `PREFIX_S3_SESSION_TOKEN`
    */
-  public static fromEnv(envPrefix: string): Partial<IS3StorageDriverConfig> {
+  public static fromEnv(envPrefix: string): IS3StorageDriverConfig {
     function env(name: string) {
       return process.env[envPrefix + name]
     }
 
-    if (env('CONNECTION_URL')) {
-      const config: Partial<IS3StorageDriverConfig> = {}
-      const url = new URL(env('CONNECTION_URL')!)
-
-      if (url.protocol !== 's3:') {
-        throw new StorageDriverError(`Invalid s3 connection url protocol. Expected s3, got ${url.protocol}`)
-      }
-
-      if (!url.username || !url.password) {
-        throw new StorageDriverError('Missing access key or secret key in the connection url')
-      }
-
-      config.endPoint = url.hostname
-      config.port = parseInt(url.port || '443')
-      config.accessKey = url.username
-      config.secretKey = url.password
-      config.basket = url.pathname.slice(1)
-
-      if (url.searchParams.has('rootPath')) {
-        config.rootPath = url.searchParams.get('rootPath')!
-      }
-
-      if (url.searchParams.has('aliveCheckPath')) {
-        config.aliveCheckPath = url.searchParams.get('aliveCheckPath')!
-      }
-
-      if (url.searchParams.has('useSSL')) {
-        config.useSSL = url.searchParams.get('useSSL') !== 'false'
-      }
-
-      if (url.searchParams.has('sessionToken')) {
-        config.sessionToken = url.searchParams.get('sessionToken')!
-      }
-
-      if (url.searchParams.has('pathStyle')) {
-        config.pathStyle = url.searchParams.get('pathStyle') !== 'false'
-      }
-
-      return config
+    const connectionUrl = env('CONNECTION_URL')
+    if (connectionUrl) {
+      return S3StorageDriver.fromConnectionUrl(connectionUrl)
     }
 
     // if connection url is not defined, use individual env variables
-    const config: Partial<IS3StorageDriverConfig> = {}
+    const config: IS3StorageDriverConfig = {} as any
 
     const accessKey = env('ACCESS_KEY')
     if (accessKey) {

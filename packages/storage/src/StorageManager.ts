@@ -2,7 +2,7 @@ import {StorageDriver} from './StorageDriver'
 import {InvalidConfig} from './exceptions'
 import {IStorageDriver, IStorageManagerConfig, IStorageManagerSingleDiskConfig} from './types'
 
-export default class StorageManager {
+export class StorageManager {
 
   /**
    * Registered disks (instances of a storage driver)

@@ -19,7 +19,6 @@ export interface IFilesystemStorageDriverConfig {
  */
 export class FilesystemStorageDriver extends StorageDriver<IFilesystemStorageDriverConfig, null> {
 
-
   /**
    * Create a new instance of the filesystem storage driver.
    *

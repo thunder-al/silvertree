@@ -1,6 +1,6 @@
 import {InjectModuleConfig} from '@silvertree/core'
 import {IStorageRootModuleConfig} from './StorageRootModule'
-import StorageManager from '../StorageManager'
+import {StorageManager} from '../StorageManager'
 import {IStorageDriver} from '../types'
 import {resolvePackageNameFromErrorMessage} from './util'
 import {StorageDriverError} from '../exceptions'
