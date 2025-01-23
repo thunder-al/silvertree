@@ -235,6 +235,19 @@ export class InMemoryStorageDriver extends StorageDriver<null, any> {
     }
   }
 
+  public async* listFiles(prefix?: string): AsyncIterable<FileListResponse> {
+    const normalizedPrefix = normalizePath(prefix || '')
+
+    for (const key of this.blobs.keys()) {
+      if (key.startsWith(normalizedPrefix) && !key.endsWith('/')) {
+        yield {
+          raw: null,
+          path: key,
+        }
+      }
+    }
+  }
+
   public async alive(): Promise<void> {
     // nothing to check
   }

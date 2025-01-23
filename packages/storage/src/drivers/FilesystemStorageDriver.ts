@@ -356,6 +356,31 @@ export class FilesystemStorageDriver extends StorageDriver<IFilesystemStorageDri
     }
   }
 
+  public async* listFiles(prefix?: string): AsyncIterable<FileListResponse<fss.Dirent>> {
+    const prefixPath = normalizePath(prefix || '')
+    const path = posixPath.join(this.config.rootPath, prefixPath)
+
+    try {
+      const files = await fs.readdir(path, {withFileTypes: true})
+
+      for (const file of files) {
+        if (file.isFile()) {
+          const relativePath = platformPath.join(platformPath.relative(path, file.path), file.name)
+          yield {
+            raw: file,
+            path: normalizePath(relativePath),
+          }
+        }
+      }
+    } catch (e: any) {
+      if (e.code === 'ENOENT') {
+        throw new ObjectNotFound(path, e)
+      }
+
+      throw new StorageDriverError(`Failed to list files: ${path}`, e)
+    }
+  }
+
   public async alive(): Promise<void> {
     // nothing to check
   }

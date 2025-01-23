@@ -41,6 +41,20 @@ export async function testStorageDriverGeneral(driver: StorageDriver) {
 
   {
     // list
+    await driver.put('file.txt', 'Hello World')
+
+    const files = []
+    for await (const file of driver.listFiles('')) {
+      files.push(file)
+    }
+
+    expect(files).toStrictEqual([
+      expect.objectContaining({path: 'file.txt'}),
+    ])
+  }
+
+  {
+    // list recursive
     const iter = driver.listFilesRecursive('')
     const files = []
     for await (const file of iter) {

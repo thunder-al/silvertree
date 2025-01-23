@@ -92,8 +92,38 @@ export abstract class StorageDriver<C = any, D = any> implements IDisk<C, D> {
     throw new MethodNotSupported('listFilesRecursive', this.constructor.name)
   }
 
+  public async listFilesRecursiveArray(prefix?: string): Promise<Array<FileListResponse>> {
+    try {
+      const files: Array<FileListResponse> = []
+      for await (const file of this.listFilesRecursive(prefix)) {
+        files.push(file)
+      }
+      return files
+    } catch (e: any) {
+      if (e instanceof MethodNotSupported) {
+        throw new MethodNotSupported('listFilesRecursiveArray', this.constructor.name)
+      }
+      throw e
+    }
+  }
+
   public async* listFiles(prefix?: string): AsyncIterable<FileListResponse> {
     throw new MethodNotSupported('listFiles', this.constructor.name)
+  }
+
+  public async listFilesArray(prefix?: string): Promise<Array<FileListResponse>> {
+    try {
+      const files: Array<FileListResponse> = []
+      for await (const file of this.listFiles(prefix)) {
+        files.push(file)
+      }
+      return files
+    } catch (e: any) {
+      if (e instanceof MethodNotSupported) {
+        throw new MethodNotSupported('listFilesArray', this.constructor.name)
+      }
+      throw e
+    }
   }
 
   public async alive(): Promise<void> {
