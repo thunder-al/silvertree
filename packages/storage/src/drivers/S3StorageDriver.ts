@@ -2,7 +2,14 @@ import {StorageDriver} from '../StorageDriver'
 import {Client, ClientOptions, S3Error} from 'minio'
 import {normalizePath} from '../util'
 import {ObjectNotFound, StorageDriverError} from '../exceptions'
-import {DeleteResponse, FileListResponse, Response, SignedUrlOptions, StatResponse} from '../response-types'
+import {
+  DeleteResponse,
+  DirectoryListResponse,
+  FileListResponse,
+  Response,
+  SignedUrlOptions,
+  StatResponse,
+} from '../response-types'
 import stream from 'node:stream'
 import type {BucketItemStat, CopyObjectResult, UploadedObjectInfo} from 'minio/src/internal/type'
 import Path from 'node:path/posix'
@@ -288,7 +295,7 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
     const iter = this.listFilesRecursive(path)
 
     for await (const file of iter) {
-      deleteObjects.push(this.normalizePath(file.path))
+      deleteObjects.push(this.normalizePath(Path.join(location, file.path)))
     }
 
     await this.client.removeObjects(this.config.basket, deleteObjects)
@@ -494,7 +501,6 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
 
   public async* listFilesRecursive(prefix?: string): AsyncIterable<FileListResponse> {
     const path = this.normalizePath((prefix || '') + '/')
-    const root = this.normalizePath('')
 
     try {
       const iter = this.client.listObjects(
@@ -510,7 +516,8 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
 
         yield {
           raw: el,
-          path: Path.relative(root, el.name),
+          path: Path.relative(path, el.name),
+          size: el.size,
         }
       }
 
@@ -521,7 +528,6 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
 
   public async* listFiles(prefix?: string): AsyncIterable<FileListResponse> {
     const path = this.normalizePath((prefix || '') + '/')
-    const root = this.normalizePath('')
 
     try {
       const iter = this.client.listObjects(
@@ -537,7 +543,42 @@ export class S3StorageDriver extends StorageDriver<IS3StorageDriverConfig, Clien
 
         yield {
           raw: el,
-          path: Path.relative(root, el.name),
+          path: Path.relative(path, el.name),
+          size: el.size,
+        }
+      }
+
+    } catch (e: any) {
+      throw this.wrapError(e, path)
+    }
+  }
+
+  public async* listDirectories(prefix?: string): AsyncIterable<DirectoryListResponse> {
+    const path = this.normalizePath((prefix || '') + '/')
+
+    try {
+      const iter = this.client.listObjects(
+        this.config.basket,
+        path,
+        false, // not recursive
+      )
+
+      const seenDirs = new Set<string>()
+
+      for await (const el of iter) {
+        if (!el.prefix || el.size !== 0) {
+          continue
+        }
+
+        const relativePath = Path.relative(path, el.prefix)
+        if (seenDirs.has(relativePath)) {
+          continue
+        }
+
+        seenDirs.add(relativePath)
+        yield {
+          raw: el,
+          path: relativePath,
         }
       }
 

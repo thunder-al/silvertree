@@ -27,6 +27,11 @@ export interface StatResponse<R = any> extends Response<R> {
 
 export interface FileListResponse<R = any> extends Response<R> {
   path: string
+  size?: number
+}
+
+export interface DirectoryListResponse<R = any> extends Response<R> {
+  path: string
 }
 
 export interface DeleteResponse<R = any> extends Response<R> {

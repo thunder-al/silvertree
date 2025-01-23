@@ -1,5 +1,12 @@
 import {MethodNotSupported} from './exceptions'
-import {DeleteResponse, FileListResponse, Response, SignedUrlOptions, StatResponse} from './response-types'
+import {
+  DeleteResponse,
+  DirectoryListResponse,
+  FileListResponse,
+  Response,
+  SignedUrlOptions,
+  StatResponse,
+} from './response-types'
 import stream from 'node:stream'
 import {IDisk} from './types'
 
@@ -121,6 +128,25 @@ export abstract class StorageDriver<C = any, D = any> implements IDisk<C, D> {
     } catch (e: any) {
       if (e instanceof MethodNotSupported) {
         throw new MethodNotSupported('listFilesArray', this.constructor.name)
+      }
+      throw e
+    }
+  }
+
+  public async* listDirectories(prefix?: string): AsyncIterable<DirectoryListResponse> {
+    throw new MethodNotSupported('listDirectories', this.constructor.name)
+  }
+
+  public async listDirectoriesArray(prefix?: string): Promise<Array<DirectoryListResponse>> {
+    try {
+      const directories: Array<DirectoryListResponse> = []
+      for await (const directory of this.listDirectories(prefix)) {
+        directories.push(directory)
+      }
+      return directories
+    } catch (e: any) {
+      if (e instanceof MethodNotSupported) {
+        throw new MethodNotSupported('listDirectoriesArray', this.constructor.name)
       }
       throw e
     }

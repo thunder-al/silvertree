@@ -1,5 +1,5 @@
 import {StorageDriver} from '../StorageDriver'
-import {DeleteResponse, FileListResponse, Response, StatResponse} from '../response-types'
+import {DeleteResponse, DirectoryListResponse, FileListResponse, Response, StatResponse} from '../response-types'
 import {normalizePath} from '../util'
 import posixPath from 'node:path/posix'
 import platformPath from 'node:path'
@@ -378,6 +378,31 @@ export class FilesystemStorageDriver extends StorageDriver<IFilesystemStorageDri
       }
 
       throw new StorageDriverError(`Failed to list files: ${path}`, e)
+    }
+  }
+
+  public async* listDirectories(prefix?: string): AsyncIterable<DirectoryListResponse<fss.Dirent>> {
+    const prefixPath = normalizePath(prefix || '')
+    const path = posixPath.join(this.config.rootPath, prefixPath)
+
+    try {
+      const files = await fs.readdir(path, {withFileTypes: true})
+
+      for (const file of files) {
+        if (file.isDirectory()) {
+          const relativePath = platformPath.join(platformPath.relative(path, file.path), file.name)
+          yield {
+            raw: file,
+            path: normalizePath(relativePath),
+          }
+        }
+      }
+    } catch (e: any) {
+      if (e.code === 'ENOENT') {
+        throw new ObjectNotFound(path, e)
+      }
+
+      throw new StorageDriverError(`Failed to list directories: ${path}`, e)
     }
   }
 

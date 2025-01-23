@@ -1,5 +1,5 @@
 import {StorageDriver} from '../StorageDriver'
-import {DeleteResponse, FileListResponse, Response, StatResponse} from '../response-types'
+import {DeleteResponse, DirectoryListResponse, FileListResponse, Response, StatResponse} from '../response-types'
 import {ObjectNotFound, StorageDriverError} from '../exceptions'
 import stream, {Readable} from 'node:stream'
 import {normalizePath} from '../util'
@@ -227,9 +227,12 @@ export class InMemoryStorageDriver extends StorageDriver<null, any> {
 
     for (const key of this.blobs.keys()) {
       if (key.startsWith(normalizedPrefix)) {
+        const blob = this.blobs.get(key)!
+        const size = typeof blob === 'string' ? Buffer.byteLength(blob) : blob.length
         yield {
           raw: null,
           path: key,
+          size,
         }
       }
     }
@@ -240,10 +243,48 @@ export class InMemoryStorageDriver extends StorageDriver<null, any> {
 
     for (const key of this.blobs.keys()) {
       if (key.startsWith(normalizedPrefix) && !key.endsWith('/')) {
+        const blob = this.blobs.get(key)!
+        const size = typeof blob === 'string' ? Buffer.byteLength(blob) : blob.length
         yield {
           raw: null,
           path: key,
+          size,
         }
+      }
+    }
+  }
+
+  public async* listDirectories(prefix?: string): AsyncIterable<DirectoryListResponse> {
+    const normalizedPrefix = normalizePath(prefix || '')
+    const seenDirs = new Set<string>()
+
+    for (const key of this.blobs.keys()) {
+      // Skip files that don't start with our prefix
+      if (!key.startsWith(normalizedPrefix)) {
+        continue
+      }
+
+      // Get the path relative to the prefix
+      const relativePath = key.slice(normalizedPrefix.length > 0 ? normalizedPrefix.length + 1 : 0)
+      if (!relativePath) {
+        continue
+      }
+
+      // Split path into parts and get the first directory name
+      const parts = relativePath.split('/')
+      if (parts.length < 2) {
+        continue
+      }
+
+      const dirName = parts[0]
+      if (!dirName || seenDirs.has(dirName)) {
+        continue
+      }
+
+      seenDirs.add(dirName)
+      yield {
+        raw: null,
+        path: dirName,
       }
     }
   }

@@ -107,6 +107,28 @@ export async function testStorageDriverGeneral(driver: StorageDriver) {
   await driver.put('dir/subdir/file6.txt', 'Hello World6')
 
   {
+    // list directories
+    const dirs = []
+    for await (const dir of driver.listDirectories('')) {
+      dirs.push(dir)
+    }
+
+    expect(dirs).toStrictEqual([
+      expect.objectContaining({path: 'dir'}),
+    ])
+
+    // list subdirectories
+    const subdirs = []
+    for await (const dir of driver.listDirectories('dir')) {
+      subdirs.push(dir)
+    }
+
+    expect(subdirs).toStrictEqual([
+      expect.objectContaining({path: 'subdir'}),
+    ])
+  }
+
+  {
     // list
     const files = []
     for await (const file of driver.listFilesRecursive('')) {
